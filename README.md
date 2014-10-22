@@ -13,6 +13,8 @@ This Mod is provided 'as is' with no warranties, implied or otherwise. The devol
 
 About Modpacks
 ----------------
-Feel free to include the mod in your modpack along modpack may not be commercial and please(you don't must) pull an request where you tell about your modpack so know if sobody includes my mod into an modpack
+Feel free to include the mod in your modpack along modpack may not be commercial and please(you don't must) pull an request where you tell about your modpack so I know if somebody includes my mod into an modpack
 
-
+Installing
+================
+To install the mod you need Minecraft(minecraft.net/, oh, i never thought I need to install Minecraft to install a Minecraft Mod), Minecraft Forge(minecraftforge.net/), Computercraft(http://computercraft.info/) and CofhCore(http://teamcofh.com/). If you installed these delete any old version of RandomPeripherials in your mods folder and drop then the new version into the folder.
