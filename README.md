@@ -17,4 +17,4 @@ Feel free to include the mod in your modpack along modpack may not be commercial
 
 Installing
 ================
-To install the mod you need Minecraft(minecraft.net/, oh, i never thought I need to install Minecraft to install a Minecraft Mod), Minecraft Forge(minecraftforge.net/), Computercraft(http://computercraft.info/) and CofhCore(http://teamcofh.com/). If you installed these delete any old version of RandomPeripherials in your mods folder and drop then the new version into the folder.
+To install the mod you need Minecraft(https://minecraft.net/, oh, i never thought I need to install Minecraft to install a Minecraft Mod), Minecraft Forge(http://minecraftforge.net/), Computercraft(http://computercraft.info/) and CofhCore(http://teamcofh.com/). If you installed these delete any old version of RandomPeripherials in your mods folder and drop then the new version into the folder.
