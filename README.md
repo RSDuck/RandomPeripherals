@@ -1,6 +1,6 @@
 RandomPeripherals
 =================
-Random Peripherals is an Mod for Minecraft (and an extension for the computercraft mod) which adds at the moment only a few blocks. It's a collection(of two things) of things I needed for constructions. And because 
+Random Peripherals is an Mod for Minecraft (and an extension for the computercraft mod) which adds at the moment only a few blocks. It's a collection(of two things) of things just what I needed.
 
 Credits: 
 Of course the Mojang, MCP and Forge guys without them nothing like that were possible, dan200 for the computercraft one of my favorite mod and TeamCofh for their great API and references like minefactory reloaded
