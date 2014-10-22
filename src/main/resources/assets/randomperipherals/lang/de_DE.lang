@@ -1,0 +1,12 @@
+#Random Peripherals German Language File
+
+tile.universalInterface.name=Universelle Schnittstelle
+
+container.universalInterface=Unverselle Schnittstelle
+
+me.kemal.randomperipheral.maxOutput=Maximale Ausgabe
+me.kemal.randomperipheral.maxInput=Maximale Einnahme
+me.kemal.randomperipheral.incOutput=Maximale Ausgabe erhöhen
+me.kemal.randomperipheral.decOutput=Maximale Ausgabe verringern
+me.kemal.randomperipheral.incInput=Maximale Einnahme erhöhen
+me.kemal.ranodmperipheral.decInput=Maximale Einnahme verringern

@@ -1,0 +1,17 @@
+[
+{
+  "modid": "RandomPeripherals",
+  "name": "Random Peripherals",
+  "description": "just some random peripherals for Computercraft",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["Kemal"],
+  "credits": "The Forge and FML guys, for making forge and dan200 for Computercraft and team cofh for there great api",
+  "logoFile": "",
+  "screenshots": [],
+  "useDependencyInformation": "true",
+  "dependencies": [ "ComputerCraft","CCTurtle","CoFHCore" ] 
+}
+]

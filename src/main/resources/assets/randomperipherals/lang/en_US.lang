@@ -1,0 +1,12 @@
+#Random Peripherals USA English Language File
+
+tile.universalInterface.name=Universal Interface
+
+container.universalInterface=Universal Interface
+
+me.kemal.randomperipheral.maxOutput=Maximum Output
+me.kemal.randomperipheral.maxInput=Maximum Input
+me.kemal.randomperipheral.incOutput=Increase maximum output
+me.kemal.randomperipheral.decOutput=Decrease maximum output
+me.kemal.randomperipheral.incInput=Increase maximum input
+me.kemal.randomperipheral.decInput=Decrease maximum input
