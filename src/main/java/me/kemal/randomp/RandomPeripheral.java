@@ -105,7 +105,7 @@ public class RandomPeripheral {
 			if (event.entityPlayer.inventory.getCurrentItem() != null) {
 				Item usedItem = event.entityPlayer.inventory.getCurrentItem().getItem();
 				if (usedItem instanceof IToolHammer) {
-					logger.info("Rotate Block!");
+					//logger.info("Rotate Block!");
 					((TileUniversalInterface) event.world.getTileEntity(event.x, event.y, event.z)).rotateBlock();
 				}
 			}
