@@ -163,7 +163,7 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 	@Override
 	public String[] getMethodNames() {
 		return new String[] { "help", "getHeldStack", "suckStack", "pushStack", "setMaxEnergyOutput",
-				"getMaxEnergyExtract", "getStoredEnergy", "getMaxEnergyStored", "setAllowAutoInput",
+				"getEnergyMaxOutput", "getStoredEnergy", "getMaxEnergyStored", "setAllowAutoInput",
 				"isAutoInputAllowed", "setSideConfiguration", "getSideConfiguration", "setMaxEnergyInput",
 				"getMaxEnergyInput" };
 	}
@@ -326,7 +326,8 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 			}
 			case 12: {// setEnergyMaxReceive
 				if (arguments.length == 1 && Util.IsValidInt(arguments[0])) {
-					if (Util.ToInt(arguments[0]) <= 1000) {
+					if (Util.ToInt(arguments[0]) <= 1000 && Util.ToInt(arguments[0]) >= 0
+							&& Util.ToInt(arguments[0]) % 10 == 0) {
 						storedEnergy.setMaxReceive(Util.ToInt(arguments[0]));
 						return new Object[] { true };
 					}

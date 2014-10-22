@@ -123,12 +123,12 @@ public class TabEnergyConf extends TabBase {
 		if (38 <= mouseX && mouseX < 54 && 20 <= mouseY && mouseY < 36) {
 			int add = (isShiftDown) ? 100 : 10;
 			if (output) {
-				int sumToDec = (myContainer.getEnergyStorage().getMaxExtract() + add >= 1000) ? myContainer
-						.getEnergyStorage().getMaxExtract() : myContainer.getEnergyStorage().getMaxExtract() + add;
+				int sumToDec = (myContainer.getEnergyStorage().getMaxExtract() + add >= 1000) ? 1000 : myContainer
+						.getEnergyStorage().getMaxExtract() + add;
 				Packets.sendToServer(Packets.ChangeMaxPowerOutput, myContainer, sumToDec);
 			} else {
-				int sumToDec = (myContainer.getEnergyStorage().getMaxReceive() + add >= 1000) ? myContainer
-						.getEnergyStorage().getMaxReceive() : myContainer.getEnergyStorage().getMaxReceive() + add;
+				int sumToDec = (myContainer.getEnergyStorage().getMaxReceive() + add >= 1000) ? 1000 : myContainer
+						.getEnergyStorage().getMaxReceive() + add;
 				Packets.sendToServer(Packets.ChangeMaxPowerInput, myContainer, sumToDec);
 			}
 			GuiBase.playSound("random.click", 1.0F, 0.4F);

@@ -92,6 +92,9 @@ public class RandomPeripheral {
 
 	@EventHandler
 	public void postInit(FMLPostInitializationEvent event) {
+		GameRegistry.addRecipe(new ItemStack(blockUniversalInterface), "axa", "zyz", "zxz", 'z', new ItemStack(
+				Items.iron_ingot), 'x', new ItemStack(Items.diamond), 'y', new ItemStack(Items.redstone), 'a',
+				new ItemStack(Items.ender_eye));
 		logger.info("Random Peripheral is finish loading!");
 	}
 

@@ -33,7 +33,7 @@ public class Util {
 			int[] array = ((NBTTagIntArray) obj).func_150302_c();
 			HashMap<Integer, Object> map = new HashMap<Integer, Object>();
 			for (int i = 0; i < array.length; i++) {
-				map.put(i, array[i]);
+				map.put(i + 1, array[i]);
 			}
 			return map;
 		}
@@ -42,7 +42,7 @@ public class Util {
 			byte[] array = ((NBTTagByteArray) obj).func_150292_c();
 			HashMap<Integer, Object> map = new HashMap<Integer, Object>();
 			for (int i = 0; i < array.length; i++) {
-				map.put(i, array[i]);
+				map.put(i + 1, array[i]);
 			}
 			return map;
 		}
@@ -61,7 +61,7 @@ public class Util {
 			NBTTagList copy = (NBTTagList) list.copy();
 			int i = 0;
 			while (copy.tagCount() > 0) {
-				map.put(i, getRealNBTType(copy.removeTag(0)));
+				map.put(i + 1, getRealNBTType(copy.removeTag(0)));
 				i++;
 			}
 			return map;
