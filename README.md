@@ -13,7 +13,7 @@ This Mod is provided 'as is' with no warranties, implied or otherwise. The devol
 
 About Modpacks
 ----------------
-Feel free to include the mod in your modpack along modpack may not be commercial, and you follow the licensing rules above and please(you don't must) open an issue where you tell about your modpack so I know if somebody includes my mod into an modpack.
+Feel free to include the mod in your modpack along modpack may not be commercial, and you follow the licensing rules above, give Credits(if your Modpack is Public) and please(you don't must) open an issue where you tell about your modpack so I know if somebody includes my mod into an modpack.
 
 
 Installing
