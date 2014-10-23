@@ -21,5 +21,5 @@ Installing
 To install the mod you need Minecraft(https://minecraft.net/, oh, i never thought I need to install Minecraft to install a Minecraft Mod), Minecraft Forge(http://minecraftforge.net/), Computercraft(http://computercraft.info/) and CofhCore(http://teamcofh.com/). If you installed these delete any old version of RandomPeripherials in your mods folder and drop then the new version into the folder.
 
 
-For a Download Link and more informations in the Computercraft thread
+For a Download Link and more informations visit the Computercraft Forum thread:
 http://www.computercraft.info/forums2/index.php?/topic/20785-mc-1710cc-164-randomperipherals-random-peripherals-just-that-what-is-needed/
