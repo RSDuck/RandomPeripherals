@@ -3,6 +3,7 @@ package me.kemal.randomp.gui.client;
 /*
  * The following code comes from
  * https://github.com/CoFH/CoFHCore/blob/505c623a58aa024ec2893e3801e7efc38f394d64/src/main/java/cofh/core/gui/element/TabConfiguration.java
+ * and is released under the 
  */
 import java.util.List;
 

@@ -69,16 +69,17 @@ public final class ItemWrapper {
 
 	@Override
 	public boolean equals(Object o) {
-
-		/*if (!(o instanceof ItemWrapper)) {
+		/*
+		if (!(o instanceof ItemWrapper)) {
 			return false;
-		}
-		return isEqual((ItemWrapper) o);*/
+		}*/
+		//return isEqual((ItemWrapper) o);
 		return false;
 	}
 
 	@Override
 	public int hashCode() {
+
 		return (metadata & 65535) | getId() << 16;
 	}
 

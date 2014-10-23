@@ -18,7 +18,6 @@ import net.minecraft.nbt.NBTTagString;
 import net.minecraft.nbt.NBTBase.NBTPrimitive;
 import net.minecraft.network.Packet;
 import net.minecraft.server.management.PlayerManager;
-import net.minecraft.server.management.PlayerManager.PlayerInstance;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 
@@ -137,21 +136,6 @@ public class Util {
 
 	public static boolean ToBool(Object bool) {
 		return (Boolean) bool;
-	}
-
-	// From the Minefactory Reloaded Source Code:
-	// https://github.com/skyboy/MineFactoryReloaded/blob/master/src/powercrystals/minefactoryreloaded/net/Packets.java
-	public static void sendToAllPlayersWatching(World world, int x, int y, int z, Packet packet) {
-		if (packet == null)
-			return;
-		if (world instanceof WorldServer) {
-			PlayerManager manager = ((WorldServer) world).getPlayerManager();
-			if (manager == null)
-				return;
-			PlayerInstance watcher = manager.getOrCreateChunkWatcher(x >> 4, x >> 4, false);
-			if (watcher != null)
-				watcher.sendToAllPlayersWatchingChunk(packet);
-		}
 	}
 
 	public static HashMap<String, Object> stackToMap(ItemStack stack) {
