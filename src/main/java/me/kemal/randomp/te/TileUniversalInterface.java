@@ -1,6 +1,7 @@
 package me.kemal.randomp.te;
 
 import me.kemal.randomp.RandomPeripheral;
+import me.kemal.randomp.util.CCUtil;
 import me.kemal.randomp.util.ICCHelpCreator;
 import me.kemal.randomp.util.Util;
 import net.minecraft.entity.EntityLivingBase;
@@ -93,6 +94,7 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 	@Override
 	public void updateEntity() {
 		super.updateEntity();
+		//TODO: clean up!
 		for (ForgeDirection dir : ForgeDirection.VALID_DIRECTIONS) {
 			if (neightborCache[getIOConfiguration(dir.ordinal())] != null
 					&& neightborCache[getIOConfiguration(dir.ordinal())] instanceof IEnergyHandler
@@ -186,25 +188,25 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 				return new Object[] { "At this time there is no help available" };
 			}
 			case 1: {// getHeldStack
-				return new Object[] { Util.stackToMap(heldStack) };
+				return new Object[] { CCUtil.stackToMap(heldStack) };
 			}
 			case 2: {// suckStack
 				if (arguments.length == 1 || arguments.length == 2) {
-					if (Util.IsValidInt(arguments[0])) {
-						if (Util.ToInt(arguments[0]) >= 0 && Util.ToInt(arguments[0]) < 6) {
+					if (CCUtil.IsValidNumber(arguments[0])) {
+						if (CCUtil.ToInt(arguments[0]) >= 0 && CCUtil.ToInt(arguments[0]) < 6) {
 							if (arguments.length == 2)
-								if (Util.IsValidInt(arguments[1])) {
-									if (!(Util.ToInt(arguments[1]) >= 0 && Util.ToInt(arguments[1]) < 6)) {
+								if (CCUtil.IsValidNumber(arguments[1])) {
+									if (!(CCUtil.ToInt(arguments[1]) >= 0 && CCUtil.ToInt(arguments[1]) < 6)) {
 										return new Object[] { false };
 									}
 								} else
 									return new Object[] { false };
-							int[] pos = Util.DirToCoord(Util.ToInt(arguments[0]));
+							int[] pos = CCUtil.DirToCoord(CCUtil.ToInt(arguments[0]));
 							TileEntity te = worldObj.getTileEntity(xCoord + pos[0], yCoord + pos[1], zCoord + pos[2]);
 							boolean sided = te instanceof ISidedInventory;
 							if (te instanceof IInventory) {
-								int side = (arguments.length == 1) ? ForgeDirection.values()[Util.ToInt(arguments[0])]
-										.getOpposite().ordinal() : Util.ToInt(arguments[1]);
+								int side = (arguments.length == 1) ? ForgeDirection.values()[CCUtil.ToInt(arguments[0])]
+										.getOpposite().ordinal() : CCUtil.ToInt(arguments[1]);
 								IInventory inv = (IInventory) te;
 								int invSize = (sided) ? ((ISidedInventory) inv).getAccessibleSlotsFromSide(side).length
 										: inv.getSizeInventory();
@@ -214,7 +216,7 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 									int slot = (sided) ? slots[i] : i;
 									if (inv.getStackInSlot(slot) == null)
 										continue;
-									int decr = Util.CanStack(heldStack, inv.getStackInSlot(slot));
+									int decr = CCUtil.CanStack(heldStack, inv.getStackInSlot(slot));
 									if (sided) {
 										if (!(((ISidedInventory) inv).canExtractItem(slot, inv.getStackInSlot(slot),
 												side))) {
@@ -227,7 +229,7 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 											heldStack.stackSize += decrStack.stackSize;
 										else
 											heldStack = decrStack;
-										return new Object[] { Util.stackToMap(decrStack) };
+										return new Object[] { CCUtil.stackToMap(decrStack) };
 									}
 								}
 							}
@@ -238,30 +240,30 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 			}
 			case 3: {// pushStack
 				if (arguments.length == 1 || arguments.length == 2) {
-					if (Util.IsValidInt(arguments[0])) {
+					if (CCUtil.IsValidNumber(arguments[0])) {
 						if (arguments.length == 2)
-							if (Util.IsValidInt(arguments[1])) {
-								if (!(Util.ToInt(arguments[1]) >= 0 && Util.ToInt(arguments[1]) < 6)) {
+							if (CCUtil.IsValidNumber(arguments[1])) {
+								if (!(CCUtil.ToInt(arguments[1]) >= 0 && CCUtil.ToInt(arguments[1]) < 6)) {
 									return new Object[] { false };
 								}
 							} else
 								return new Object[] { false };
 						if (heldStack == null)
 							return new Object[] { false };
-						int[] pos = Util.DirToCoord(Util.ToInt(arguments[0]));
+						int[] pos = CCUtil.DirToCoord(CCUtil.ToInt(arguments[0]));
 						TileEntity te = worldObj.getTileEntity(xCoord + pos[0], yCoord + pos[1], zCoord + pos[2]);
 						boolean sided = te instanceof ISidedInventory;
 						if (te instanceof IInventory) {
 							IInventory inv = (IInventory) te;
-							int side = (arguments.length == 1) ? ForgeDirection.values()[Util.ToInt(arguments[0])]
-									.getOpposite().ordinal() : Util.ToInt(arguments[1]);
+							int side = (arguments.length == 1) ? ForgeDirection.values()[CCUtil.ToInt(arguments[0])]
+									.getOpposite().ordinal() : CCUtil.ToInt(arguments[1]);
 							int invSize = (sided) ? ((ISidedInventory) inv).getAccessibleSlotsFromSide(side).length
 									: inv.getSizeInventory();
 							int[] slots = (sided) ? ((ISidedInventory) inv).getAccessibleSlotsFromSide(side)
 									: new int[] {};
 							for (int i = 0; i < invSize; i++) {
 								int slot = (sided) ? slots[i] : i;
-								int stackable = Util.CanStack(inv.getStackInSlot(slot), heldStack);
+								int stackable = CCUtil.CanStack(inv.getStackInSlot(slot), heldStack);
 								if (sided) {
 									if (!((ISidedInventory) inv).canInsertItem(slot, heldStack, side)) {
 										continue;
@@ -273,7 +275,7 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 										inv.getStackInSlot(slot).stackSize += decrStack.stackSize;
 									} else
 										inv.setInventorySlotContents(slot, decrStack);
-									return new Object[] { Util.stackToMap(decrStack) };
+									return new Object[] { CCUtil.stackToMap(decrStack) };
 								}
 							}
 						}
@@ -283,10 +285,10 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 				return new Object[] { false };
 			}
 			case 4: {// setEnergyMaxExtract
-				if (arguments.length == 1 && Util.IsValidInt(arguments[0])) {
-					if (Util.ToInt(arguments[0]) <= 10000 && Util.ToInt(arguments[0]) >= 0
-							&& Util.ToInt(arguments[0]) % 10 == 0) {
-						storedEnergy.setMaxExtract(Util.ToInt(arguments[0]));
+				if (arguments.length == 1 && CCUtil.IsValidNumber(arguments[0])) {
+					if (CCUtil.ToInt(arguments[0]) <= 10000 && CCUtil.ToInt(arguments[0]) >= 0
+							&& CCUtil.ToInt(arguments[0]) % 10 == 0) {
+						storedEnergy.setMaxExtract(CCUtil.ToInt(arguments[0]));
 						return new Object[] { true };
 					}
 				}
@@ -302,8 +304,8 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 				return new Object[] { storedEnergy.getMaxEnergyStored() };
 			}
 			case 8: {// setAllowAutoInput
-				if (arguments.length == 1 && Util.IsValidBool(arguments[0])) {
-					allowAutoInput = Util.ToBool(arguments[0]);
+				if (arguments.length == 1 && CCUtil.IsValidBool(arguments[0])) {
+					allowAutoInput = CCUtil.ToBool(arguments[0]);
 					return new Object[] { true };
 				}
 				return new Object[] { false };
@@ -312,9 +314,9 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 				return new Object[] { allowAutoInput };
 			}
 			case 10: {// setSideConfiguration
-				if (arguments.length == 2 && Util.IsValidInt(arguments[0]) && Util.IsValidInt(arguments[1])) {
-					if (Util.ToInt(arguments[0]) < 6 && Util.ToInt(arguments[1]) < SIDES_COUNT) {
-						setSide(Util.ToInt(arguments[0]), Util.ToInt(arguments[1]));
+				if (arguments.length == 2 && CCUtil.IsValidNumber(arguments[0]) && CCUtil.IsValidNumber(arguments[1])) {
+					if (CCUtil.ToInt(arguments[0]) < 6 && CCUtil.ToInt(arguments[1]) < SIDES_COUNT) {
+						setSide(CCUtil.ToInt(arguments[0]), CCUtil.ToInt(arguments[1]));
 						updateAllBlocks();
 						return new Object[] { true };
 					}
@@ -325,10 +327,10 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 				return new Object[] { Util.getRealNBTType(new NBTTagIntArray(ioConfiguration)) };
 			}
 			case 12: {// setEnergyMaxReceive
-				if (arguments.length == 1 && Util.IsValidInt(arguments[0])) {
-					if (Util.ToInt(arguments[0]) <= 1000 && Util.ToInt(arguments[0]) >= 0
-							&& Util.ToInt(arguments[0]) % 10 == 0) {
-						storedEnergy.setMaxReceive(Util.ToInt(arguments[0]));
+				if (arguments.length == 1 && CCUtil.IsValidNumber(arguments[0])) {
+					if (CCUtil.ToInt(arguments[0]) <= 1000 && CCUtil.ToInt(arguments[0]) >= 0
+							&& CCUtil.ToInt(arguments[0]) % 10 == 0) {
+						storedEnergy.setMaxReceive(CCUtil.ToInt(arguments[0]));
 						return new Object[] { true };
 					}
 				}

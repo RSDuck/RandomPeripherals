@@ -1,7 +1,6 @@
 package me.kemal.randomp.util;
 
 import java.util.HashMap;
-import java.util.Map;
 
 import cofh.lib.inventory.ComparableItemStack;
 import cofh.lib.inventory.ComparableItemStackNBT;
@@ -51,7 +50,7 @@ public class Util {
 		}
 		if (obj instanceof NBTTagCompound) {
 			System.out.println("Type: Compound");
-			return NBTCompoundToMap((NBTTagCompound) obj);
+			return CCUtil.NBTCompoundToMap((NBTTagCompound) obj);
 		}
 		if (obj instanceof NBTTagList) {
 			System.out.println("Type: List ");
@@ -68,57 +67,8 @@ public class Util {
 		return obj.toString();
 	}
 
-	public static Map<String, Object> NBTCompoundToMap(NBTTagCompound compound) {
-		HashMap<String, Object> nbtMap = new HashMap<String, Object>();
-		Object[] nbtSet = compound.func_150296_c().toArray();
-		for (int i = 0; i < nbtSet.length; i++) {
-			nbtMap.put(nbtSet[i].toString(), getRealNBTType(compound.getTag((String) nbtSet[i])));
-		}
-		return nbtMap;
-	}
-
-	public static boolean IsValidInt(Object number) {
-		return (number instanceof Double);
-	}
-
-	public static boolean IsValidBool(Object bool) {
-		return (bool instanceof Boolean);
-	}
-
-	public static int ToInt(Object number) {
-		return ((Number) number).intValue();
-	}
-
-	public static boolean IsValidString(Object string) {
-		return (string instanceof String);
-	}
-
-	public static String ToString(Object string) {
-		return ((String) string);
-	}
-
-	public static int CanStack(ItemStack stack1, ItemStack stack2) {
-		if (stack1 == null) {
-			return 64;
-		}
-		if (stack2 != null && stack2.getItem().equals(stack1.getItem())
-				&& (!stack1.getHasSubtypes() || stack1.getItemDamage() == stack2.getItemDamage())
-				&& ItemStack.areItemStackTagsEqual(stack1, stack2)) {
-			if (stack1.stackSize + stack2.stackSize > 64) {
-				return stack1.getMaxStackSize() - (((stack2.stackSize + stack1.stackSize) - 64));
-			}
-			return stack1.stackSize + stack2.stackSize;
-		} else
-			return -1;
-	}
-
-	public static boolean IsNumber(String num) {
-		try {
-			Integer.parseInt(num);
-			return true;
-		} catch (NumberFormatException e) {
-			return false;
-		}
+	public static boolean ToBool(int var) {
+		return var == 1;
 	}
 
 	public static void DropStack(World world, int x, int y, int z, ItemStack stack) {
@@ -130,42 +80,47 @@ public class Util {
 		world.spawnEntityInWorld(itemEntity);
 	}
 
-	public static boolean ToBool(int var) {
-		return var == 1;
-	}
-
-	public static boolean ToBool(Object bool) {
-		return (Boolean) bool;
-	}
-
-	public static HashMap<String, Object> stackToMap(ItemStack stack) {
-		HashMap<String, Object> map = new HashMap<String, Object>();
-		map.put("unlocalizedName", stack.getItem().getUnlocalizedName());
-		map.put("damage", stack.getItemDamage());
-		map.put("amount", stack.stackSize);
-		map.put("name", stack.getDisplayName());
-		if (stack.getTagCompound() != null)
-			map.put("nbtdata", Util.NBTCompoundToMap(stack.getTagCompound()));
-		return map;
-	}
-
-	public static int[] DirToCoord(int dir) {
-		switch (dir) {
-			case 0:
-				return new int[] { 0, -1, 0 };
-			case 1:
-				return new int[] { 0, 1, 0 };
-			case 2:
-				return new int[] { 0, 0, 1 };
-			case 3:
-				return new int[] { 0, 0, -1 };
-			case 4:
-				return new int[] { -1, 0, 0 };
-			case 5:
-				return new int[] { 1, 0, 0 };
-			default:
-				return new int[] { 0, 0, 0 };
+	public static boolean IsNumber(String num) {
+		try {
+			Integer.parseInt(num);
+			return true;
+		} catch (NumberFormatException e) {
+			return false;
 		}
 	}
-
+	
+	//Regex!
+	/**
+	 * TODO: Needs to be more dynamic!!!!
+	 * An function for parsing string based lambda like expressions
+	 * Usage: with an input string of "%a==%b" then it compares aObj and bObj %a>0
+	 * @param lambda string to parse
+	 * @param aObj first object
+	 * @param bObj second object is only needed for == and !=
+	 * @return the result of comparing
+	 */
+	public static boolean ParsePseudoLambda(String lambda, Object aObj, Object bObj) {
+		try {
+			if (lambda.matches("^(%a)(==)(%b)")) {
+				return aObj == bObj;
+			} else if (lambda.matches("^(%a)(!=)(%b)")) {
+				return aObj != bObj;
+			} else if (lambda.matches("^(%a)(>)(\\d+)")) {
+				double b = Double.parseDouble(lambda.replaceAll("^(%a)(>)(\\d+)", "$3"));
+				return (Double)aObj > b;
+			} else if (lambda.matches("^(%a)(<)(\\d+)")) {
+				double b = Double.parseDouble(lambda.replaceAll("^(%a)(<)(\\d+)", "$3"));
+				return (Double)aObj < b;
+			} else if (lambda.matches("^(%a)(>=)(\\d+)")) {
+				double b = Double.parseDouble(lambda.replaceAll("^(%a)(>=)(\\d+)", "$3"));
+				return (Double)aObj < b;
+			}else if(lambda.matches("^(%a)(==)(\\d+)")){
+				double b = Double.parseDouble(lambda.replaceAll("^(%a)(<=)(\\d+)", "$3"));
+				return (Double)aObj < b;
+			}
+		} catch (Exception e) {
+			RandomPeripheral.logger.info("Exception in parsing a pseudo lambda: " + e.getMessage());
+		}
+		return false;
+	}
 }

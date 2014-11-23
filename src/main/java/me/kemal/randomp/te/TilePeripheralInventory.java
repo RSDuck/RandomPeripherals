@@ -9,7 +9,7 @@ import dan200.computercraft.api.lua.LuaException;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 import dan200.computercraft.api.peripheral.IPeripheral;
 import dan200.computercraft.api.turtle.ITurtleAccess;
-import me.kemal.randomp.util.Util;
+import me.kemal.randomp.util.CCUtil;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.JsonToNBT;
@@ -58,7 +58,7 @@ public class TilePeripheralInventory extends TileEntity implements IPeripheral {
 					int slotNumber = ((Number) arguments[0]).intValue();
 					ItemStack stack = turtle.getInventory().getStackInSlot(slotNumber - 1);
 					if (stack != null) {
-						return new Object[] { Util.stackToMap(stack) };
+						return new Object[] { CCUtil.stackToMap(stack) };
 					} else
 						return new Object[] { false };
 				} else {

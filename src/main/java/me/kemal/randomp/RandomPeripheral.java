@@ -14,8 +14,8 @@ import me.kemal.randomp.gui.RandomPGuiHandler;
 import me.kemal.randomp.net.RandomPMSG;
 import me.kemal.randomp.net.ServerPacketHandler;
 import me.kemal.randomp.te.TileUniversalInterface;
+import me.kemal.randomp.util.CCUtil;
 import me.kemal.randomp.util.ConfigFile;
-import me.kemal.randomp.util.Util;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.init.Items;
@@ -86,7 +86,7 @@ public class RandomPeripheral {
 		MinecraftForge.EVENT_BUS.register(instance);
 
 		ComputerCraftAPI.registerTurtleUpgrade(new TurtleUpgradeInventory(((config.map.get("inventoryTurtleUpgrade")
-				.matches("[20-255]") ? Util.ToInt(config.map.get("inventoryTurtleUpgrade")) : 153))));
+				.matches("[20-255]") ? CCUtil.ToInt(config.map.get("inventoryTurtleUpgrade")) : 153))));
 		ComputerCraftAPI.registerPeripheralProvider(new RandomPPeripheralProvider());
 	}
 
