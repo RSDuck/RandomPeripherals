@@ -3,7 +3,9 @@ package me.kemal.randomp.util;
 import java.util.HashMap;
 import java.util.Map;
 
+import cofh.lib.util.helpers.BlockHelper;
 import dan200.computercraft.api.lua.LuaException;
+import me.kemal.randomp.RandomPeripheral;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 
@@ -26,38 +28,6 @@ public class CCUtil {
 
 	public static boolean IsValidBool(Object bool) {
 		return (bool instanceof Boolean);
-	}
-
-	public static int ToInt(Object number) {
-		return ((Number) number).intValue();
-	}
-
-	public static String ToString(Object string) {
-		return ((String) string);
-	}
-
-	public static int CanStack(ItemStack stack1, ItemStack stack2) {
-		if (stack1 == null) {
-			return 64;
-		}
-		if (stack2 != null && stack2.getItem().equals(stack1.getItem())
-				&& (!stack1.getHasSubtypes() || stack1.getItemDamage() == stack2.getItemDamage())
-				&& ItemStack.areItemStackTagsEqual(stack1, stack2)) {
-			if (stack1.stackSize + stack2.stackSize > 64) {
-				return stack1.getMaxStackSize() - (((stack2.stackSize + stack1.stackSize) - 64));
-			}
-			return stack1.stackSize + stack2.stackSize;
-		} else
-			return -1;
-	}
-
-	public static Map<String, Object> NBTCompoundToMap(NBTTagCompound compound) {
-		HashMap<String, Object> nbtMap = new HashMap<String, Object>();
-		Object[] nbtSet = compound.func_150296_c().toArray();
-		for (int i = 0; i < nbtSet.length; i++) {
-			nbtMap.put(nbtSet[i].toString(), Util.getRealNBTType(compound.getTag((String) nbtSet[i])));
-		}
-		return nbtMap;
 	}
 
 	public static Map<Integer, Object> ArrayToLuaArray(Object[] array) {
@@ -112,4 +82,31 @@ public class CCUtil {
 		return false;
 	}
 
+	public static Object[] getHelp(ICCHelpCreator help) {
+
+		return null;
+	}
+
+	public static Map<String, Object> NBTCompoundToMap(NBTTagCompound compound) {
+		HashMap<String, Object> nbtMap = new HashMap<String, Object>();
+		Object[] nbtSet = compound.func_150296_c().toArray();
+		for (int i = 0; i < nbtSet.length; i++) {
+			nbtMap.put(nbtSet[i].toString(), Util.getRealNBTType(compound.getTag((String) nbtSet[i])));
+		}
+		return nbtMap;
+	}
+
+	public static int TurtleDirToForgeDir(int turtleDir, String dir) {
+		int output = -1;
+		RandomPeripheral.logger.info("Turtle Dir: " + turtleDir + " Dir: " + dir);
+		String[] dirs = new String[] { "top", "bottom", "front", "back", "right", "left" };
+		for (int i = 0; i < dirs.length; i++) {
+			RandomPeripheral.logger.info("dirs[i] = " + dirs[i] + "|dirs[i] == dir = " + (dirs[i] == dir));
+			if (dirs[i].startsWith(dir) || dirs[i].endsWith(dir))
+				output = i;
+		}
+		if (output == -1)
+			return output;
+		return (int) BlockHelper.ICON_ROTATION_MAP[output][(turtleDir + 1) % 4];
+	}
 }

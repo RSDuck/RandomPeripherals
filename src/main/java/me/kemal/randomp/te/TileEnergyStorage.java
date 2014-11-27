@@ -1,5 +1,6 @@
 package me.kemal.randomp.te;
 
+import appeng.api.networking.energy.IEnergySource;
 import me.kemal.randomp.RandomPeripheral;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
@@ -7,8 +8,13 @@ import net.minecraftforge.common.util.ForgeDirection;
 import net.minecraftforge.fluids.IFluidHandler;
 import cofh.api.energy.EnergyStorage;
 import cofh.api.energy.IEnergyHandler;
+import cofh.api.energy.IEnergyStorage;
+import dan200.computercraft.api.lua.ILuaContext;
+import dan200.computercraft.api.lua.LuaException;
+import dan200.computercraft.api.peripheral.IComputerAccess;
+import dan200.computercraft.api.peripheral.IPeripheral;
 
-public class TileEnergyStorage extends TileEntity implements IEnergyHandler {
+public class TileEnergyStorage extends TileEntity implements IEnergyHandler, IPeripheral {
 	protected EnergyStorage storedEnergy;
 	protected Object neightborCache[];
 
@@ -107,5 +113,40 @@ public class TileEnergyStorage extends TileEntity implements IEnergyHandler {
 	
 	public EnergyStorage getEnergyStorage() {
 		return storedEnergy;
+	}
+
+	@Override
+	public String getType() {
+		return "Energy Storage";
+	}
+
+	@Override
+	public String[] getMethodNames() {
+		return new String[] {""};
+	}
+
+	@Override
+	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments)
+			throws LuaException, InterruptedException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void attach(IComputerAccess computer) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void detach(IComputerAccess computer) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public boolean equals(IPeripheral other) {
+		// TODO Auto-generated method stub
+		return false;
 	}
 }

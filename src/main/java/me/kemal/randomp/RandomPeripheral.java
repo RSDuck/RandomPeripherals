@@ -9,13 +9,15 @@ import cofh.lib.util.helpers.FluidHelper;
 import me.kemal.randomp.block.BlockUniversalInterface;
 import me.kemal.randomp.common.CommonProxy;
 import me.kemal.randomp.computercraft.RandomPPeripheralProvider;
+import me.kemal.randomp.computercraft.RandomPTurtleUpgrade;
+import me.kemal.randomp.computercraft.TurtleUpgradeDispense;
 import me.kemal.randomp.computercraft.TurtleUpgradeInventory;
 import me.kemal.randomp.gui.RandomPGuiHandler;
 import me.kemal.randomp.net.RandomPMSG;
 import me.kemal.randomp.net.ServerPacketHandler;
 import me.kemal.randomp.te.TileUniversalInterface;
-import me.kemal.randomp.util.CCUtil;
 import me.kemal.randomp.util.ConfigFile;
+import me.kemal.randomp.util.Util;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.init.Items;
@@ -70,6 +72,7 @@ public class RandomPeripheral {
 		config = new ConfigFile(event.getSuggestedConfigurationFile());
 		config.commentMap.put("inventoryTurtleUpgrade", "ID of the Turtle Advanced Inventory Upgrade");
 		config.map.put("inventoryTurtleUpgrade", "153");
+		config.map.put("dispenserTurtleUpgrade", "154");
 		config.read();
 
 		networkWrapper = new SimpleNetworkWrapper(modnetworkchannel);
@@ -84,24 +87,22 @@ public class RandomPeripheral {
 		NetworkRegistry.INSTANCE.registerGuiHandler(this.instance, new RandomPGuiHandler());
 		MinecraftForge.EVENT_BUS.register(proxy);
 		MinecraftForge.EVENT_BUS.register(instance);
-
-		ComputerCraftAPI.registerTurtleUpgrade(new TurtleUpgradeInventory(((config.map.get("inventoryTurtleUpgrade")
-				.matches("[20-255]") ? CCUtil.ToInt(config.map.get("inventoryTurtleUpgrade")) : 153))));
+	
+		ComputerCraftAPI.registerTurtleUpgrade(new TurtleUpgradeInventory(RandomPTurtleUpgrade.IsIDValid(config.map.get("inventoryTurtleUpgrade"), 153)));
+		ComputerCraftAPI.registerTurtleUpgrade(new TurtleUpgradeDispense(RandomPTurtleUpgrade.IsIDValid(config.map.get("dispenserTurtleUpgrade"),154)));
 		ComputerCraftAPI.registerPeripheralProvider(new RandomPPeripheralProvider());
 	}
 
 	@EventHandler
 	public void postInit(FMLPostInitializationEvent event) {
-		GameRegistry.addRecipe(new ItemStack(blockUniversalInterface), "axa", "zyz", "zxz", 'z', new ItemStack(
-				Items.iron_ingot), 'x', new ItemStack(Items.diamond), 'y', new ItemStack(Items.redstone), 'a',
-				new ItemStack(Items.ender_eye));
+		GameRegistry.addRecipe(new ItemStack(blockUniversalInterface), "axa", "zyz", "zxz", 'z', new ItemStack(Items.iron_ingot), 'x', new ItemStack(
+				Items.diamond), 'y', new ItemStack(Items.redstone), 'a', new ItemStack(Items.ender_eye));
 		logger.info("Random Peripheral is finish loading!");
 	}
 
 	@SubscribeEvent
 	public void playerInteract(PlayerInteractEvent event) {
-		if (event.world.getTileEntity(event.x, event.y, event.z) instanceof TileUniversalInterface
-				&& event.action == event.action.RIGHT_CLICK_BLOCK) {
+		if (event.world.getTileEntity(event.x, event.y, event.z) instanceof TileUniversalInterface && event.action == event.action.RIGHT_CLICK_BLOCK) {
 			if (event.entityPlayer.inventory.getCurrentItem() != null) {
 				Item usedItem = event.entityPlayer.inventory.getCurrentItem().getItem();
 				if (usedItem instanceof IToolHammer) {

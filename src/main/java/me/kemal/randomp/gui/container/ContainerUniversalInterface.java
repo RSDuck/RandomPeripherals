@@ -142,31 +142,35 @@ public class ContainerUniversalInterface extends Container {
 		super.detectAndSendChanges();
 		for (int i = 0; i < this.crafters.size(); ++i) {
 			ICrafting icrafting = (ICrafting) this.crafters.get(i);
-			if (te.getEnergyStored(ForgeDirection.DOWN) != lastStoredEnergy) {
-				icrafting.sendProgressBarUpdate(this, 0, te.getEnergyStored(ForgeDirection.DOWN));
-				lastStoredEnergy = te.getEnergyStored(ForgeDirection.DOWN);
-			}
+			// if (energy != lastStoredEnergy) {
+			icrafting.sendProgressBarUpdate(this, 0, te.getEnergyStorage().getEnergyStored());
+			//lastStoredEnergy = energy;
+			// RandomPeripheral.logger.info("Energy Stored Changed");
+			// }
 			if (te.getTank().getFluid() != null) {
-				if (lastFluidAmount != te.getTank().getFluid().amount) {
-					icrafting.sendProgressBarUpdate(this, 1, te.getTank().getFluid().amount);
-					icrafting.sendProgressBarUpdate(this, 2, te.getTank().getFluid().fluidID);
-					lastFluidAmount = te.getTank().getFluid().amount;
-				}
+				int amount = te.getTank().getFluid().amount;
+				int fluidID = te.getTank().getFluid().fluidID;
+				// if (lastFluidAmount != amount) {
+				icrafting.sendProgressBarUpdate(this, 1, amount);
+				icrafting.sendProgressBarUpdate(this, 2, fluidID);
+				lastFluidAmount = amount;
+				// }
 			} else {
 				icrafting.sendProgressBarUpdate(this, 1, 0);
 				icrafting.sendProgressBarUpdate(this, 2, 0);
-				lastFluidAmount = -1;
+				// lastFluidAmount = -1;
 			}
-			//if (te.getEnergyStorage().getMaxReceive() != lastMaxInput) {
-			//	RandomPeripheral.logger.info("getMaxReceive(): " + te.getEnergyStorage().getMaxReceive()
-			//			+ " lastMaxInput: " + lastMaxInput);
-				icrafting.sendProgressBarUpdate(this, 103, te.getEnergyStorage().getMaxReceive());
-			//	lastMaxInput = te.getEnergyStorage().getMaxReceive();
-			//}
-			//if (te.getEnergyStorage().getMaxExtract() != lastMaxOutput) {
-				icrafting.sendProgressBarUpdate(this, 104, te.getEnergyStorage().getMaxExtract());
-			//	lastMaxOutput = te.getEnergyStorage().getMaxExtract();
-			//}
+			// if (te.getEnergyStorage().getMaxReceive() != lastMaxInput) {
+			// RandomPeripheral.logger.info("getMaxReceive(): " +
+			// te.getEnergyStorage().getMaxReceive()
+			// + " lastMaxInput: " + lastMaxInput);
+			icrafting.sendProgressBarUpdate(this, 103, te.getEnergyStorage().getMaxReceive());
+			// lastMaxInput = te.getEnergyStorage().getMaxReceive();
+			// }
+			// if (te.getEnergyStorage().getMaxExtract() != lastMaxOutput) {
+			icrafting.sendProgressBarUpdate(this, 104, te.getEnergyStorage().getMaxExtract());
+			// lastMaxOutput = te.getEnergyStorage().getMaxExtract();
+			// }
 		}
 
 	}
@@ -174,17 +178,18 @@ public class ContainerUniversalInterface extends Container {
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void updateProgressBar(int bar, int value) {
+		// RandomPeripheral.logger.info("Progressbar Update Received! bar: " +
+		// bar + ", value: " + value);
 		switch (bar) {
 			case 0:
-				te.setEnergyStored(value);
+				te.getEnergyStorage().setEnergyStored(value);
 				break;
 			case 1:
 				_tankAmount = value;
 				break;
 			case 2: {
 				_tankFluidID = value;
-				te.getTank().setFluid(
-						FluidRegistry.getFluidStack(FluidRegistry.getFluidName(_tankFluidID), _tankAmount));
+				te.getTank().setFluid(FluidRegistry.getFluidStack(FluidRegistry.getFluidName(_tankFluidID), _tankAmount));
 			}
 			case 103:
 				// RandomPeripheral.logger.info("Bar Update Input: " + value);

@@ -55,10 +55,8 @@ public class TabEnergyConf extends TabBase {
 		if (!isFullyOpened()) {
 			return;
 		}
-		String tabName = (output) ? StringHelper.localize("me.kemal.randomperipheral.maxOutput") : StringHelper
-				.localize("me.kemal.randomperipheral.maxInput");
-		int maxEnergyIO = (output) ? myContainer.getEnergyStorage().getMaxExtract() : myContainer.getEnergyStorage()
-				.getMaxReceive();
+		String tabName = (output) ? StringHelper.localize("me.kemal.randomperipheral.maxOutput") : StringHelper.localize("me.kemal.randomperipheral.maxInput");
+		int maxEnergyIO = (output) ? myContainer.getEnergyStorage().getMaxExtract() : myContainer.getEnergyStorage().getMaxReceive();
 		String currentIO = (output) ? StringHelper.localize("me.kemal.randomperipheral.currentOutput") : StringHelper
 				.localize("me.kemal.randomperipheral.currentOutput");
 		getFontRenderer().drawStringWithShadow(tabName, posXOffset() + 18, posY + 6, headerColor);
@@ -69,12 +67,7 @@ public class TabEnergyConf extends TabBase {
 		gui.drawButton("IconPlus", posX() + 38, posY + 20, 1, 1);
 		gui.drawButton("IconMinus", posX() + 58, posY + 20, 1, 0);
 		getFontRenderer().drawString(maxEnergyIO + " RF/t", posXOffset() + 14, posY + 54, textColor);
-		getFontRenderer().drawString("1000 RF/t", posXOffset() + 14, posY + 78, textColor); // TODO:
-																							// Konstante
-																							// hinzufügen
-																							// für
-																							// max
-																							// IO
+		getFontRenderer().drawString("" + TileUniversalInterface.MAX_ENERGY_IO + " RF/t", posXOffset() + 14, posY + 78, textColor);
 		GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
 	}
 
@@ -82,12 +75,10 @@ public class TabEnergyConf extends TabBase {
 	public void addTooltip(List<String> list) {
 		if (!isFullyOpened()) {
 			if (output) {
-				list.add(StringHelper.localize("me.kemal.randomperipheral.maxOutput") + " "
-						+ myContainer.getEnergyStorage().getMaxExtract() + " RF/t");
+				list.add(StringHelper.localize("me.kemal.randomperipheral.maxOutput") + " " + myContainer.getEnergyStorage().getMaxExtract() + " RF/t");
 				return;
 			} else {
-				list.add(StringHelper.localize("me.kemal.randomperipheral.maxInput") + " "
-						+ myContainer.getEnergyStorage().getMaxReceive() + " RF/t");
+				list.add(StringHelper.localize("me.kemal.randomperipheral.maxInput") + " " + myContainer.getEnergyStorage().getMaxReceive() + " RF/t");
 				return;
 			}
 			// list.add(StringHelper.localize("info.cofh.enabled") + ", " +
@@ -96,10 +87,10 @@ public class TabEnergyConf extends TabBase {
 		}
 		int x = gui.getMouseX() - currentShiftX;
 		int y = gui.getMouseY() - currentShiftY;
-		String firstButtonToolTip = (output) ? StringHelper.localize("me.kemal.randomperipheral.incOutput")
-				: StringHelper.localize("me.kemal.randomperipheral.incInput");
-		String lastButtonToolTip = (output) ? StringHelper.localize("me.kemal.randomperipheral.decOutput")
-				: StringHelper.localize("me.kemal.randomperipheral.decOutput");
+		String firstButtonToolTip = (output) ? StringHelper.localize("me.kemal.randomperipheral.incOutput") : StringHelper
+				.localize("me.kemal.randomperipheral.incInput");
+		String lastButtonToolTip = (output) ? StringHelper.localize("me.kemal.randomperipheral.decOutput") : StringHelper
+				.localize("me.kemal.randomperipheral.decOutput");
 		if (38 <= x && x < 54 && 20 <= y && y < 36) {
 			list.add(firstButtonToolTip);
 		} else if (58 <= x && x < 74 && 20 <= y && y < 36) {
@@ -123,24 +114,24 @@ public class TabEnergyConf extends TabBase {
 		if (38 <= mouseX && mouseX < 54 && 20 <= mouseY && mouseY < 36) {
 			int add = (isShiftDown) ? 100 : 10;
 			if (output) {
-				int sumToDec = (myContainer.getEnergyStorage().getMaxExtract() + add >= 1000) ? 1000 : myContainer
-						.getEnergyStorage().getMaxExtract() + add;
+				int sumToDec = (myContainer.getEnergyStorage().getMaxExtract() + add >= TileUniversalInterface.MAX_ENERGY_IO) ? TileUniversalInterface.MAX_ENERGY_IO
+						: myContainer.getEnergyStorage().getMaxExtract() + add;
 				Packets.sendToServer(Packets.ChangeMaxPowerOutput, myContainer, sumToDec);
 			} else {
-				int sumToDec = (myContainer.getEnergyStorage().getMaxReceive() + add >= 1000) ? 1000 : myContainer
-						.getEnergyStorage().getMaxReceive() + add;
+				int sumToDec = (myContainer.getEnergyStorage().getMaxReceive() + add >= TileUniversalInterface.MAX_ENERGY_IO) ? TileUniversalInterface.MAX_ENERGY_IO
+						: myContainer.getEnergyStorage().getMaxReceive() + add;
 				Packets.sendToServer(Packets.ChangeMaxPowerInput, myContainer, sumToDec);
 			}
 			GuiBase.playSound("random.click", 1.0F, 0.4F);
 		} else if (58 <= mouseX && mouseX < 74 && 20 <= mouseY && mouseY < 36) {
 			int dec = (isShiftDown) ? 100 : 10;
 			if (output) {
-				int sumToDec = (myContainer.getEnergyStorage().getMaxExtract() - dec < 0) ? myContainer
-						.getEnergyStorage().getMaxExtract() : myContainer.getEnergyStorage().getMaxExtract() - dec;
+				int sumToDec = (myContainer.getEnergyStorage().getMaxExtract() - dec < 0) ? myContainer.getEnergyStorage().getMaxExtract() : myContainer
+						.getEnergyStorage().getMaxExtract() - dec;
 				Packets.sendToServer(Packets.ChangeMaxPowerOutput, myContainer, sumToDec);
 			} else {
-				int sumToDec = (myContainer.getEnergyStorage().getMaxReceive() - dec < 0) ? myContainer
-						.getEnergyStorage().getMaxReceive() : myContainer.getEnergyStorage().getMaxReceive() - dec;
+				int sumToDec = (myContainer.getEnergyStorage().getMaxReceive() - dec < 0) ? myContainer.getEnergyStorage().getMaxReceive() : myContainer
+						.getEnergyStorage().getMaxReceive() - dec;
 				Packets.sendToServer(Packets.ChangeMaxPowerInput, myContainer, sumToDec);
 			}
 			GuiBase.playSound("random.click", 1.0F, 0.6F);

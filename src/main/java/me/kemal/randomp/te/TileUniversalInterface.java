@@ -41,12 +41,14 @@ import dan200.computercraft.api.lua.LuaException;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 import dan200.computercraft.api.peripheral.IPeripheral;
 
-//TODO: Mehr Unter- und Unterklassen
-public class TileUniversalInterface extends TileEnergyStorage implements ISidedInventory, ICCHelpCreator,
-		IReconfigurableFacing, IReconfigurableSides, ISidedTexture, IFluidHandler {
+//TODO: DE: Mehr Unter- und Unterklassen EN: More Sub Classes
+public class TileUniversalInterface extends TileEnergyStorage implements ISidedInventory, ICCHelpCreator, IReconfigurableFacing, IReconfigurableSides,
+		ISidedTexture, IFluidHandler {
 	public static final int capacity = 400000;
+	public static final int fluid_capacity = 4000;
 
-	public static final int LEADSTONE_CAPACITY = 40000;
+	public static final int MAX_ENERGY_IO = 1000;
+	public static final int MAX_FLUID_IO = 100;
 
 	public static final int SIDE_NEUTRAL = 0;
 	public static final int SIDE_IO = 1;
@@ -73,7 +75,7 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 				SIDE_NEUTRAL, // West
 				SIDE_NEUTRAL // Osten
 		};
-		tank = new FluidTank(4000);
+		tank = new FluidTank(fluid_capacity);
 	}
 
 	// TODO: Eigene Klasse fürs Packet Handling schreiben
@@ -94,17 +96,13 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 	@Override
 	public void updateEntity() {
 		super.updateEntity();
-		//TODO: clean up!
+		// TODO: clean up!
 		for (ForgeDirection dir : ForgeDirection.VALID_DIRECTIONS) {
-			if (neightborCache[getIOConfiguration(dir.ordinal())] != null
-					&& neightborCache[getIOConfiguration(dir.ordinal())] instanceof IEnergyHandler
-					&& (getIOConfiguration(dir.getOpposite().ordinal()) == SIDE_IO || getIOConfiguration(dir
-							.getOpposite().ordinal()) == SIDE_ENERGY_ONLY)) {
+			if (neightborCache[getIOConfiguration(dir.ordinal())] != null && neightborCache[getIOConfiguration(dir.ordinal())] instanceof IEnergyHandler
+					&& (getIOConfiguration(dir.getOpposite().ordinal()) == SIDE_IO || getIOConfiguration(dir.getOpposite().ordinal()) == SIDE_ENERGY_ONLY)) {
 				int energy = storedEnergy.getEnergyStored();
-				if (((IEnergyHandler) neightborCache[getIOConfiguration(dir.ordinal())]).receiveEnergy(dir,
-						storedEnergy.getMaxExtract(), true) > 0)
-					energy -= ((IEnergyHandler) neightborCache[getIOConfiguration(dir.ordinal())]).receiveEnergy(dir,
-							storedEnergy.getMaxExtract(), false);
+				if (((IEnergyHandler) neightborCache[getIOConfiguration(dir.ordinal())]).receiveEnergy(dir, storedEnergy.getMaxExtract(), true) > 0)
+					energy -= ((IEnergyHandler) neightborCache[getIOConfiguration(dir.ordinal())]).receiveEnergy(dir, storedEnergy.getMaxExtract(), false);
 				if (energy <= 0)
 					energy = 0;
 				this.storedEnergy.setEnergyStored(energy);
@@ -112,15 +110,12 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 				// + dir.toString() + " side. " + energy
 				// + " RF succefull transfered");
 			}
-			if (neightborCache[getIOConfiguration(dir.ordinal())] != null
-					&& neightborCache[getIOConfiguration(dir.ordinal())] instanceof IFluidHandler
+			if (neightborCache[getIOConfiguration(dir.ordinal())] != null && neightborCache[getIOConfiguration(dir.ordinal())] instanceof IFluidHandler
 					&& this.tank.getFluid() != null
-					&& (getIOConfiguration(dir.getOpposite().ordinal()) == SIDE_IO || getIOConfiguration(dir
-							.getOpposite().ordinal()) == SIDE_FLUID_ONLY)) {
+					&& (getIOConfiguration(dir.getOpposite().ordinal()) == SIDE_IO || getIOConfiguration(dir.getOpposite().ordinal()) == SIDE_FLUID_ONLY)) {
 				IFluidHandler fluidHandler = (IFluidHandler) neightborCache[getIOConfiguration(dir.ordinal())];
 				if (fluidHandler.canFill(dir, tank.getFluid().getFluid())) {
-					final int maxDrain = 100;
-					FluidStack fluidToDrain = this.drain(dir.getOpposite(), maxDrain, false);
+					FluidStack fluidToDrain = this.drain(dir.getOpposite(), MAX_FLUID_IO, false);
 					int maxFill = fluidHandler.fill(dir, fluidToDrain, false);
 					FluidStack drainedFluid = this.drain(dir.getOpposite(), maxFill, true);
 					fluidHandler.fill(dir, drainedFluid, true);
@@ -164,9 +159,8 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 	// TODO: Computercraft Funktions Namen aufräumen
 	@Override
 	public String[] getMethodNames() {
-		return new String[] { "help", "getHeldStack", "suckStack", "pushStack", "setMaxEnergyOutput",
-				"getEnergyMaxOutput", "getStoredEnergy", "getMaxEnergyStored", "setAllowAutoInput",
-				"isAutoInputAllowed", "setSideConfiguration", "getSideConfiguration", "setMaxEnergyInput",
+		return new String[] { "help", "getHeldStack", "suckStack", "pushStack", "setMaxEnergyOutput", "getEnergyMaxOutput", "getStoredEnergy",
+				"getMaxEnergyStored", "setAllowAutoInput", "isAutoInputAllowed", "setSideConfiguration", "getSideConfiguration", "setMaxEnergyInput",
 				"getMaxEnergyInput" };
 	}
 
@@ -176,13 +170,12 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 	}
 
 	@Override
-	public String[] getFunctionDescription() {
+	public String[] getFunctionDescriptions() {
 		return null;
 	}
 
 	@Override
-	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments)
-			throws LuaException, InterruptedException {
+	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) throws LuaException, InterruptedException {
 		switch (method) {
 			case 0: { // help
 				return new Object[] { "At this time there is no help available" };
@@ -191,35 +184,33 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 				return new Object[] { CCUtil.stackToMap(heldStack) };
 			}
 			case 2: {// suckStack
+				//TODO: move suckStack and pushStack into an inventory util class
 				if (arguments.length == 1 || arguments.length == 2) {
 					if (CCUtil.IsValidNumber(arguments[0])) {
-						if (CCUtil.ToInt(arguments[0]) >= 0 && CCUtil.ToInt(arguments[0]) < 6) {
+						if (Util.ToInt(arguments[0]) >= 0 && Util.ToInt(arguments[0]) < 6) {
 							if (arguments.length == 2)
 								if (CCUtil.IsValidNumber(arguments[1])) {
-									if (!(CCUtil.ToInt(arguments[1]) >= 0 && CCUtil.ToInt(arguments[1]) < 6)) {
+									if (!(Util.ToInt(arguments[1]) >= 0 && Util.ToInt(arguments[1]) < 6)) {
 										return new Object[] { false };
 									}
 								} else
 									return new Object[] { false };
-							int[] pos = CCUtil.DirToCoord(CCUtil.ToInt(arguments[0]));
+							int[] pos = CCUtil.DirToCoord(Util.ToInt(arguments[0]));
 							TileEntity te = worldObj.getTileEntity(xCoord + pos[0], yCoord + pos[1], zCoord + pos[2]);
 							boolean sided = te instanceof ISidedInventory;
 							if (te instanceof IInventory) {
-								int side = (arguments.length == 1) ? ForgeDirection.values()[CCUtil.ToInt(arguments[0])]
-										.getOpposite().ordinal() : CCUtil.ToInt(arguments[1]);
+								int side = (arguments.length == 1) ? ForgeDirection.values()[Util.ToInt(arguments[0])].getOpposite().ordinal() : Util
+										.ToInt(arguments[1]);
 								IInventory inv = (IInventory) te;
-								int invSize = (sided) ? ((ISidedInventory) inv).getAccessibleSlotsFromSide(side).length
-										: inv.getSizeInventory();
-								int[] slots = (sided) ? ((ISidedInventory) inv).getAccessibleSlotsFromSide(side)
-										: new int[] {};
+								int invSize = (sided) ? ((ISidedInventory) inv).getAccessibleSlotsFromSide(side).length : inv.getSizeInventory();
+								int[] slots = (sided) ? ((ISidedInventory) inv).getAccessibleSlotsFromSide(side) : new int[] {};
 								for (int i = 0; i < invSize; i++) {
 									int slot = (sided) ? slots[i] : i;
 									if (inv.getStackInSlot(slot) == null)
 										continue;
-									int decr = CCUtil.CanStack(heldStack, inv.getStackInSlot(slot));
+									int decr = Util.CanStack(heldStack, inv.getStackInSlot(slot));
 									if (sided) {
-										if (!(((ISidedInventory) inv).canExtractItem(slot, inv.getStackInSlot(slot),
-												side))) {
+										if (!(((ISidedInventory) inv).canExtractItem(slot, inv.getStackInSlot(slot), side))) {
 											continue;
 										}
 									}
@@ -243,27 +234,25 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 					if (CCUtil.IsValidNumber(arguments[0])) {
 						if (arguments.length == 2)
 							if (CCUtil.IsValidNumber(arguments[1])) {
-								if (!(CCUtil.ToInt(arguments[1]) >= 0 && CCUtil.ToInt(arguments[1]) < 6)) {
+								if (!(Util.ToInt(arguments[1]) >= 0 && Util.ToInt(arguments[1]) < 6)) {
 									return new Object[] { false };
 								}
 							} else
 								return new Object[] { false };
 						if (heldStack == null)
 							return new Object[] { false };
-						int[] pos = CCUtil.DirToCoord(CCUtil.ToInt(arguments[0]));
+						int[] pos = CCUtil.DirToCoord(Util.ToInt(arguments[0]));
 						TileEntity te = worldObj.getTileEntity(xCoord + pos[0], yCoord + pos[1], zCoord + pos[2]);
 						boolean sided = te instanceof ISidedInventory;
 						if (te instanceof IInventory) {
 							IInventory inv = (IInventory) te;
-							int side = (arguments.length == 1) ? ForgeDirection.values()[CCUtil.ToInt(arguments[0])]
-									.getOpposite().ordinal() : CCUtil.ToInt(arguments[1]);
-							int invSize = (sided) ? ((ISidedInventory) inv).getAccessibleSlotsFromSide(side).length
-									: inv.getSizeInventory();
-							int[] slots = (sided) ? ((ISidedInventory) inv).getAccessibleSlotsFromSide(side)
-									: new int[] {};
+							int side = (arguments.length == 1) ? ForgeDirection.values()[Util.ToInt(arguments[0])].getOpposite().ordinal() : Util
+									.ToInt(arguments[1]);
+							int invSize = (sided) ? ((ISidedInventory) inv).getAccessibleSlotsFromSide(side).length : inv.getSizeInventory();
+							int[] slots = (sided) ? ((ISidedInventory) inv).getAccessibleSlotsFromSide(side) : new int[] {};
 							for (int i = 0; i < invSize; i++) {
 								int slot = (sided) ? slots[i] : i;
-								int stackable = CCUtil.CanStack(inv.getStackInSlot(slot), heldStack);
+								int stackable = Util.CanStack(inv.getStackInSlot(slot), heldStack);
 								if (sided) {
 									if (!((ISidedInventory) inv).canInsertItem(slot, heldStack, side)) {
 										continue;
@@ -286,9 +275,8 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 			}
 			case 4: {// setEnergyMaxExtract
 				if (arguments.length == 1 && CCUtil.IsValidNumber(arguments[0])) {
-					if (CCUtil.ToInt(arguments[0]) <= 10000 && CCUtil.ToInt(arguments[0]) >= 0
-							&& CCUtil.ToInt(arguments[0]) % 10 == 0) {
-						storedEnergy.setMaxExtract(CCUtil.ToInt(arguments[0]));
+					if (Util.ToInt(arguments[0]) <= MAX_ENERGY_IO && Util.ToInt(arguments[0]) >= 0 && Util.ToInt(arguments[0]) % 10 == 0) {
+						storedEnergy.setMaxExtract(Util.ToInt(arguments[0]));
 						return new Object[] { true };
 					}
 				}
@@ -315,8 +303,8 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 			}
 			case 10: {// setSideConfiguration
 				if (arguments.length == 2 && CCUtil.IsValidNumber(arguments[0]) && CCUtil.IsValidNumber(arguments[1])) {
-					if (CCUtil.ToInt(arguments[0]) < 6 && CCUtil.ToInt(arguments[1]) < SIDES_COUNT) {
-						setSide(CCUtil.ToInt(arguments[0]), CCUtil.ToInt(arguments[1]));
+					if (Util.ToInt(arguments[0]) < 6 && Util.ToInt(arguments[1]) < SIDES_COUNT) {
+						setSide(Util.ToInt(arguments[0]), Util.ToInt(arguments[1]));
 						updateAllBlocks();
 						return new Object[] { true };
 					}
@@ -328,9 +316,8 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 			}
 			case 12: {// setEnergyMaxReceive
 				if (arguments.length == 1 && CCUtil.IsValidNumber(arguments[0])) {
-					if (CCUtil.ToInt(arguments[0]) <= 1000 && CCUtil.ToInt(arguments[0]) >= 0
-							&& CCUtil.ToInt(arguments[0]) % 10 == 0) {
-						storedEnergy.setMaxReceive(CCUtil.ToInt(arguments[0]));
+					if (Util.ToInt(arguments[0]) <= MAX_ENERGY_IO && Util.ToInt(arguments[0]) >= 0 && Util.ToInt(arguments[0]) % 10 == 0) {
+						storedEnergy.setMaxReceive(Util.ToInt(arguments[0]));
 						return new Object[] { true };
 					}
 				}
@@ -462,8 +449,7 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 
 	@Override
 	public boolean canInsertItem(int slot, ItemStack stack, int side) {
-		return (getIOConfigurationWithFacing(side) == SIDE_IO || getIOConfigurationWithFacing(side) == SIDE_ITEMS_ONLY)
-				&& allowAutoInput;
+		return (getIOConfigurationWithFacing(side) == SIDE_IO || getIOConfigurationWithFacing(side) == SIDE_ITEMS_ONLY) && allowAutoInput;
 	}
 
 	@Override
@@ -473,16 +459,14 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 
 	@Override
 	public int extractEnergy(ForgeDirection from, int maxExtract, boolean simulate) {
-		if (getIOConfigurationWithFacing(from.ordinal()) == SIDE_IO
-				|| getIOConfigurationWithFacing(from.ordinal()) == SIDE_ENERGY_ONLY)
+		if (getIOConfigurationWithFacing(from.ordinal()) == SIDE_IO || getIOConfigurationWithFacing(from.ordinal()) == SIDE_ENERGY_ONLY)
 			return super.extractEnergy(from, maxExtract, simulate);
 		return 0;
 	}
 
 	@Override
 	public int receiveEnergy(ForgeDirection from, int maxReceive, boolean simulate) {
-		if (getIOConfigurationWithFacing(from.ordinal()) == SIDE_IO
-				|| getIOConfigurationWithFacing(from.ordinal()) == SIDE_ENERGY_ONLY)
+		if (getIOConfigurationWithFacing(from.ordinal()) == SIDE_IO || getIOConfigurationWithFacing(from.ordinal()) == SIDE_ENERGY_ONLY)
 			return super.receiveEnergy(from, maxReceive, simulate);
 		return 0;
 	}
@@ -594,8 +578,7 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 
 	@Override
 	public boolean canDrain(ForgeDirection from, Fluid fluid) {
-		return tank.getFluidAmount() > 0 && getIOConfiguration(from.ordinal()) == SIDE_IO
-				|| getIOConfiguration(from.ordinal()) == SIDE_FLUID_ONLY;
+		return tank.getFluidAmount() > 0 && getIOConfiguration(from.ordinal()) == SIDE_IO || getIOConfiguration(from.ordinal()) == SIDE_FLUID_ONLY;
 	}
 
 	@Override
@@ -607,6 +590,11 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 
 	public FluidTank getTank() {
 		return tank;
+	}
+
+	@Override
+	public String[] getFunctionReturns() {
+		return null;
 	}
 
 }

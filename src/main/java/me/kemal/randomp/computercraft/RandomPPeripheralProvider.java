@@ -14,7 +14,7 @@ public class RandomPPeripheralProvider implements IPeripheralProvider {
 			return (TileUniversalInterface) world.getTileEntity(x, y, z);
 		}
 		if(world.getTileEntity(x, y, z) instanceof TileEntitySign){
-			return new PeripheralPPeripheralSign((TileEntitySign)world.getTileEntity(x, y, z));
+			return new PeripheralSign((TileEntitySign)world.getTileEntity(x, y, z));
 		}
 		return null;
 	}

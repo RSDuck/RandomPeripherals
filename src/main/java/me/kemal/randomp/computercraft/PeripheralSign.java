@@ -9,13 +9,13 @@ import dan200.computercraft.api.lua.LuaException;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 import dan200.computercraft.api.peripheral.IPeripheral;
 
-public class PeripheralPPeripheralSign implements IPeripheral {
+public class PeripheralSign implements IPeripheral {
 	TileEntitySign sign;
 
-	public PeripheralPPeripheralSign() { // Empty Constructor
+	public PeripheralSign() { // Empty Constructor
 	}
 
-	public PeripheralPPeripheralSign(TileEntitySign sign) {
+	public PeripheralSign(TileEntitySign sign) {
 		this.sign = sign;
 	}
 

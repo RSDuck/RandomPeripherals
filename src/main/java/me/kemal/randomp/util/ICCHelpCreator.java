@@ -4,11 +4,12 @@ import dan200.computercraft.api.peripheral.IPeripheral;
 
 /***
  * 
- * @author Kemal Implement this to automaticly generate a computercraft help
- *         function function
+ * Implement this to automaticly generate a computercraft help
+ * function function
+ * @author Kemal 
  *
  */
-public interface ICCHelpCreator extends IPeripheral {
+public interface ICCHelpCreator {
 	/***
 	 * Example: return new String[] {"parameter1,parameter2","parameter1"}; This
 	 * will say that function one has to parameters, function two has one
@@ -24,5 +25,11 @@ public interface ICCHelpCreator extends IPeripheral {
 	 * 
 	 * @return The description of each function
 	 */
-	public String[] getFunctionDescription();
+	public String[] getFunctionDescriptions();
+	
+	/***
+	 * 
+	 * @return An description about what the function returns
+	 */
+	public String[] getFunctionReturns();
 }

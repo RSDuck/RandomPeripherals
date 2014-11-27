@@ -123,4 +123,27 @@ public class Util {
 		}
 		return false;
 	}
+
+	public static String ToString(Object string) {
+		return ((String) string);
+	}
+	
+	public static int ToInt(Object number) {
+		return ((Number) number).intValue();
+	}
+
+	public static int CanStack(ItemStack stack1, ItemStack stack2) {
+		if (stack1 == null) {
+			return 64;
+		}
+		if (stack2 != null && stack2.getItem().equals(stack1.getItem())
+				&& (!stack1.getHasSubtypes() || stack1.getItemDamage() == stack2.getItemDamage())
+				&& ItemStack.areItemStackTagsEqual(stack1, stack2)) {
+			if (stack1.stackSize + stack2.stackSize > 64) {
+				return stack1.getMaxStackSize() - (((stack2.stackSize + stack1.stackSize) - 64));
+			}
+			return stack1.stackSize + stack2.stackSize;
+		} else
+			return -1;
+	}
 }
