@@ -99,14 +99,14 @@ public class CCUtil {
 	public static int TurtleDirToForgeDir(int turtleDir, String dir) {
 		int output = -1;
 		RandomPeripheral.logger.info("Turtle Dir: " + turtleDir + " Dir: " + dir);
-		String[] dirs = new String[] { "top", "bottom", "front", "back", "right", "left" };
+		String[] dirs = new String[] { "left", "right", "back", "front", "bottom", "top" };
 		for (int i = 0; i < dirs.length; i++) {
-			RandomPeripheral.logger.info("dirs[i] = " + dirs[i] + "|dirs[i] == dir = " + (dirs[i] == dir));
+			RandomPeripheral.logger.info("dirs[i] = " + dirs[i] + "|dirs[i] == dir = " + (dirs[i].startsWith(dir) || dirs[i].endsWith(dir)));
 			if (dirs[i].startsWith(dir) || dirs[i].endsWith(dir))
 				output = i;
 		}
 		if (output == -1)
 			return output;
-		return (int) BlockHelper.ICON_ROTATION_MAP[output][(turtleDir + 1) % 4];
+		return (int) BlockHelper.ICON_ROTATION_MAP[turtleDir][output];
 	}
 }

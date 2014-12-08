@@ -91,6 +91,9 @@ public class RandomPeripheral {
 		ComputerCraftAPI.registerTurtleUpgrade(new TurtleUpgradeInventory(RandomPTurtleUpgrade.IsIDValid(config.map.get("inventoryTurtleUpgrade"), 153)));
 		ComputerCraftAPI.registerTurtleUpgrade(new TurtleUpgradeDispense(RandomPTurtleUpgrade.IsIDValid(config.map.get("dispenserTurtleUpgrade"),154)));
 		ComputerCraftAPI.registerPeripheralProvider(new RandomPPeripheralProvider());
+		if(ComputerCraftAPI.createResourceMount(RandomPeripheral.class, "randomperipherals", "randomperipherals/lua") == null){
+			logger.info("Could not mount ressource");
+		}
 	}
 
 	@EventHandler
@@ -106,7 +109,7 @@ public class RandomPeripheral {
 			if (event.entityPlayer.inventory.getCurrentItem() != null) {
 				Item usedItem = event.entityPlayer.inventory.getCurrentItem().getItem();
 				if (usedItem instanceof IToolHammer) {
-					logger.info("Rotate Block!");
+					//logger.info("Rotate Block!");
 					((TileUniversalInterface) event.world.getTileEntity(event.x, event.y, event.z)).rotateBlock();
 				}
 			}
