@@ -42,7 +42,7 @@ public class BlockUniversalInterface extends Block implements ITileEntityProvide
 	@SideOnly(Side.CLIENT)
 	private IIcon universalFace, itemFace, energyFace, fluidFace, neutralFace;
 
-	public String blockName = "universalInterface";
+	public final static String blockName = "universalInterface";
 
 	public BlockUniversalInterface(Material mat) {
 		super(mat);

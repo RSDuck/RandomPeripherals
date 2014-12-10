@@ -3,6 +3,7 @@ package me.kemal.randomp.util;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Vector;
 
@@ -12,28 +13,30 @@ import dan200.computercraft.api.lua.LuaException;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 import dan200.computercraft.api.peripheral.IPeripheral;
 
-public class Peripheral implements IExtendablePeripheral {
+public class Peripheral implements IExtendablePeripheral, IPeripheral {
 	private String type;
 	private Vector<String> functionNames;
 	// For help function
 	private HashMap<String, String> functionDescriptions;
-	private HashMap<String, String[]> functionArgDescriptions;
-	private HashMap<String, String[]> functionReturnDescriptions;
+	private HashMap<String, CCType[]> functionArgs;
+	private HashMap<String, CCType[]> functionReturns;
 
 	private HashMap<String, MethodHandle> functionClassHandlers;
 
 	public Peripheral() {
 		functionNames = new Vector<String>();
-		functionArgDescriptions = new HashMap<String, String[]>();
-		functionReturnDescriptions = new HashMap<String, String[]>();
+		functionArgs = new HashMap<String, CCType[]>();
+		functionDescriptions = new HashMap<String, String>();
+		functionReturns = new HashMap<String, CCType[]>();
 		functionClassHandlers = new HashMap<String, MethodHandle>();
 
-		AddMethod("help", "Get Help about an function", new String[] { "functionName : the name of the function you need help" },
-				new String[] { "An help like this" }, this);
-		AddMethod("getMethods", "Lists all function of this peripheral", new String[] {}, new String[] {}, this);
+		AddMethod("help", "Get Help about an function",
+				new CCType[] { new CCType(String.class, "functionName", "the name of the function you need help with") }, new CCType[] { new CCType(
+						String.class, "", "an help like this") }, this);
+		AddMethod("getMethods", "Lists all function of this peripheral", new CCType[] {}, new CCType[] {}, this);
 	}
 
-	public void AddMethod(String name, String description, String[] args, String returns[], IExtendablePeripheral classToCall) {
+	public void AddMethod(String name, String description, CCType[] args, CCType returns[], IExtendablePeripheral classToCall) {
 		MethodHandles.Lookup lookup = MethodHandles.lookup();
 		try {
 			functionClassHandlers.put(
@@ -50,8 +53,8 @@ public class Peripheral implements IExtendablePeripheral {
 		}
 		functionNames.addElement(name);
 		functionDescriptions.put(name, description);
-		functionArgDescriptions.put(name, args);
-		functionReturnDescriptions.put(name, returns);
+		functionArgs.put(name, args);
+		functionReturns.put(name, returns);
 	}
 
 	@Override
@@ -65,13 +68,14 @@ public class Peripheral implements IExtendablePeripheral {
 
 	@Override
 	public String[] getMethodNames() {
-		return (String[]) functionNames.toArray();
+		return Arrays.copyOf(functionNames.toArray(), functionNames.size(), String[].class);
 	}
 
 	@Override
 	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) throws LuaException {
 		try {
-			return (Object[]) functionClassHandlers.get(functionNames.get(method)).invokeWithArguments(computer, context, functionNames.get(method), arguments);
+			return ((Object[]) functionClassHandlers.get(functionNames.get(method)).invokeWithArguments(this, computer, context, functionNames.get(method),
+					arguments));
 		} catch (Throwable e) {
 			e.printStackTrace();
 		}
@@ -92,7 +96,16 @@ public class Peripheral implements IExtendablePeripheral {
 	}
 
 	@Override
-	public Object[] callMethod(IComputerAccess computer, ILuaContext context, String method, Object[] arguments) {
-		return new Object[] {};
+	public Object[] callMethod(IComputerAccess computer, ILuaContext context, String method, Object[] arguments) throws LuaException {
+		switch (method) {
+			case "help": {
+
+			}
+				break;
+			case "getMethods": {
+			}
+				break;
+		}
+		throw new LuaException("Internal Error: function not found");
 	}
 }

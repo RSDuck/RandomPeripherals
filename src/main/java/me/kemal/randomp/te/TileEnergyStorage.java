@@ -14,16 +14,16 @@ import dan200.computercraft.api.lua.LuaException;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 import dan200.computercraft.api.peripheral.IPeripheral;
 
-public class TileEnergyStorage extends TileEntity implements IEnergyHandler, IPeripheral {
+public class TileEnergyStorage extends TileRandomPMachine implements IEnergyHandler {
 	protected EnergyStorage storedEnergy;
 	protected Object neightborCache[];
 
 	public TileEnergyStorage() {
-		storedEnergy = new EnergyStorage(0, 0);
-		neightborCache = new Object[6];
+		this(0);
 	}
 
 	public TileEnergyStorage(int capacity) {
+		super("EnergyStorage");
 		storedEnergy = new EnergyStorage(capacity, 0);
 		neightborCache = new Object[6];
 	}
@@ -47,6 +47,7 @@ public class TileEnergyStorage extends TileEntity implements IEnergyHandler, IPe
 	@Override
 	public void updateEntity() {
 		super.updateEntity();
+		// TODO: function for energy output
 		/*
 		 * for (ForgeDirection dir : ForgeDirection.VALID_DIRECTIONS) { if
 		 * (neightborCache[dir.ordinal()] != null) { int energyAvailable = 0;
@@ -110,43 +111,9 @@ public class TileEnergyStorage extends TileEntity implements IEnergyHandler, IPe
 	public void setEnergyStored(int val) {
 		storedEnergy.setEnergyStored(val);
 	}
-	
+
 	public EnergyStorage getEnergyStorage() {
 		return storedEnergy;
 	}
 
-	@Override
-	public String getType() {
-		return "Energy Storage";
-	}
-
-	@Override
-	public String[] getMethodNames() {
-		return new String[] {""};
-	}
-
-	@Override
-	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments)
-			throws LuaException, InterruptedException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void attach(IComputerAccess computer) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void detach(IComputerAccess computer) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public boolean equals(IPeripheral other) {
-		// TODO Auto-generated method stub
-		return false;
-	}
 }

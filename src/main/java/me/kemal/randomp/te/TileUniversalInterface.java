@@ -43,7 +43,7 @@ import dan200.computercraft.api.peripheral.IPeripheral;
 
 //TODO: DE: Mehr Unter- und Unterklassen EN: More Sub Classes
 public class TileUniversalInterface extends TileEnergyStorage implements ISidedInventory, ICCHelpCreator, IReconfigurableFacing, IReconfigurableSides,
-		ISidedTexture, IFluidHandler {
+		ISidedTexture, IFluidHandler, IPeripheral {
 	public static final int capacity = 400000;
 	public static final int fluid_capacity = 4000;
 
@@ -184,7 +184,8 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 				return new Object[] { CCUtil.stackToMap(heldStack) };
 			}
 			case 2: {// suckStack
-				//TODO: move suckStack and pushStack into an inventory util class
+				// TODO: move suckStack and pushStack into an inventory util
+				// class
 				if (arguments.length == 1 || arguments.length == 2) {
 					if (CCUtil.IsValidNumber(arguments[0])) {
 						if (Util.ToInt(arguments[0]) >= 0 && Util.ToInt(arguments[0]) < 6) {

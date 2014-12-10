@@ -10,34 +10,14 @@ import net.minecraft.tileentity.TileEntity;
 
 public class TileRandomPMachine extends TileEntity implements IExtendablePeripheral {
 	public Peripheral peripheral;
-
-	@Override
-	public String getType() {
-		return peripheral.getType();
+	
+	public TileRandomPMachine(String peripheralType) {
+		peripheral = new Peripheral();
+		peripheral.setType(peripheralType);
 	}
-
-	@Override
-	public String[] getMethodNames() {
-		return peripheral.getMethodNames();
-	}
-
-	@Override
-	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) throws LuaException, InterruptedException {
-		
-		return null;
-	}
-
-	@Override
-	public void attach(IComputerAccess computer) {
-	}
-
-	@Override
-	public void detach(IComputerAccess computer) {
-	}
-
-	@Override
-	public boolean equals(IPeripheral other) {
-		return false;
+	
+	public Peripheral getPeripheral(){
+		return peripheral;
 	}
 
 	@Override

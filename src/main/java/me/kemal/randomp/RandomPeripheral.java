@@ -6,6 +6,7 @@ import cofh.api.item.IToolHammer;
 import cofh.api.modhelpers.ThermalExpansionHelper;
 import cofh.lib.util.ItemWrapper;
 import cofh.lib.util.helpers.FluidHelper;
+import me.kemal.randomp.block.BlockDebugPeripheral;
 import me.kemal.randomp.block.BlockUniversalInterface;
 import me.kemal.randomp.common.CommonProxy;
 import me.kemal.randomp.computercraft.RandomPPeripheralProvider;
@@ -60,6 +61,7 @@ public class RandomPeripheral {
 	public static RandomPeripheral instance;
 
 	public static Block blockUniversalInterface;
+	public static Block blockDebugBlock;
 
 	public static Logger logger;
 	public static ConfigFile config;
@@ -79,6 +81,7 @@ public class RandomPeripheral {
 		networkWrapper.registerMessage(ServerPacketHandler.class, RandomPMSG.class, 0, Side.SERVER);
 
 		blockUniversalInterface = new BlockUniversalInterface(Material.iron);
+		blockDebugBlock = new BlockDebugPeripheral(Material.piston);
 	}
 
 	@EventHandler
@@ -91,9 +94,9 @@ public class RandomPeripheral {
 		ComputerCraftAPI.registerTurtleUpgrade(new TurtleUpgradeInventory(RandomPTurtleUpgrade.IsIDValid(config.map.get("inventoryTurtleUpgrade"), 153)));
 		ComputerCraftAPI.registerTurtleUpgrade(new TurtleUpgradeDispense(RandomPTurtleUpgrade.IsIDValid(config.map.get("dispenserTurtleUpgrade"),154)));
 		ComputerCraftAPI.registerPeripheralProvider(new RandomPPeripheralProvider());
-		if(ComputerCraftAPI.createResourceMount(RandomPeripheral.class, "randomperipherals", "randomperipherals/lua") == null){
+		/*if(ComputerCraftAPI.createResourceMount(RandomPeripheral.class, "randomperipherals", "lua") == null){
 			logger.info("Could not mount ressource");
-		}
+		}*/
 	}
 
 	@EventHandler
