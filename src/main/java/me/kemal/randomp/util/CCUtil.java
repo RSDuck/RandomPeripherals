@@ -33,8 +33,9 @@ public class CCUtil {
 	public static Map<Integer, Object> ArrayToLuaArray(Object[] array) {
 		HashMap<Integer, Object> map = new HashMap<Integer, Object>();
 		int iterator = 0;
+		boolean isCCType = (array instanceof CCType[]);
 		for (Object obj : array) {
-			map.put(iterator + 1, array[iterator]);
+			map.put(iterator + 1, (isCCType) ? ((CCType[]) array)[iterator].toHashMap() : array[iterator]);
 			iterator++;
 		}
 		return map;
@@ -67,26 +68,6 @@ public class CCUtil {
 		}
 	}
 
-	public static boolean checkArgument(Object[] arguments, Object[] check, Class<?>... types) {
-		if (arguments.length == types.length) {
-			for (int i = 0; i < arguments.length; i++)
-				if (!(types[i].isInstance(arguments))) {
-					return false;
-				} else {
-					// throw new
-					// LuaException("Internal Error: argument lenght is not equal to the lenght of types");
-					return false; // ...
-				}
-			return true;
-		}
-		return false;
-	}
-
-	public static Object[] getHelp(ICCHelpCreator help) {
-
-		return null;
-	}
-
 	public static Map<String, Object> NBTCompoundToMap(NBTTagCompound compound) {
 		HashMap<String, Object> nbtMap = new HashMap<String, Object>();
 		Object[] nbtSet = compound.func_150296_c().toArray();
@@ -101,7 +82,7 @@ public class CCUtil {
 		RandomPeripheral.logger.info("Turtle Dir: " + turtleDir + " Dir: " + dir);
 		String[] dirs = new String[] { "left", "right", "back", "front", "bottom", "top" };
 		for (int i = 0; i < dirs.length; i++) {
-			RandomPeripheral.logger.info("dirs[i] = " + dirs[i] + "|dirs[i] == dir = " + (dirs[i].startsWith(dir) || dirs[i].endsWith(dir)));
+			RandomPeripheral.logger.info("dirs[i] = " + dirs[i] + "|dirs[i] == dir = " + (dirs[i] == dir));
 			if (dirs[i].startsWith(dir) || dirs[i].endsWith(dir))
 				output = i;
 		}

@@ -29,36 +29,14 @@ public class PeripheralDispenser implements IPeripheral {
 		return new String[] { "help", "dispense" };
 	}
 
-	protected IBehaviorDispenseItem getDispenseBehavior(ItemStack p_149940_1_) {
-		return (IBehaviorDispenseItem) BlockDispenser.dispenseBehaviorRegistry.getObject(p_149940_1_.getItem());
-	}
-
-	public boolean dispense(String direction) {
-		int dir = CCUtil.TurtleDirToForgeDir(turtle.getDirection(), direction);
-		if (dir != -1) {
-			BlockSourceImpl blocksourceimpl = new BlockSourceImplDispenserHack(turtle.getWorld(), dir, turtle.getPosition().posX, turtle.getPosition().posY,
-					turtle.getPosition().posZ);
-			ItemStack stack = turtle.getInventory().getStackInSlot(turtle.getSelectedSlot());
-			if (stack != null) {
-				IBehaviorDispenseItem dispenseBehavior = this.getDispenseBehavior(stack);
-				if (dispenseBehavior != IBehaviorDispenseItem.itemDispenseBehaviorProvider) {
-					ItemStack dispensedStack = dispenseBehavior.dispense(blocksourceimpl, stack);
-					turtle.getInventory().setInventorySlotContents(turtle.getSelectedSlot(), dispensedStack);
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-
 	@Override
 	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) throws LuaException, InterruptedException {
-		if (method == 0) {
-			return new Object[] { "Help will be added in a few" };
-		} else if (method == 1 && arguments.length == 1) {
-			if (CCUtil.IsValidString(arguments[0]))
-				return new Object[] { dispense(Util.ToString(arguments[0])) };
-		}
+		/*
+		 * if (method == 0) { return new Object[] {
+		 * "Help will be added in a few" }; } else if (method == 1 &&
+		 * arguments.length == 1) { if (CCUtil.IsValidString(arguments[0]))
+		 * return new Object[] { dispense(Util.ToString(arguments[0])) }; }
+		 */
 		return new Object[] { null };
 	}
 

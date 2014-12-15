@@ -1,6 +1,9 @@
 package me.kemal.randomp.te;
 
+import java.util.HashMap;
+
 import me.kemal.randomp.RandomPeripheral;
+import me.kemal.randomp.util.CCType;
 import me.kemal.randomp.util.CCUtil;
 import me.kemal.randomp.util.ICCHelpCreator;
 import me.kemal.randomp.util.Util;
@@ -40,10 +43,10 @@ import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.lua.LuaException;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 import dan200.computercraft.api.peripheral.IPeripheral;
+import dan200.computercraft.api.turtle.ITurtleAccess;
 
 //TODO: DE: Mehr Unter- und Unterklassen EN: More Sub Classes
-public class TileUniversalInterface extends TileEnergyStorage implements ISidedInventory, ICCHelpCreator, IReconfigurableFacing, IReconfigurableSides,
-		ISidedTexture, IFluidHandler, IPeripheral {
+public class TileUniversalInterface extends TileEnergyStorage implements ISidedInventory, IFluidHandler {
 	public static final int capacity = 400000;
 	public static final int fluid_capacity = 4000;
 
@@ -55,11 +58,9 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 	public static final int SIDE_ITEMS_ONLY = 2;
 	public static final int SIDE_ENERGY_ONLY = 3;
 	public static final int SIDE_FLUID_ONLY = 4;
-	public static final int SIDES_COUNT = 5;
 
 	private ItemStack heldStack;
 	private int outputDirection;
-	private int[] ioConfiguration;
 	private boolean allowAutoInput;
 	private FluidTank tank;
 
@@ -76,6 +77,19 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 				SIDE_NEUTRAL // Osten
 		};
 		tank = new FluidTank(fluid_capacity);
+		peripheral.AddMethod("getHeldStack", "Returns the current hold stack", new CCType[] {}, new CCType[] { new CCType(HashMap.class,
+				"An table which holds informations about the item, or nil if no item is in inventory") }, this);
+		peripheral.AddMethod(
+				"pushStack",
+				"Pushs the currently holded stack into an inventory",
+				new CCType[] { new CCType(String.class, "", "") },
+				new CCType[] { new CCType(Boolean.class, "") },
+				this);
+		peripheral.AddMethod("suckStack", "", new CCType[] {}, new CCType[] {}, this);
+		peripheral.AddMethod("setAllowAutoInput", "", new CCType[] {}, new CCType[] {}, this);
+		peripheral.AddMethod("isAutoInputAllowed", "", new CCType[] {}, new CCType[] {}, this);
+		peripheral.AddMethod("setSideConfiguration", "", new CCType[] {}, new CCType[] {}, this);
+		peripheral.AddMethod("getSideConfiguration", "", new CCType[] {}, new CCType[] {}, this);
 	}
 
 	// TODO: Eigene Klasse fürs Packet Handling schreiben
@@ -151,13 +165,11 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 		tag.setBoolean("allowAutoInput", allowAutoInput);
 	}
 
-	@Override
 	public String getType() {
 		return "UniversalInterface";
 	}
 
-	// TODO: Computercraft Funktions Namen aufräumen
-	@Override
+	// TODO: Auf neues Preperie System umstellen
 	public String[] getMethodNames() {
 		return new String[] { "help", "getHeldStack", "suckStack", "pushStack", "setMaxEnergyOutput", "getEnergyMaxOutput", "getStoredEnergy",
 				"getMaxEnergyStored", "setAllowAutoInput", "isAutoInputAllowed", "setSideConfiguration", "getSideConfiguration", "setMaxEnergyInput",
@@ -165,16 +177,16 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 	}
 
 	@Override
-	public String[] getMethodValues() {
-		return null;
+	public Object[] callMethod(IComputerAccess computer, ILuaContext context, String method, Object[] arguments, ITurtleAccess turtle) throws LuaException {
+		switch (method) {
+			case "getHeldStack":
+				return new Object[] { CCUtil.stackToMap(heldStack) };
+			case "":
+				break;
+		}
+		throw new LuaException("Internal Error: function not found");
 	}
 
-	@Override
-	public String[] getFunctionDescriptions() {
-		return null;
-	}
-
-	@Override
 	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) throws LuaException, InterruptedException {
 		switch (method) {
 			case 0: { // help
@@ -341,19 +353,6 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 		worldObj.markBlockForUpdate(xCoord, yCoord, zCoord + 1);
 		worldObj.markBlockForUpdate(xCoord, yCoord, zCoord - 1);
 		worldObj.markBlockForUpdate(xCoord, yCoord, zCoord);
-	}
-
-	@Override
-	public void attach(IComputerAccess computer) {
-	}
-
-	@Override
-	public void detach(IComputerAccess computer) {
-	}
-
-	@Override
-	public boolean equals(IPeripheral other) {
-		return false;
 	}
 
 	@Override
@@ -592,10 +591,4 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 	public FluidTank getTank() {
 		return tank;
 	}
-
-	@Override
-	public String[] getFunctionReturns() {
-		return null;
-	}
-
 }

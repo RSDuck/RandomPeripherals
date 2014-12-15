@@ -2,6 +2,7 @@ package me.kemal.randomp.te;
 
 import appeng.api.networking.energy.IEnergySource;
 import me.kemal.randomp.RandomPeripheral;
+import me.kemal.randomp.util.CCType;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraftforge.common.util.ForgeDirection;
@@ -13,19 +14,61 @@ import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.lua.LuaException;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 import dan200.computercraft.api.peripheral.IPeripheral;
+import dan200.computercraft.api.turtle.ITurtleAccess;
 
 public class TileEnergyStorage extends TileRandomPMachine implements IEnergyHandler {
 	protected EnergyStorage storedEnergy;
 	protected Object neightborCache[];
 
-	public TileEnergyStorage() {
-		this(0);
-	}
-
 	public TileEnergyStorage(int capacity) {
 		super("EnergyStorage");
 		storedEnergy = new EnergyStorage(capacity, 0);
 		neightborCache = new Object[6];
+		peripheral.AddMethod("setMaxEnergyOutput", "Sets the maximum amount of energy that goes out", new CCType[] { new CCType(Double.class, "newOutput",
+				"The new amount of maximum energy output", 0, 1000) }, new CCType[] {}, this);
+		peripheral.AddMethod("setMaxEnergyInput", "Sets the maximum amount of energy that goes in", new CCType[] { new CCType(Double.class, "newInput",
+				"The new amount of maximum energy input", 0, 1000) }, new CCType[] {}, this);
+		peripheral.AddMethod("getMaxEnergyOutput", "Returns the maximum amount of energy that goes out", new CCType[] {}, new CCType[] { new CCType(
+				Double.class, "The current maximum amount of energy that goes out") }, this);
+		peripheral.AddMethod("getMaxEnergyInput", "Returns the maximum amount of energy that will goes in", new CCType[] {}, new CCType[] { new CCType(
+				Double.class, "The current maximum amount of energy that comes in") }, this);
+		peripheral.AddMethod("getEnergyStored", "Returns the current amount of stored energy", new CCType[] {}, new CCType[] { new CCType(Double.class,
+				"The current amount of stored energy") }, this);
+		peripheral.AddMethod("getMaxEnergyStored", "Return the maximum amount of energy that can be stored", new CCType[] {}, new CCType[] { new CCType(
+				Double.class, "The maximum amount of energy that can be stored") }, this);
+	}
+
+	public TileEnergyStorage() {
+		this(0);
+	}
+
+	@Override
+	public Object[] callMethod(IComputerAccess computer, ILuaContext context, String method, Object[] arguments, ITurtleAccess turtle) throws LuaException {
+		switch (method) {
+			case "setMaxEnergyOutput": {
+				int arg0 = ((Number) arguments[0]).intValue();
+				storedEnergy.setMaxExtract(arg0);
+				return new Object[] {};
+			}
+			case "setMaxEnergyInput": {
+				int arg0 = ((Number) arguments[0]).intValue();
+				storedEnergy.setMaxReceive(arg0);
+				return new Object[] {};
+			}
+			case "getMaxEnergyOutput": {
+				return new Object[] { storedEnergy.getMaxExtract() };
+			}
+			case "getMaxEnergyInput": {
+				return new Object[] { storedEnergy.getMaxReceive() };
+			}
+			case "getEnergyStored": {
+				return new Object[] { storedEnergy.getEnergyStored() };
+			}
+			case "getMaxEnergyStored": {
+				return new Object[] { storedEnergy.getMaxEnergyStored() };
+			}
+		}
+		throw new LuaException("Internal Error: function not found");
 	}
 
 	@Override
