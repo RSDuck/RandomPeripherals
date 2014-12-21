@@ -79,17 +79,45 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 		tank = new FluidTank(fluid_capacity);
 		peripheral.AddMethod("getHeldStack", "Returns the current hold stack", new CCType[] {}, new CCType[] { new CCType(HashMap.class,
 				"An table which holds informations about the item, or nil if no item is in inventory") }, this);
+		peripheral
+				.AddMethod(
+						"pushStack",
+						"Pushs the currently holded stack into an external inventory",
+						new CCType[] {
+								new CCType(String.class, "direction",
+										"The direction, where the items should be pushed(valid inputs: north, south, west, east, top, bottom)"),
+								new CCType(
+										String.class,
+										"simulatedDir",
+										"Only used if you want to simulate that the item was push from an specific direction, if you don't simply insert this argument an empty string then it will use the real direction from where the items come(valid inputs: [an empty string], north, south, right, left, top, bottom)") },
+						new CCType[] { new CCType(HashMap.class, "The stack if was sucessfull transfered into the inventory, otherwise nil") },
+						this);
+		peripheral
+				.AddMethod(
+						"suckStack",
+						"Pulls the first stack it gets from an inventory which stands on the given side into it's own inventory",
+						new CCType[] {
+								new CCType(String.class, "direction",
+										"The direction from where the items should be sucked(valid inputs: north,south west,east,top,bottom)"),
+								new CCType(
+										String.class,
+										"simulatedDir",
+										"Only used if you want to simulate that the item was pulled from an specific direction, if you don't simply insert this argument an empty string then it will use the real direction from where the items come(valid inputs: [an empty string], north, south, right, left, top, bottom)") },
+						new CCType[] { new CCType(HashMap.class, "The pulled stack, or nil if nothing canned be sucked") },
+						this);
+		peripheral.AddMethod("setAllowAutoInput", "Sets if the Universal Interface allows that other blocks insert items", new CCType[] { new CCType(
+				Boolean.class, "The new value") }, new CCType[] {}, this);
 		peripheral.AddMethod(
-				"pushStack",
-				"Pushs the currently holded stack into an inventory",
-				new CCType[] { new CCType(String.class, "", "") },
-				new CCType[] { new CCType(Boolean.class, "") },
+				"isAutoInputAllowed",
+				"Returns if the Universal Interface allows that other blocks insert items",
+				new CCType[] {},
+				new CCType[] { new CCType(Boolean.class, "If it is allowed") },
 				this);
-		peripheral.AddMethod("suckStack", "", new CCType[] {}, new CCType[] {}, this);
-		peripheral.AddMethod("setAllowAutoInput", "", new CCType[] {}, new CCType[] {}, this);
-		peripheral.AddMethod("isAutoInputAllowed", "", new CCType[] {}, new CCType[] {}, this);
-		peripheral.AddMethod("setSideConfiguration", "", new CCType[] {}, new CCType[] {}, this);
-		peripheral.AddMethod("getSideConfiguration", "", new CCType[] {}, new CCType[] {}, this);
+		peripheral.AddMethod("setSideConfiguration", "Sets the IO configuration on a specific side", new CCType[] {
+				new CCType(String.class, "side", "The side where the configuration should be changed(valid inputs: front, back, right, left, top, bottom)"),
+				new CCType(String.class, "config", "The new configuration (valid inputs: neutral, universal, items, energy, fluids)") }, new CCType[] {}, this);
+		peripheral.AddMethod("getSideConfiguration", "Returns an table which contains the IO configuration", new CCType[] {}, new CCType[] { new CCType(
+				HashMap.class, "A table which is in the format { \"side\" : \"configuration\" }") }, this);
 	}
 
 	// TODO: Eigene Klasse fürs Packet Handling schreiben
@@ -181,8 +209,19 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 		switch (method) {
 			case "getHeldStack":
 				return new Object[] { CCUtil.stackToMap(heldStack) };
-			case "":
-				break;
+			case "pushStack": {
+				int direction = Util.ReadableDirToForgeDir((String) arguments[0]);
+				int simulatedDir = -1;
+				if (arguments[1] != "")
+					simulatedDir = Util.ReadableDirToForgeDir((String) arguments[1]);
+				else
+					simulatedDir = ForgeDirection.values()[direction].getOpposite().ordinal();
+
+				if (direction == -1 || simulatedDir == -1)
+					return new Object[] { null };
+
+				return new Object[] { CCUtil.stackToMap(Util.PushStack(this, this, direction, heldStack, simulatedDir)) };
+			}
 		}
 		throw new LuaException("Internal Error: function not found");
 	}
@@ -208,35 +247,7 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 									}
 								} else
 									return new Object[] { false };
-							int[] pos = CCUtil.DirToCoord(Util.ToInt(arguments[0]));
-							TileEntity te = worldObj.getTileEntity(xCoord + pos[0], yCoord + pos[1], zCoord + pos[2]);
-							boolean sided = te instanceof ISidedInventory;
-							if (te instanceof IInventory) {
-								int side = (arguments.length == 1) ? ForgeDirection.values()[Util.ToInt(arguments[0])].getOpposite().ordinal() : Util
-										.ToInt(arguments[1]);
-								IInventory inv = (IInventory) te;
-								int invSize = (sided) ? ((ISidedInventory) inv).getAccessibleSlotsFromSide(side).length : inv.getSizeInventory();
-								int[] slots = (sided) ? ((ISidedInventory) inv).getAccessibleSlotsFromSide(side) : new int[] {};
-								for (int i = 0; i < invSize; i++) {
-									int slot = (sided) ? slots[i] : i;
-									if (inv.getStackInSlot(slot) == null)
-										continue;
-									int decr = Util.CanStack(heldStack, inv.getStackInSlot(slot));
-									if (sided) {
-										if (!(((ISidedInventory) inv).canExtractItem(slot, inv.getStackInSlot(slot), side))) {
-											continue;
-										}
-									}
-									if (decr != -1) {
-										ItemStack decrStack = inv.decrStackSize(slot, decr);
-										if (heldStack != null)
-											heldStack.stackSize += decrStack.stackSize;
-										else
-											heldStack = decrStack;
-										return new Object[] { CCUtil.stackToMap(decrStack) };
-									}
-								}
-							}
+
 						}
 					}
 				}
@@ -252,35 +263,6 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 								}
 							} else
 								return new Object[] { false };
-						if (heldStack == null)
-							return new Object[] { false };
-						int[] pos = CCUtil.DirToCoord(Util.ToInt(arguments[0]));
-						TileEntity te = worldObj.getTileEntity(xCoord + pos[0], yCoord + pos[1], zCoord + pos[2]);
-						boolean sided = te instanceof ISidedInventory;
-						if (te instanceof IInventory) {
-							IInventory inv = (IInventory) te;
-							int side = (arguments.length == 1) ? ForgeDirection.values()[Util.ToInt(arguments[0])].getOpposite().ordinal() : Util
-									.ToInt(arguments[1]);
-							int invSize = (sided) ? ((ISidedInventory) inv).getAccessibleSlotsFromSide(side).length : inv.getSizeInventory();
-							int[] slots = (sided) ? ((ISidedInventory) inv).getAccessibleSlotsFromSide(side) : new int[] {};
-							for (int i = 0; i < invSize; i++) {
-								int slot = (sided) ? slots[i] : i;
-								int stackable = Util.CanStack(inv.getStackInSlot(slot), heldStack);
-								if (sided) {
-									if (!((ISidedInventory) inv).canInsertItem(slot, heldStack, side)) {
-										continue;
-									}
-								}
-								if (stackable != -1) {
-									ItemStack decrStack = decrStackSize(0, stackable);
-									if (inv.getStackInSlot(slot) != null) {
-										inv.getStackInSlot(slot).stackSize += decrStack.stackSize;
-									} else
-										inv.setInventorySlotContents(slot, decrStack);
-									return new Object[] { CCUtil.stackToMap(decrStack) };
-								}
-							}
-						}
 
 					}
 				}

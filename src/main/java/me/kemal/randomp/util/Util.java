@@ -7,6 +7,8 @@ import cofh.lib.inventory.ComparableItemStackNBT;
 import cofh.lib.util.ItemWrapper;
 import me.kemal.randomp.RandomPeripheral;
 import net.minecraft.entity.item.EntityItem;
+import net.minecraft.inventory.IInventory;
+import net.minecraft.inventory.ISidedInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagByteArray;
@@ -17,8 +19,10 @@ import net.minecraft.nbt.NBTTagString;
 import net.minecraft.nbt.NBTBase.NBTPrimitive;
 import net.minecraft.network.Packet;
 import net.minecraft.server.management.PlayerManager;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
+import net.minecraftforge.common.util.ForgeDirection;
 
 public class Util {
 	public static Object getRealNBTType(NBTBase obj) {
@@ -88,15 +92,19 @@ public class Util {
 			return false;
 		}
 	}
-	
-	//Regex!
+
+	// Regex!
 	/**
-	 * TODO: Needs to be more dynamic!!!!
-	 * An function for parsing string based lambda like expressions
-	 * Usage: with an input string of "%a==%b" then it compares aObj and bObj %a>0
-	 * @param lambda string to parse
-	 * @param aObj first object
-	 * @param bObj second object is only needed for == and !=
+	 * TODO: Needs to be more dynamic!!!! An function for parsing string based
+	 * lambda like expressions Usage: with an input string of "%a==%b" then it
+	 * compares aObj and bObj %a>0
+	 * 
+	 * @param lambda
+	 *            string to parse
+	 * @param aObj
+	 *            first object
+	 * @param bObj
+	 *            second object is only needed for == and !=
 	 * @return the result of comparing
 	 */
 	public static boolean ParsePseudoLambda(String lambda, Object aObj, Object bObj) {
@@ -107,16 +115,16 @@ public class Util {
 				return aObj != bObj;
 			} else if (lambda.matches("^(%a)(>)(\\d+)")) {
 				double b = Double.parseDouble(lambda.replaceAll("^(%a)(>)(\\d+)", "$3"));
-				return (Double)aObj > b;
+				return (Double) aObj > b;
 			} else if (lambda.matches("^(%a)(<)(\\d+)")) {
 				double b = Double.parseDouble(lambda.replaceAll("^(%a)(<)(\\d+)", "$3"));
-				return (Double)aObj < b;
+				return (Double) aObj < b;
 			} else if (lambda.matches("^(%a)(>=)(\\d+)")) {
 				double b = Double.parseDouble(lambda.replaceAll("^(%a)(>=)(\\d+)", "$3"));
-				return (Double)aObj < b;
-			}else if(lambda.matches("^(%a)(==)(\\d+)")){
+				return (Double) aObj < b;
+			} else if (lambda.matches("^(%a)(==)(\\d+)")) {
 				double b = Double.parseDouble(lambda.replaceAll("^(%a)(<=)(\\d+)", "$3"));
-				return (Double)aObj < b;
+				return (Double) aObj < b;
 			}
 		} catch (Exception e) {
 			RandomPeripheral.logger.info("Exception in parsing a pseudo lambda: " + e.getMessage());
@@ -127,7 +135,7 @@ public class Util {
 	public static String ToString(Object string) {
 		return ((String) string);
 	}
-	
+
 	public static int ToInt(Object number) {
 		return ((Number) number).intValue();
 	}
@@ -136,8 +144,7 @@ public class Util {
 		if (stack1 == null) {
 			return 64;
 		}
-		if (stack2 != null && stack2.getItem().equals(stack1.getItem())
-				&& (!stack1.getHasSubtypes() || stack1.getItemDamage() == stack2.getItemDamage())
+		if (stack2 != null && stack2.getItem().equals(stack1.getItem()) && (!stack1.getHasSubtypes() || stack1.getItemDamage() == stack2.getItemDamage())
 				&& ItemStack.areItemStackTagsEqual(stack1, stack2)) {
 			if (stack1.stackSize + stack2.stackSize > 64) {
 				return stack1.getMaxStackSize() - (((stack2.stackSize + stack1.stackSize) - 64));
@@ -145,5 +152,90 @@ public class Util {
 			return stack1.stackSize + stack2.stackSize;
 		} else
 			return -1;
+	}
+
+	public static int ReadableDirToForgeDir(String dir) {
+		int intDir = -1;
+		final String[] dirs = new String[] { "bottom", "top", "north", "south", "west", "east" };
+		for (int i = 0; i < dirs.length; i++)
+			if (dirs[i] == dir) {
+				intDir = i;
+				break;
+			}
+		return intDir;
+	}
+
+	public static ItemStack SuckStack(TileEntity a, ItemStack stack, int whereB, int fromWhere) {
+		World worldObj = a.getWorldObj();
+		int xCoord = a.xCoord;
+		int yCoord = a.yCoord;
+		int zCoord = a.zCoord;
+		int[] pos = CCUtil.DirToCoord(Util.ToInt(whereB));
+		ItemStack heldStack = stack.copy();
+		TileEntity te = worldObj.getTileEntity(xCoord + pos[0], yCoord + pos[1], zCoord + pos[2]);
+		boolean sided = te instanceof ISidedInventory;
+		if (te instanceof IInventory) {
+			int side = fromWhere;
+			IInventory inv = (IInventory) te;
+			int invSize = (sided) ? ((ISidedInventory) inv).getAccessibleSlotsFromSide(side).length : inv.getSizeInventory();
+			int[] slots = (sided) ? ((ISidedInventory) inv).getAccessibleSlotsFromSide(side) : new int[] {};
+			for (int i = 0; i < invSize; i++) {
+				int slot = (sided) ? slots[i] : i;
+				if (inv.getStackInSlot(slot) == null)
+					continue;
+				int decr = Util.CanStack(heldStack, inv.getStackInSlot(slot));
+				if (sided) {
+					if (!(((ISidedInventory) inv).canExtractItem(slot, inv.getStackInSlot(slot), side))) {
+						continue;
+					}
+				}
+				if (decr != -1) {
+					ItemStack decrStack = inv.decrStackSize(slot, decr);
+					if (heldStack != null)
+						heldStack.stackSize += decrStack.stackSize;
+					else
+						heldStack = decrStack;
+					return decrStack;
+				}
+			}
+		}
+		return null;
+	}
+
+	public static ItemStack PushStack(TileEntity tile, IInventory inventory, int whereB, ItemStack stack, int fromWhere) {
+		World worldObj = tile.getWorldObj();
+		int xCoord = tile.xCoord;
+		int yCoord = tile.yCoord;
+		int zCoord = tile.zCoord;
+		ItemStack heldStack = stack.copy();
+		if (heldStack == null)
+			return null;
+		int[] pos = CCUtil.DirToCoord(whereB);
+		TileEntity te = worldObj.getTileEntity(xCoord + pos[0], yCoord + pos[1], zCoord + pos[2]);
+		boolean sided = te instanceof ISidedInventory;
+		if (te instanceof IInventory) {
+			IInventory inv = (IInventory) te;
+			int side = fromWhere;
+			int invSize = (sided) ? ((ISidedInventory) inv).getAccessibleSlotsFromSide(side).length : inv.getSizeInventory();
+			int[] slots = (sided) ? ((ISidedInventory) inv).getAccessibleSlotsFromSide(side) : new int[] {};
+			for (int i = 0; i < invSize; i++) {
+				int slot = (sided) ? slots[i] : i;
+				int stackable = Util.CanStack(inv.getStackInSlot(slot), heldStack);
+				if (sided) {
+					if (!((ISidedInventory) inv).canInsertItem(slot, heldStack, side)) {
+						continue;
+					}
+				}
+				if (stackable != -1) {
+					ItemStack decrStack = inventory.decrStackSize(0, stackable);
+					if (inv.getStackInSlot(slot) != null) {
+						inv.getStackInSlot(slot).stackSize += decrStack.stackSize;
+					} else
+						inv.setInventorySlotContents(slot, decrStack);
+					return decrStack;
+				}
+			}
+		}
+		return null;
 	}
 }
