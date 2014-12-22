@@ -27,5 +27,6 @@ public interface IExtendablePeripheral {
 	 * @return
 	 * @throws LuaException
 	 */
-	public Object[] callMethod(IComputerAccess computer, ILuaContext context, String method, Object[] arguments, ITurtleAccess turtle) throws LuaException;
+	public Object[] callMethod(IComputerAccess computer, ILuaContext context, String method, Object[] arguments, ITurtleAccess turtle) throws LuaException,
+			FunctionNotFoundException;
 }

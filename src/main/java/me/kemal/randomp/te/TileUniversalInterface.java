@@ -5,6 +5,7 @@ import java.util.HashMap;
 import me.kemal.randomp.RandomPeripheral;
 import me.kemal.randomp.util.CCType;
 import me.kemal.randomp.util.CCUtil;
+import me.kemal.randomp.util.FunctionNotFoundException;
 import me.kemal.randomp.util.ICCHelpCreator;
 import me.kemal.randomp.util.Util;
 import net.minecraft.entity.EntityLivingBase;
@@ -111,7 +112,7 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 				"isAutoInputAllowed",
 				"Returns if the Universal Interface allows that other blocks insert items",
 				new CCType[] {},
-				new CCType[] { new CCType(Boolean.class, "If it is allowed") },
+				new CCType[] { new CCType(Boolean.class, "True if it is allowed") },
 				this);
 		peripheral.AddMethod("setSideConfiguration", "Sets the IO configuration on a specific side", new CCType[] {
 				new CCType(String.class, "side", "The side where the configuration should be changed(valid inputs: front, back, right, left, top, bottom)"),
@@ -205,25 +206,69 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 	}
 
 	@Override
-	public Object[] callMethod(IComputerAccess computer, ILuaContext context, String method, Object[] arguments, ITurtleAccess turtle) throws LuaException {
-		switch (method) {
-			case "getHeldStack":
-				return new Object[] { CCUtil.stackToMap(heldStack) };
-			case "pushStack": {
-				int direction = Util.ReadableDirToForgeDir((String) arguments[0]);
-				int simulatedDir = -1;
-				if (arguments[1] != "")
-					simulatedDir = Util.ReadableDirToForgeDir((String) arguments[1]);
-				else
-					simulatedDir = ForgeDirection.values()[direction].getOpposite().ordinal();
+	public Object[] callMethod(IComputerAccess computer, ILuaContext context, String method, Object[] arguments, ITurtleAccess turtle) throws LuaException,
+			FunctionNotFoundException {
+		try {
+			return super.callMethod(computer, context, method, arguments, turtle);
+		} catch (LuaException e) {
+			throw e;
+		} catch (FunctionNotFoundException e) {
+			final String[] configNames = { "neutral", "universal", "items", "energy", "fluid" };
+			switch (method) {
+				case "getHeldStack":
+					return new Object[] { CCUtil.stackToMap(heldStack) };
+				case "pushStack": {
+					int direction = Util.ReadableDirToForgeDir((String) arguments[0]);
+					int simulatedDir = -1;
+					if (arguments[1] != "")
+						simulatedDir = Util.ReadableDirToForgeDir((String) arguments[1]);
+					else
+						simulatedDir = ForgeDirection.values()[direction].getOpposite().ordinal();
+					// RandomPeripheral.logger.info("Direction: " + direction +
+					// " SimulatedDir: " + simulatedDir);
 
-				if (direction == -1 || simulatedDir == -1)
-					return new Object[] { null };
+					if (direction == -1 || simulatedDir == -1)
+						throw new LuaException("Invalid Direction");
 
-				return new Object[] { CCUtil.stackToMap(Util.PushStack(this, this, direction, heldStack, simulatedDir)) };
+					return new Object[] { CCUtil.stackToMap(Util.PushStack(this, this, direction, heldStack, simulatedDir)) };
+				}
+				case "suckStack": {
+					int direction = Util.ReadableDirToForgeDir((String) arguments[0]);
+					int simulatedDir = -1;
+					if (arguments[1] != "")
+						simulatedDir = Util.ReadableDirToForgeDir((String) arguments[1]);
+					else
+						simulatedDir = ForgeDirection.values()[direction].getOpposite().ordinal();
+
+					if (direction == -1 || simulatedDir == -1)
+						throw new LuaException("Invalid Direction");
+
+					return new Object[] { CCUtil.stackToMap(heldStack = Util.SuckStack(this, heldStack, direction, simulatedDir)) };
+				}
+				case "setAllowAutoInput": {
+					allowAutoInput = (Boolean) arguments[0];
+					return new Object[] {};
+				}
+				case "isAutoInputAllowed": {
+					return new Object[] { allowAutoInput };
+				}
+				case "setSideConfiguration": {
+					String arg1 = (String) arguments[1];
+					int config = -1;
+					for (int i = 0; i < configNames.length; i++)
+						if (configNames[i].indexOf(arg0) != -1) {
+							config = i;
+							break;
+						}
+
+					setIOConfiguration(, config);
+				}
+				case "getSideConfiguration": {
+
+				}
 			}
+			throw new FunctionNotFoundException();
 		}
-		throw new LuaException("Internal Error: function not found");
 	}
 
 	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) throws LuaException, InterruptedException {

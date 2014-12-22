@@ -39,29 +39,18 @@ public class Peripheral implements IExtendablePeripheral, IPeripheral {
 				new CCType[] { new CCType(String.class, "functionName", "the name of the function you need help with") },
 				new CCType[] { new CCType(HashMap.class, "an help like this") },
 				this);
-		AddMethod(
-				"getMethods",
-				"Lists all function of this peripheral",
-				new CCType[] {},
-				new CCType[] { new CCType(HashMap.class, "An table filled with the names of all function") },
-				this);
+		AddMethod("getMethods", "Lists all function of this peripheral", new CCType[] {}, new CCType[] { new CCType(HashMap.class,
+				"An table filled with the names of all function") }, this);
 	}
 
 	public void AddMethod(String name, String description, CCType[] args, CCType returns[], IExtendablePeripheral classToCall) {
 		MethodHandles.Lookup lookup = MethodHandles.lookup();
 		try {
-			functionClassHandlers.put(
-					name,
-					lookup.findVirtual(
+			functionClassHandlers
+					.put(name, lookup.findVirtual(
 							IExtendablePeripheral.class,
 							"callMethod",
-							MethodType.methodType(
-									Object[].class,
-									IComputerAccess.class,
-									ILuaContext.class,
-									String.class,
-									Object[].class,
-									ITurtleAccess.class)));
+							MethodType.methodType(Object[].class, IComputerAccess.class, ILuaContext.class, String.class, Object[].class, ITurtleAccess.class)));
 		} catch (NoSuchMethodException e) {
 			RandomPeripheral.logger.error("Could not callback function for function " + name + " in peripheral " + type);
 			e.printStackTrace();
@@ -71,18 +60,10 @@ public class Peripheral implements IExtendablePeripheral, IPeripheral {
 			return;
 		}
 		functionNames.addElement(name);
-		functionDescriptions.put(
-				name,
-				description);
-		functionArgs.put(
-				name,
-				args);
-		functionReturns.put(
-				name,
-				returns);
-		peripheralHolders.put(
-				name,
-				classToCall);
+		functionDescriptions.put(name, description);
+		functionArgs.put(name, args);
+		functionReturns.put(name, returns);
+		peripheralHolders.put(name, classToCall);
 	}
 
 	@Override
@@ -96,10 +77,7 @@ public class Peripheral implements IExtendablePeripheral, IPeripheral {
 
 	@Override
 	public String[] getMethodNames() {
-		return Arrays.copyOf(
-				functionNames.toArray(),
-				functionNames.size(),
-				String[].class);
+		return Arrays.copyOf(functionNames.toArray(), functionNames.size(), String[].class);
 	}
 
 	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments, ITurtleAccess turtle) throws LuaException {
@@ -111,7 +89,7 @@ public class Peripheral implements IExtendablePeripheral, IPeripheral {
 				for (CCType requiredType : requiredTypes) {
 					int returnValue;
 					if ((returnValue = requiredType.isValid(arguments[i])) > 0) {
-						if (returnValue == 1)
+						if (returnValue != 1)
 							throw new LuaException("Invalid argument type in argument " + requiredType.getName() + "");
 						else if (returnValue == 2)
 							throw new LuaException("Arg " + i + " should be " + requiredType.getMinValue() + " or more and be " + requiredType.getMaxValue()
@@ -121,8 +99,7 @@ public class Peripheral implements IExtendablePeripheral, IPeripheral {
 				}
 			} else
 				throw new LuaException(((arguments.length < requiredTypes.length) ? "To few arguments" : "To many arguments") + " to call" + functionName);
-			return ((Object[]) functionClassHandlers.get(
-					functionName).invokeWithArguments(
+			return ((Object[]) functionClassHandlers.get(functionName).invokeWithArguments(
 					peripheralHolders.get(functionName),
 					computer,
 					context,
@@ -131,6 +108,8 @@ public class Peripheral implements IExtendablePeripheral, IPeripheral {
 					turtle));
 		} catch (LuaException e) {
 			throw e;
+		} catch (FunctionNotFoundException e) {
+			throw new LuaException("Internal Error: Function not found");
 		} catch (Throwable e) {
 			e.printStackTrace();
 		}
@@ -140,12 +119,7 @@ public class Peripheral implements IExtendablePeripheral, IPeripheral {
 
 	@Override
 	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) throws LuaException {
-		return callMethod(
-				computer,
-				context,
-				method,
-				arguments,
-				null);
+		return callMethod(computer, context, method, arguments, null);
 	}
 
 	@Override
@@ -162,7 +136,8 @@ public class Peripheral implements IExtendablePeripheral, IPeripheral {
 	}
 
 	@Override
-	public Object[] callMethod(IComputerAccess computer, ILuaContext context, String method, Object[] arguments, ITurtleAccess turtle) throws LuaException {
+	public Object[] callMethod(IComputerAccess computer, ILuaContext context, String method, Object[] arguments, ITurtleAccess turtle) throws LuaException,
+			FunctionNotFoundException {
 		switch (method) {
 			case "help": {
 				try {
@@ -170,18 +145,10 @@ public class Peripheral implements IExtendablePeripheral, IPeripheral {
 					if (!functionArgs.containsKey(arg1))
 						return new Object[] { null };
 					HashMap<String, Object> functionInfo = new HashMap<String, Object>();
-					functionInfo.put(
-							"name",
-							arg1);
-					functionInfo.put(
-							"description",
-							functionDescriptions.get(arg1));
-					functionInfo.put(
-							"arguments",
-							CCUtil.ArrayToLuaArray(functionArgs.get(arg1)));
-					functionInfo.put(
-							"returns",
-							CCUtil.ArrayToLuaArray(functionReturns.get(arg1)));
+					functionInfo.put("name", arg1);
+					functionInfo.put("description", functionDescriptions.get(arg1));
+					functionInfo.put("arguments", CCUtil.ArrayToLuaArray(functionArgs.get(arg1)));
+					functionInfo.put("returns", CCUtil.ArrayToLuaArray(functionReturns.get(arg1)));
 					return new Object[] { functionInfo };
 				} catch (Exception e) {
 					e.printStackTrace();

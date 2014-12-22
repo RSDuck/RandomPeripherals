@@ -10,6 +10,7 @@ import dan200.computercraft.api.lua.LuaException;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 import dan200.computercraft.api.peripheral.IPeripheral;
 import dan200.computercraft.api.turtle.ITurtleAccess;
+import me.kemal.randomp.util.FunctionNotFoundException;
 import me.kemal.randomp.util.IExtendablePeripheral;
 import me.kemal.randomp.util.Peripheral;
 import net.minecraft.entity.player.EntityPlayer;
@@ -37,8 +38,8 @@ public class TileRandomPMachine extends TileEntity implements IInventory, ISided
 	}
 
 	@Override
-	public Object[] callMethod(IComputerAccess computer, ILuaContext context, String method, Object[] arguments, ITurtleAccess turtle) throws LuaException {
-		return null;
+	public Object[] callMethod(IComputerAccess computer, ILuaContext context, String method, Object[] arguments, ITurtleAccess turtle) throws LuaException, FunctionNotFoundException {
+		throw new LuaException("Worst exception ever, I nobody will ever see this ever!");
 	}
 
 	@Override

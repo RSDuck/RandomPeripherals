@@ -12,6 +12,8 @@ import net.minecraft.nbt.NBTTagCompound;
 public class CCUtil {
 
 	public static HashMap<String, Object> stackToMap(ItemStack stack) {
+		if (stack == null)
+			return null;
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("unlocalizedName", stack.getItem().getUnlocalizedName());
 		map.put("damage", stack.getItemDamage());
@@ -83,7 +85,7 @@ public class CCUtil {
 		String[] dirs = new String[] { "left", "right", "back", "front", "bottom", "top" };
 		for (int i = 0; i < dirs.length; i++) {
 			RandomPeripheral.logger.info("dirs[i] = " + dirs[i] + "|dirs[i] == dir = " + (dirs[i] == dir));
-			if (dirs[i].startsWith(dir) || dirs[i].endsWith(dir))
+			if (dirs[i].indexOf(dir) != -1)
 				output = i;
 		}
 		if (output == -1)

@@ -158,7 +158,7 @@ public class Util {
 		int intDir = -1;
 		final String[] dirs = new String[] { "bottom", "top", "north", "south", "west", "east" };
 		for (int i = 0; i < dirs.length; i++)
-			if (dirs[i] == dir) {
+			if (dirs[i].indexOf(dir) != -1) {
 				intDir = i;
 				break;
 			}
