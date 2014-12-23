@@ -88,8 +88,8 @@ public class Peripheral implements IExtendablePeripheral, IPeripheral {
 				int i = 0;
 				for (CCType requiredType : requiredTypes) {
 					int returnValue;
-					if ((returnValue = requiredType.isValid(arguments[i])) > 0) {
-						if (returnValue != 1)
+					if ((returnValue = requiredType.isValid(arguments[i])) != 1) {
+						if (returnValue == 0)
 							throw new LuaException("Invalid argument type in argument " + requiredType.getName() + "");
 						else if (returnValue == 2)
 							throw new LuaException("Arg " + i + " should be " + requiredType.getMinValue() + " or more and be " + requiredType.getMaxValue()
@@ -114,7 +114,7 @@ public class Peripheral implements IExtendablePeripheral, IPeripheral {
 			e.printStackTrace();
 		}
 
-		throw new LuaException("Internal Error: Function not found!");
+		throw new LuaException("Internal Error ocurred!");
 	}
 
 	@Override

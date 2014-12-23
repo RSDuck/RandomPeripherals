@@ -38,8 +38,9 @@ public class TileRandomPMachine extends TileEntity implements IInventory, ISided
 	}
 
 	@Override
-	public Object[] callMethod(IComputerAccess computer, ILuaContext context, String method, Object[] arguments, ITurtleAccess turtle) throws LuaException, FunctionNotFoundException {
-		throw new LuaException("Worst exception ever, I nobody will ever see this ever!");
+	public Object[] callMethod(IComputerAccess computer, ILuaContext context, String method, Object[] arguments, ITurtleAccess turtle) throws LuaException,
+			FunctionNotFoundException {
+		throw new FunctionNotFoundException();
 	}
 
 	@Override
@@ -137,7 +138,7 @@ public class TileRandomPMachine extends TileEntity implements IInventory, ISided
 
 	@Override
 	public void setInventorySlotContents(int slot, ItemStack stack) {
-		
+
 	}
 
 	@Override

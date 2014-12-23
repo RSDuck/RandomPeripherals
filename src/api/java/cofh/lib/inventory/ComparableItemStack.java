@@ -122,18 +122,16 @@ public class ComparableItemStack extends ComparableItem {
 	@Override
 	public int hashCode() {
 
-		//return oreID != -1 ? oreID : super.hashCode();
-		return 0;
+		return oreID != -1 ? oreID : super.hashCode();
 	}
 
 	@Override
 	public boolean equals(Object o) {
 
-		/*if (!(o instanceof ComparableItemStack)) {
+		if (!(o instanceof ComparableItemStack)) {
 			return false;
 		}
-		return isItemEqual((ComparableItemStack) o);*/
-		return false;
+		return isItemEqual((ComparableItemStack) o);
 	}
 
 }

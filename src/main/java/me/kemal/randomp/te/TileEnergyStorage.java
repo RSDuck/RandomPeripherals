@@ -2,7 +2,6 @@ package me.kemal.randomp.te;
 
 import java.util.Random;
 
-import appeng.api.networking.energy.IEnergySource;
 import me.kemal.randomp.RandomPeripheral;
 import me.kemal.randomp.util.CCType;
 import me.kemal.randomp.util.FunctionNotFoundException;
@@ -48,36 +47,38 @@ public class TileEnergyStorage extends TileRandomPMachine implements IEnergyHand
 	@Override
 	public Object[] callMethod(IComputerAccess computer, ILuaContext context, String method, Object[] arguments, ITurtleAccess turtle) throws LuaException,
 			FunctionNotFoundException {
-		try {
-			return super.callMethod(computer, context, method, arguments, turtle);
-		} catch (LuaException e) {
-			throw e;
-		} catch (FunctionNotFoundException e) {
-			switch (method) {
-				case "setMaxEnergyOutput": {
-					int arg0 = ((Number) arguments[0]).intValue();
-					storedEnergy.setMaxExtract(arg0);
-					return new Object[] {};
-				}
-				case "setMaxEnergyInput": {
-					int arg0 = ((Number) arguments[0]).intValue();
-					storedEnergy.setMaxReceive(arg0);
-					return new Object[] {};
-				}
-				case "getMaxEnergyOutput": {
-					return new Object[] { storedEnergy.getMaxExtract() };
-				}
-				case "getMaxEnergyInput": {
-					return new Object[] { storedEnergy.getMaxReceive() };
-				}
-				case "getEnergyStored": {
-					return new Object[] { storedEnergy.getEnergyStored() };
-				}
-				case "getMaxEnergyStored": {
-					return new Object[] { storedEnergy.getMaxEnergyStored() };
+		switch (method) {
+			case "setMaxEnergyOutput": {
+				int arg0 = ((Number) arguments[0]).intValue();
+				storedEnergy.setMaxExtract(arg0);
+				return new Object[] {};
+			}
+			case "setMaxEnergyInput": {
+				int arg0 = ((Number) arguments[0]).intValue();
+				storedEnergy.setMaxReceive(arg0);
+				return new Object[] {};
+			}
+			case "getMaxEnergyOutput": {
+				return new Object[] { storedEnergy.getMaxExtract() };
+			}
+			case "getMaxEnergyInput": {
+				return new Object[] { storedEnergy.getMaxReceive() };
+			}
+			case "getEnergyStored": {
+				return new Object[] { storedEnergy.getEnergyStored() };
+			}
+			case "getMaxEnergyStored": {
+				return new Object[] { storedEnergy.getMaxEnergyStored() };
+			}
+			default: {
+				try {
+					return super.callMethod(computer, context, method, arguments, turtle);
+				} catch (LuaException e) {
+					throw e;
+				} catch (FunctionNotFoundException e){
+					throw e;
 				}
 			}
-			throw new LuaException("Internal Error: function not found");
 		}
 	}
 

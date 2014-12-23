@@ -26,7 +26,7 @@ public class CCType {
 		this.maxValue = 0;
 	}
 
-	public CCType(Class<?> type, String name, String description, int maxValue, int minValue) {
+	public CCType(Class<?> type, String name, String description, int minValue, int maxValue) {
 		this(type, name, description);
 		this.minValue = minValue;
 		this.maxValue = maxValue;
@@ -36,10 +36,10 @@ public class CCType {
 	public int isValid(Object obj) {
 		if (type.isInstance(obj)) {
 			if (obj instanceof Double && rangeChecker) {
-				double dValue = (double) obj;
+				int dValue = ((Number) obj).intValue();
 				if ((dValue <= maxValue) && (dValue >= minValue))
-					return 2;
-				return 0;
+					return 1;
+				return 2;
 			}
 			return 1;
 		}

@@ -93,45 +93,6 @@ public class Util {
 		}
 	}
 
-	// Regex!
-	/**
-	 * TODO: Needs to be more dynamic!!!! An function for parsing string based
-	 * lambda like expressions Usage: with an input string of "%a==%b" then it
-	 * compares aObj and bObj %a>0
-	 * 
-	 * @param lambda
-	 *            string to parse
-	 * @param aObj
-	 *            first object
-	 * @param bObj
-	 *            second object is only needed for == and !=
-	 * @return the result of comparing
-	 */
-	public static boolean ParsePseudoLambda(String lambda, Object aObj, Object bObj) {
-		try {
-			if (lambda.matches("^(%a)(==)(%b)")) {
-				return aObj == bObj;
-			} else if (lambda.matches("^(%a)(!=)(%b)")) {
-				return aObj != bObj;
-			} else if (lambda.matches("^(%a)(>)(\\d+)")) {
-				double b = Double.parseDouble(lambda.replaceAll("^(%a)(>)(\\d+)", "$3"));
-				return (Double) aObj > b;
-			} else if (lambda.matches("^(%a)(<)(\\d+)")) {
-				double b = Double.parseDouble(lambda.replaceAll("^(%a)(<)(\\d+)", "$3"));
-				return (Double) aObj < b;
-			} else if (lambda.matches("^(%a)(>=)(\\d+)")) {
-				double b = Double.parseDouble(lambda.replaceAll("^(%a)(>=)(\\d+)", "$3"));
-				return (Double) aObj < b;
-			} else if (lambda.matches("^(%a)(==)(\\d+)")) {
-				double b = Double.parseDouble(lambda.replaceAll("^(%a)(<=)(\\d+)", "$3"));
-				return (Double) aObj < b;
-			}
-		} catch (Exception e) {
-			RandomPeripheral.logger.info("Exception in parsing a pseudo lambda: " + e.getMessage());
-		}
-		return false;
-	}
-
 	public static String ToString(Object string) {
 		return ((String) string);
 	}
@@ -171,7 +132,7 @@ public class Util {
 		int yCoord = a.yCoord;
 		int zCoord = a.zCoord;
 		int[] pos = CCUtil.DirToCoord(Util.ToInt(whereB));
-		ItemStack heldStack = stack.copy();
+		ItemStack heldStack = (stack != null) ? stack.copy() : null;
 		TileEntity te = worldObj.getTileEntity(xCoord + pos[0], yCoord + pos[1], zCoord + pos[2]);
 		boolean sided = te instanceof ISidedInventory;
 		if (te instanceof IInventory) {
@@ -207,7 +168,7 @@ public class Util {
 		int xCoord = tile.xCoord;
 		int yCoord = tile.yCoord;
 		int zCoord = tile.zCoord;
-		ItemStack heldStack = stack.copy();
+		ItemStack heldStack = (stack != null) ? stack.copy() : null;
 		if (heldStack == null)
 			return null;
 		int[] pos = CCUtil.DirToCoord(whereB);

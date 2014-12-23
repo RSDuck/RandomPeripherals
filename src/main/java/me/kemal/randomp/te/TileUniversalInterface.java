@@ -208,66 +208,89 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 	@Override
 	public Object[] callMethod(IComputerAccess computer, ILuaContext context, String method, Object[] arguments, ITurtleAccess turtle) throws LuaException,
 			FunctionNotFoundException {
-		try {
-			return super.callMethod(computer, context, method, arguments, turtle);
-		} catch (LuaException e) {
-			throw e;
-		} catch (FunctionNotFoundException e) {
-			final String[] configNames = { "neutral", "universal", "items", "energy", "fluid" };
-			switch (method) {
-				case "getHeldStack":
-					return new Object[] { CCUtil.stackToMap(heldStack) };
-				case "pushStack": {
-					int direction = Util.ReadableDirToForgeDir((String) arguments[0]);
-					int simulatedDir = -1;
-					if (arguments[1] != "")
-						simulatedDir = Util.ReadableDirToForgeDir((String) arguments[1]);
+		final String[] configNames = { "neutral", "universal", "items", "energy", "fluid" };
+		switch (method) {
+			case "getHeldStack":
+				return new Object[] { CCUtil.stackToMap(heldStack) };
+			case "pushStack": {
+				int direction = Util.ReadableDirToForgeDir((String) arguments[0]);
+				int simulatedDir = -1;
+				if (arguments[1] != "")
+					simulatedDir = Util.ReadableDirToForgeDir((String) arguments[1]);
+				else
+					simulatedDir = ForgeDirection.values()[direction].getOpposite().ordinal();
+				// RandomPeripheral.logger.info("Direction: " + direction +
+				// " SimulatedDir: " + simulatedDir);
+
+				if (direction == -1 || simulatedDir == -1)
+					throw new LuaException("Invalid Direction");
+
+				return new Object[] { CCUtil.stackToMap(Util.PushStack(this, this, direction, heldStack, simulatedDir)) };
+			}
+			case "suckStack": {
+				int direction = Util.ReadableDirToForgeDir((String) arguments[0]);
+				int simulatedDir = -1;
+				if (arguments[1] != "")
+					simulatedDir = Util.ReadableDirToForgeDir((String) arguments[1]);
+				else
+					simulatedDir = ForgeDirection.values()[direction].getOpposite().ordinal();
+
+				if (direction == -1 || simulatedDir == -1)
+					throw new LuaException("Invalid Direction");
+
+				ItemStack decrStack = Util.SuckStack(this, heldStack, direction, simulatedDir);
+				if (decrStack != null)
+					if (heldStack != null)
+						heldStack.stackSize += decrStack.stackSize;
 					else
-						simulatedDir = ForgeDirection.values()[direction].getOpposite().ordinal();
-					// RandomPeripheral.logger.info("Direction: " + direction +
-					// " SimulatedDir: " + simulatedDir);
+						heldStack = decrStack;
 
-					if (direction == -1 || simulatedDir == -1)
-						throw new LuaException("Invalid Direction");
+				return new Object[] { CCUtil.stackToMap(decrStack) };
+			}
+			case "setAllowAutoInput": {
+				allowAutoInput = (Boolean) arguments[0];
+				return new Object[] {};
+			}
+			case "isAutoInputAllowed": {
+				return new Object[] { allowAutoInput };
+			}
+			case "setSideConfiguration": {
+				String arg0 = (String) arguments[0];
+				String arg1 = (String) arguments[1];
+				int config = -1;
+				for (int i = 0; i < configNames.length; i++)
+					if (configNames[i].indexOf(arg1) != -1) {
+						config = i;
+						break;
+					}
+				if (config == -1)
+					throw new LuaException("Invalid configuration");
+				int side = CCUtil.ReadableRelDirToRelForgeDir(arg0);
+				if (side == -1)
+					throw new LuaException("Invalid side");
 
-					return new Object[] { CCUtil.stackToMap(Util.PushStack(this, this, direction, heldStack, simulatedDir)) };
-				}
-				case "suckStack": {
-					int direction = Util.ReadableDirToForgeDir((String) arguments[0]);
-					int simulatedDir = -1;
-					if (arguments[1] != "")
-						simulatedDir = Util.ReadableDirToForgeDir((String) arguments[1]);
-					else
-						simulatedDir = ForgeDirection.values()[direction].getOpposite().ordinal();
-
-					if (direction == -1 || simulatedDir == -1)
-						throw new LuaException("Invalid Direction");
-
-					return new Object[] { CCUtil.stackToMap(heldStack = Util.SuckStack(this, heldStack, direction, simulatedDir)) };
-				}
-				case "setAllowAutoInput": {
-					allowAutoInput = (Boolean) arguments[0];
-					return new Object[] {};
-				}
-				case "isAutoInputAllowed": {
-					return new Object[] { allowAutoInput };
-				}
-				case "setSideConfiguration": {
-					String arg1 = (String) arguments[1];
-					int config = -1;
-					for (int i = 0; i < configNames.length; i++)
-						if (configNames[i].indexOf(arg0) != -1) {
-							config = i;
-							break;
-						}
-
-					setIOConfiguration(, config);
-				}
-				case "getSideConfiguration": {
-
+				setIOConfiguration(side, config);
+				return new Object[] {};
+			}
+			case "getSideConfiguration": {
+				HashMap<String, Object> map = new HashMap<String, Object>();
+				map.put("bottom", configNames[getIOConfigurationWithFacing(0)]);
+				map.put("front", configNames[getIOConfigurationWithFacing(1)]);
+				map.put("back", configNames[getIOConfigurationWithFacing(2)]);
+				map.put("front", configNames[getIOConfigurationWithFacing(3)]);
+				map.put("left", configNames[getIOConfigurationWithFacing(4)]);
+				map.put("right", configNames[getIOConfigurationWithFacing(5)]);
+				return new Object[] { map };
+			}
+			default: {
+				try {
+					return super.callMethod(computer, context, method, arguments, turtle);
+				} catch (FunctionNotFoundException e) {
+					throw e;
+				} catch (LuaException e) {
+					throw e;
 				}
 			}
-			throw new FunctionNotFoundException();
 		}
 	}
 

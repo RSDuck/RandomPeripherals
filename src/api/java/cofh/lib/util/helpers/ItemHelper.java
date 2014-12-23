@@ -359,6 +359,21 @@ public final class ItemHelper {
 		return new ShapedOreRecipe(result, recipe);
 	}
 
+	public static final IRecipe ShapedRecipe(Block result, int s, Object... recipe) {
+
+		return new ShapedOreRecipe(stack(result, s), recipe);
+	}
+
+	public static final IRecipe ShapedRecipe(Item result, int s, Object... recipe) {
+
+		return new ShapedOreRecipe(stack(result, s), recipe);
+	}
+
+	public static final IRecipe ShapedRecipe(ItemStack result, int s, Object... recipe) {
+
+		return new ShapedOreRecipe(cloneStack(result, s), recipe);
+	}
+
 	public static final IRecipe ShapelessRecipe(Block result, Object... recipe) {
 
 		return new ShapelessOreRecipe(result, recipe);
@@ -372,6 +387,21 @@ public final class ItemHelper {
 	public static final IRecipe ShapelessRecipe(ItemStack result, Object... recipe) {
 
 		return new ShapelessOreRecipe(result, recipe);
+	}
+
+	public static final IRecipe ShapelessRecipe(Block result, int s, Object... recipe) {
+
+		return new ShapelessOreRecipe(stack(result, s), recipe);
+	}
+
+	public static final IRecipe ShapelessRecipe(Item result, int s, Object... recipe) {
+
+		return new ShapelessOreRecipe(stack(result, s), recipe);
+	}
+
+	public static final IRecipe ShapelessRecipe(ItemStack result, int s, Object... recipe) {
+
+		return new ShapelessOreRecipe(cloneStack(result, s), recipe);
 	}
 
 	/* CRAFTING HELPER FUNCTIONS */
@@ -719,6 +749,8 @@ public final class ItemHelper {
 		FMLInterModComms.sendMessage("ForgeMicroblock", "microMaterial", stack);
 	}
 
+	// RECIPE{
+
 	public static void addRecipe(IRecipe recipe) {
 
 		GameRegistry.addRecipe(recipe);
@@ -734,10 +766,62 @@ public final class ItemHelper {
 		GameRegistry.addRecipe(out, recipe);
 	}
 
+	public static void addShapedRecipe(Item out, Object... recipe) {
+
+		addRecipe(new ItemStack(out), recipe);
+	}
+
+	public static void addShapedRecipe(Block out, Object... recipe) {
+
+		addRecipe(new ItemStack(out), recipe);
+	}
+
 	public static void addShapelessRecipe(ItemStack out, Object... recipe) {
 
 		GameRegistry.addShapelessRecipe(out, recipe);
 	}
+
+	public static void addShapelessRecipe(Item out, Object... recipe) {
+
+		addShapelessRecipe(new ItemStack(out), recipe);
+	}
+
+	public static void addShapelessRecipe(Block out, Object... recipe) {
+
+		addShapelessRecipe(new ItemStack(out), recipe);
+	}
+
+	public static void addShapedOreRecipe(ItemStack out, Object... recipe) {
+
+		GameRegistry.addRecipe(ShapedRecipe(out, recipe));
+	}
+
+	public static void addShapedOreRecipe(Item out, Object... recipe) {
+
+		GameRegistry.addRecipe(ShapedRecipe(out, recipe));
+	}
+
+	public static void addShapedOreRecipe(Block out, Object... recipe) {
+
+		GameRegistry.addRecipe(ShapedRecipe(out, recipe));
+	}
+
+	public static void addShapelessOreRecipe(ItemStack out, Object... recipe) {
+
+		GameRegistry.addRecipe(ShapelessRecipe(out, recipe));
+	}
+
+	public static void addShapelessOreRecipe(Item out, Object... recipe) {
+
+		GameRegistry.addRecipe(ShapelessRecipe(out, recipe));
+	}
+
+	public static void addShapelessOreRecipe(Block out, Object... recipe) {
+
+		GameRegistry.addRecipe(ShapelessRecipe(out, recipe));
+	}
+
+	// }
 
 	/* EMPOWERED ITEM HELPERS */
 	public static boolean isPlayerHoldingEmpowerableItem(EntityPlayer player) {
