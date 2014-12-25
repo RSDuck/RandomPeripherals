@@ -12,13 +12,15 @@ import net.minecraftforge.fluids.IFluidHandler;
 import cofh.api.energy.EnergyStorage;
 import cofh.api.energy.IEnergyHandler;
 import cofh.api.energy.IEnergyStorage;
+import cofh.lib.util.helpers.BlockHelper;
 import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.lua.LuaException;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 import dan200.computercraft.api.peripheral.IPeripheral;
 import dan200.computercraft.api.turtle.ITurtleAccess;
 
-public class TileEnergyStorage extends TileRandomPMachine implements IEnergyHandler {
+public class TileEnergyStorage extends TileRandomPMachine implements
+		IEnergyHandler {
 	protected EnergyStorage storedEnergy;
 	protected Object neightborCache[];
 
@@ -26,18 +28,41 @@ public class TileEnergyStorage extends TileRandomPMachine implements IEnergyHand
 		super("EnergyStorage");
 		storedEnergy = new EnergyStorage(capacity, 0);
 		neightborCache = new Object[6];
-		peripheral.AddMethod("setMaxEnergyOutput", "Sets the maximum amount of energy that goes out", new CCType[] { new CCType(Double.class, "newOutput",
-				"The new amount of maximum energy output", 0, 1000) }, new CCType[] {}, this);
-		peripheral.AddMethod("setMaxEnergyInput", "Sets the maximum amount of energy that goes in", new CCType[] { new CCType(Double.class, "newInput",
-				"The new amount of maximum energy input", 0, 1000) }, new CCType[] {}, this);
-		peripheral.AddMethod("getMaxEnergyOutput", "Returns the maximum amount of energy that goes out", new CCType[] {}, new CCType[] { new CCType(
-				Double.class, "The current maximum amount of energy that goes out") }, this);
-		peripheral.AddMethod("getMaxEnergyInput", "Returns the maximum amount of energy that will goes in", new CCType[] {}, new CCType[] { new CCType(
-				Double.class, "The current maximum amount of energy that comes in") }, this);
-		peripheral.AddMethod("getEnergyStored", "Returns the current amount of stored energy", new CCType[] {}, new CCType[] { new CCType(Double.class,
-				"The current amount of stored energy") }, this);
-		peripheral.AddMethod("getMaxEnergyStored", "Return the maximum amount of energy that can be stored", new CCType[] {}, new CCType[] { new CCType(
-				Double.class, "The maximum amount of energy that can be stored") }, this);
+		peripheral.AddMethod("setMaxEnergyOutput",
+				"Sets the maximum amount of energy that goes out",
+				new CCType[] { new CCType(Double.class, "newOutput",
+						"The new amount of maximum energy output", 0, 1000) },
+				new CCType[] {}, this);
+		peripheral.AddMethod("setMaxEnergyInput",
+				"Sets the maximum amount of energy that goes in",
+				new CCType[] { new CCType(Double.class, "newInput",
+						"The new amount of maximum energy input", 0, 1000) },
+				new CCType[] {}, this);
+		peripheral
+				.AddMethod(
+						"getMaxEnergyOutput",
+						"Returns the maximum amount of energy that goes out",
+						new CCType[] {},
+						new CCType[] { new CCType(Double.class,
+								"The current maximum amount of energy that goes out") },
+						this);
+		peripheral
+				.AddMethod(
+						"getMaxEnergyInput",
+						"Returns the maximum amount of energy that will goes in",
+						new CCType[] {},
+						new CCType[] { new CCType(Double.class,
+								"The current maximum amount of energy that comes in") },
+						this);
+		peripheral.AddMethod("getEnergyStored",
+				"Returns the current amount of stored energy", new CCType[] {},
+				new CCType[] { new CCType(Double.class,
+						"The current amount of stored energy") }, this);
+		peripheral.AddMethod("getMaxEnergyStored",
+				"Return the maximum amount of energy that can be stored",
+				new CCType[] {}, new CCType[] { new CCType(Double.class,
+						"The maximum amount of energy that can be stored") },
+				this);
 	}
 
 	public TileEnergyStorage() {
@@ -45,40 +70,42 @@ public class TileEnergyStorage extends TileRandomPMachine implements IEnergyHand
 	}
 
 	@Override
-	public Object[] callMethod(IComputerAccess computer, ILuaContext context, String method, Object[] arguments, ITurtleAccess turtle) throws LuaException,
-			FunctionNotFoundException {
+	public Object[] callMethod(IComputerAccess computer, ILuaContext context,
+			String method, Object[] arguments, ITurtleAccess turtle)
+			throws LuaException, FunctionNotFoundException {
 		switch (method) {
-			case "setMaxEnergyOutput": {
-				int arg0 = ((Number) arguments[0]).intValue();
-				storedEnergy.setMaxExtract(arg0);
-				return new Object[] {};
+		case "setMaxEnergyOutput": {
+			int arg0 = ((Number) arguments[0]).intValue();
+			storedEnergy.setMaxExtract(arg0);
+			return new Object[] {};
+		}
+		case "setMaxEnergyInput": {
+			int arg0 = ((Number) arguments[0]).intValue();
+			storedEnergy.setMaxReceive(arg0);
+			return new Object[] {};
+		}
+		case "getMaxEnergyOutput": {
+			return new Object[] { storedEnergy.getMaxExtract() };
+		}
+		case "getMaxEnergyInput": {
+			return new Object[] { storedEnergy.getMaxReceive() };
+		}
+		case "getEnergyStored": {
+			return new Object[] { storedEnergy.getEnergyStored() };
+		}
+		case "getMaxEnergyStored": {
+			return new Object[] { storedEnergy.getMaxEnergyStored() };
+		}
+		default: {
+			try {
+				return super.callMethod(computer, context, method, arguments,
+						turtle);
+			} catch (LuaException e) {
+				throw e;
+			} catch (FunctionNotFoundException e) {
+				throw e;
 			}
-			case "setMaxEnergyInput": {
-				int arg0 = ((Number) arguments[0]).intValue();
-				storedEnergy.setMaxReceive(arg0);
-				return new Object[] {};
-			}
-			case "getMaxEnergyOutput": {
-				return new Object[] { storedEnergy.getMaxExtract() };
-			}
-			case "getMaxEnergyInput": {
-				return new Object[] { storedEnergy.getMaxReceive() };
-			}
-			case "getEnergyStored": {
-				return new Object[] { storedEnergy.getEnergyStored() };
-			}
-			case "getMaxEnergyStored": {
-				return new Object[] { storedEnergy.getMaxEnergyStored() };
-			}
-			default: {
-				try {
-					return super.callMethod(computer, context, method, arguments, turtle);
-				} catch (LuaException e) {
-					throw e;
-				} catch (FunctionNotFoundException e){
-					throw e;
-				}
-			}
+		}
 		}
 	}
 
@@ -115,7 +142,8 @@ public class TileEnergyStorage extends TileRandomPMachine implements IEnergyHand
 	}
 
 	@Override
-	public int extractEnergy(ForgeDirection from, int maxExtract, boolean simulate) {
+	public int extractEnergy(ForgeDirection from, int maxExtract,
+			boolean simulate) {
 		return storedEnergy.extractEnergy(maxExtract, simulate);
 	}
 
@@ -135,7 +163,8 @@ public class TileEnergyStorage extends TileRandomPMachine implements IEnergyHand
 	}
 
 	@Override
-	public int receiveEnergy(ForgeDirection from, int maxReceive, boolean simulate) {
+	public int receiveEnergy(ForgeDirection from, int maxReceive,
+			boolean simulate) {
 		return storedEnergy.receiveEnergy(maxReceive, simulate);
 	}
 

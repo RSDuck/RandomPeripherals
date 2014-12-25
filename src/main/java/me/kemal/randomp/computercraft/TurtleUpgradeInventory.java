@@ -13,7 +13,7 @@ import dan200.computercraft.api.turtle.TurtleSide;
 import dan200.computercraft.api.turtle.TurtleUpgradeType;
 import dan200.computercraft.api.turtle.TurtleVerb;
 import me.kemal.randomp.util.CCType;
-import me.kemal.randomp.util.CCUtil;
+import me.kemal.randomp.util.CCUtils;
 import me.kemal.randomp.util.Peripheral;
 import me.kemal.randomp.util.TurtlePeripheral;
 import net.minecraft.client.renderer.texture.IIconRegister;
@@ -59,7 +59,7 @@ public class TurtleUpgradeInventory extends RandomPTurtleUpgrade {
 		if (method == "getStackInSlot") {
 			ItemStack selectedItem = turtle.getInventory().getStackInSlot(turtle.getSelectedSlot());
 			if (selectedItem != null) {
-				return new Object[] { CCUtil.stackToMap(selectedItem) };
+				return new Object[] { CCUtils.stackToMap(selectedItem) };
 			} else
 				return new Object[] { null };
 		}

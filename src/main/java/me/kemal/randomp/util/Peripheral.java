@@ -147,8 +147,8 @@ public class Peripheral implements IExtendablePeripheral, IPeripheral {
 					HashMap<String, Object> functionInfo = new HashMap<String, Object>();
 					functionInfo.put("name", arg1);
 					functionInfo.put("description", functionDescriptions.get(arg1));
-					functionInfo.put("arguments", CCUtil.ArrayToLuaArray(functionArgs.get(arg1)));
-					functionInfo.put("returns", CCUtil.ArrayToLuaArray(functionReturns.get(arg1)));
+					functionInfo.put("arguments", CCUtils.ArrayToLuaArray(functionArgs.get(arg1)));
+					functionInfo.put("returns", CCUtils.ArrayToLuaArray(functionReturns.get(arg1)));
 					return new Object[] { functionInfo };
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -156,7 +156,7 @@ public class Peripheral implements IExtendablePeripheral, IPeripheral {
 				}
 			}
 			case "getMethods": {
-				return new Object[] { CCUtil.ArrayToLuaArray(functionNames.toArray()) };
+				return new Object[] { CCUtils.ArrayToLuaArray(functionNames.toArray()) };
 			}
 		}
 		throw new LuaException("Internal Error: function not found");

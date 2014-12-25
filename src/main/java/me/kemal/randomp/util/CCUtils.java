@@ -9,7 +9,7 @@ import me.kemal.randomp.RandomPeripheral;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 
-public class CCUtil {
+public class CCUtils {
 
 	public static HashMap<String, Object> stackToMap(ItemStack stack) {
 		if (stack == null)
@@ -20,7 +20,7 @@ public class CCUtil {
 		map.put("amount", stack.stackSize);
 		map.put("name", stack.getDisplayName());
 		if (stack.getTagCompound() != null)
-			map.put("nbtdata", CCUtil.NBTCompoundToMap(stack.getTagCompound()));
+			map.put("nbtdata", CCUtils.NBTCompoundToMap(stack.getTagCompound()));
 		return map;
 	}
 

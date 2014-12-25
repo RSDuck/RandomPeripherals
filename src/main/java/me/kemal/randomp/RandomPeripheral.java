@@ -21,6 +21,7 @@ import me.kemal.randomp.util.ConfigFile;
 import me.kemal.randomp.util.Util;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
+import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -43,6 +44,7 @@ import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.common.registry.LanguageRegistry;
 import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import dan200.computercraft.api.ComputerCraftAPI;
 
 import org.apache.logging.log4j.Logger;
@@ -65,6 +67,16 @@ public class RandomPeripheral {
 
 	public static Logger logger;
 	public static ConfigFile config;
+	
+	/*
+	@SideOnly(Side.CLIENT)
+	public CreativeTabs randompTab = new CreativeTabs("tabRandomPeripheral") {
+		
+		@Override
+		public Item getTabIconItem() {
+			return new ItemStack(blockUniversalInterface).getItem();
+		}
+	};*/
 
 	@EventHandler
 	public void preInit(FMLPreInitializationEvent event) {
@@ -82,6 +94,8 @@ public class RandomPeripheral {
 
 		blockUniversalInterface = new BlockUniversalInterface(Material.iron);
 		blockDebugBlock = new BlockDebugPeripheral(Material.piston);
+		
+		//randompTab;
 	}
 
 	@EventHandler

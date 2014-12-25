@@ -54,7 +54,7 @@ public class Util {
 		}
 		if (obj instanceof NBTTagCompound) {
 			System.out.println("Type: Compound");
-			return CCUtil.NBTCompoundToMap((NBTTagCompound) obj);
+			return CCUtils.NBTCompoundToMap((NBTTagCompound) obj);
 		}
 		if (obj instanceof NBTTagList) {
 			System.out.println("Type: List ");
@@ -131,7 +131,7 @@ public class Util {
 		int xCoord = a.xCoord;
 		int yCoord = a.yCoord;
 		int zCoord = a.zCoord;
-		int[] pos = CCUtil.DirToCoord(Util.ToInt(whereB));
+		int[] pos = CCUtils.DirToCoord(Util.ToInt(whereB));
 		ItemStack heldStack = (stack != null) ? stack.copy() : null;
 		TileEntity te = worldObj.getTileEntity(xCoord + pos[0], yCoord + pos[1], zCoord + pos[2]);
 		boolean sided = te instanceof ISidedInventory;
@@ -171,7 +171,7 @@ public class Util {
 		ItemStack heldStack = (stack != null) ? stack.copy() : null;
 		if (heldStack == null)
 			return null;
-		int[] pos = CCUtil.DirToCoord(whereB);
+		int[] pos = CCUtils.DirToCoord(whereB);
 		TileEntity te = worldObj.getTileEntity(xCoord + pos[0], yCoord + pos[1], zCoord + pos[2]);
 		boolean sided = te instanceof ISidedInventory;
 		if (te instanceof IInventory) {

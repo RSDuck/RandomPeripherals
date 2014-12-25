@@ -21,6 +21,9 @@ version = "1.3"
 group= "me.kemal.randompp" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "RandomPeripherals"
 
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
+
 minecraft {
     version = "1.7.10-10.13.2.1236"
     runDir = "eclipse"

@@ -25,12 +25,15 @@ public class TileRandomPMachine extends TileEntity implements IInventory, ISided
 	protected Peripheral peripheral;
 	protected int[] ioConfiguration;
 	protected ItemStack[] inventory;
+	protected int facing;
 
 	public static final int SIDES_COUNT = 5;
 
 	public TileRandomPMachine(String peripheralType) {
 		peripheral = new Peripheral();
 		peripheral.setType(peripheralType);
+		facing = 1;
+		ioConfiguration = new int[6];
 	}
 
 	public Peripheral getPeripheral() {
@@ -143,7 +146,6 @@ public class TileRandomPMachine extends TileEntity implements IInventory, ISided
 
 	@Override
 	public String getInventoryName() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 

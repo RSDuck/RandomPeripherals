@@ -4,7 +4,7 @@ import java.util.HashMap;
 
 import me.kemal.randomp.RandomPeripheral;
 import me.kemal.randomp.util.CCType;
-import me.kemal.randomp.util.CCUtil;
+import me.kemal.randomp.util.CCUtils;
 import me.kemal.randomp.util.FunctionNotFoundException;
 import me.kemal.randomp.util.ICCHelpCreator;
 import me.kemal.randomp.util.Util;
@@ -61,14 +61,12 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 	public static final int SIDE_FLUID_ONLY = 4;
 
 	private ItemStack heldStack;
-	private int outputDirection;
 	private boolean allowAutoInput;
 	private FluidTank tank;
 
 	public TileUniversalInterface() {
 		super(capacity);
 		heldStack = null;
-		outputDirection = 1;
 		allowAutoInput = true;
 		ioConfiguration = new int[] { SIDE_NEUTRAL, // Unten
 				SIDE_NEUTRAL, // Oben
@@ -141,11 +139,11 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 		super.updateEntity();
 		// TODO: clean up!
 		for (ForgeDirection dir : ForgeDirection.VALID_DIRECTIONS) {
-			if (neightborCache[getIOConfiguration(dir.ordinal())] != null && neightborCache[getIOConfiguration(dir.ordinal())] instanceof IEnergyHandler
+			if (neightborCache[(dir.ordinal())] != null && neightborCache[(dir.ordinal())] instanceof IEnergyHandler
 					&& (getIOConfiguration(dir.getOpposite().ordinal()) == SIDE_IO || getIOConfiguration(dir.getOpposite().ordinal()) == SIDE_ENERGY_ONLY)) {
 				int energy = storedEnergy.getEnergyStored();
-				if (((IEnergyHandler) neightborCache[getIOConfiguration(dir.ordinal())]).receiveEnergy(dir, storedEnergy.getMaxExtract(), true) > 0)
-					energy -= ((IEnergyHandler) neightborCache[getIOConfiguration(dir.ordinal())]).receiveEnergy(dir, storedEnergy.getMaxExtract(), false);
+				if (((IEnergyHandler) neightborCache[(dir.ordinal())]).receiveEnergy(dir, storedEnergy.getMaxExtract(), true) > 0)
+					energy -= ((IEnergyHandler) neightborCache[(dir.ordinal())]).receiveEnergy(dir, storedEnergy.getMaxExtract(), false);
 				if (energy <= 0)
 					energy = 0;
 				this.storedEnergy.setEnergyStored(energy);
@@ -153,10 +151,10 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 				// + dir.toString() + " side. " + energy
 				// + " RF succefull transfered");
 			}
-			if (neightborCache[getIOConfiguration(dir.ordinal())] != null && neightborCache[getIOConfiguration(dir.ordinal())] instanceof IFluidHandler
+			if (neightborCache[(dir.ordinal())] != null && neightborCache[(dir.ordinal())] instanceof IFluidHandler
 					&& this.tank.getFluid() != null
 					&& (getIOConfiguration(dir.getOpposite().ordinal()) == SIDE_IO || getIOConfiguration(dir.getOpposite().ordinal()) == SIDE_FLUID_ONLY)) {
-				IFluidHandler fluidHandler = (IFluidHandler) neightborCache[getIOConfiguration(dir.ordinal())];
+				IFluidHandler fluidHandler = (IFluidHandler) neightborCache[(dir.ordinal())];
 				if (fluidHandler.canFill(dir, tank.getFluid().getFluid())) {
 					FluidStack fluidToDrain = this.drain(dir.getOpposite(), MAX_FLUID_IO, false);
 					int maxFill = fluidHandler.fill(dir, fluidToDrain, false);
@@ -173,7 +171,7 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 		super.readFromNBT(tag);
 		heldStack = ItemStack.loadItemStackFromNBT(tag.getCompoundTag("heldStack"));
 		tank = tank.readFromNBT(tag.getCompoundTag("tank"));
-		outputDirection = tag.getInteger("outputDir");
+		facing = tag.getInteger("outputDir");
 		ioConfiguration = tag.getIntArray("configuration");
 		allowAutoInput = tag.getBoolean("allowAutoInput");
 	}
@@ -181,7 +179,7 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 	@Override
 	public void writeToNBT(NBTTagCompound tag) {
 		super.writeToNBT(tag);
-		tag.setByte("outputDir", (byte) outputDirection);
+		tag.setByte("outputDir", (byte) facing);
 		tag.setIntArray("configuration", ioConfiguration);
 		if (heldStack != null) {
 			NBTTagCompound heldStackTag = new NBTTagCompound();
@@ -211,7 +209,7 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 		final String[] configNames = { "neutral", "universal", "items", "energy", "fluid" };
 		switch (method) {
 			case "getHeldStack":
-				return new Object[] { CCUtil.stackToMap(heldStack) };
+				return new Object[] { CCUtils.stackToMap(heldStack) };
 			case "pushStack": {
 				int direction = Util.ReadableDirToForgeDir((String) arguments[0]);
 				int simulatedDir = -1;
@@ -225,7 +223,7 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 				if (direction == -1 || simulatedDir == -1)
 					throw new LuaException("Invalid Direction");
 
-				return new Object[] { CCUtil.stackToMap(Util.PushStack(this, this, direction, heldStack, simulatedDir)) };
+				return new Object[] { CCUtils.stackToMap(Util.PushStack(this, this, direction, heldStack, simulatedDir)) };
 			}
 			case "suckStack": {
 				int direction = Util.ReadableDirToForgeDir((String) arguments[0]);
@@ -245,7 +243,7 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 					else
 						heldStack = decrStack;
 
-				return new Object[] { CCUtil.stackToMap(decrStack) };
+				return new Object[] { CCUtils.stackToMap(decrStack) };
 			}
 			case "setAllowAutoInput": {
 				allowAutoInput = (Boolean) arguments[0];
@@ -265,7 +263,7 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 					}
 				if (config == -1)
 					throw new LuaException("Invalid configuration");
-				int side = CCUtil.ReadableRelDirToRelForgeDir(arg0);
+				int side = CCUtils.ReadableRelDirToRelForgeDir(arg0);
 				if (side == -1)
 					throw new LuaException("Invalid side");
 
@@ -292,107 +290,6 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 				}
 			}
 		}
-	}
-
-	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) throws LuaException, InterruptedException {
-		switch (method) {
-			case 0: { // help
-				return new Object[] { "At this time there is no help available" };
-			}
-			case 1: {// getHeldStack
-				return new Object[] { CCUtil.stackToMap(heldStack) };
-			}
-			case 2: {// suckStack
-				// TODO: move suckStack and pushStack into an inventory util
-				// class
-				if (arguments.length == 1 || arguments.length == 2) {
-					if (CCUtil.IsValidNumber(arguments[0])) {
-						if (Util.ToInt(arguments[0]) >= 0 && Util.ToInt(arguments[0]) < 6) {
-							if (arguments.length == 2)
-								if (CCUtil.IsValidNumber(arguments[1])) {
-									if (!(Util.ToInt(arguments[1]) >= 0 && Util.ToInt(arguments[1]) < 6)) {
-										return new Object[] { false };
-									}
-								} else
-									return new Object[] { false };
-
-						}
-					}
-				}
-				return new Object[] { false };
-			}
-			case 3: {// pushStack
-				if (arguments.length == 1 || arguments.length == 2) {
-					if (CCUtil.IsValidNumber(arguments[0])) {
-						if (arguments.length == 2)
-							if (CCUtil.IsValidNumber(arguments[1])) {
-								if (!(Util.ToInt(arguments[1]) >= 0 && Util.ToInt(arguments[1]) < 6)) {
-									return new Object[] { false };
-								}
-							} else
-								return new Object[] { false };
-
-					}
-				}
-				return new Object[] { false };
-			}
-			case 4: {// setEnergyMaxExtract
-				if (arguments.length == 1 && CCUtil.IsValidNumber(arguments[0])) {
-					if (Util.ToInt(arguments[0]) <= MAX_ENERGY_IO && Util.ToInt(arguments[0]) >= 0 && Util.ToInt(arguments[0]) % 10 == 0) {
-						storedEnergy.setMaxExtract(Util.ToInt(arguments[0]));
-						return new Object[] { true };
-					}
-				}
-				return new Object[] { false };
-			}
-			case 5: {// getEnergyMaxExtract
-				return new Object[] { storedEnergy.getMaxExtract() };
-			}
-			case 6: {// getStoredEnergy
-				return new Object[] { storedEnergy.getEnergyStored() };
-			}
-			case 7: {// getMaxEnergyStored
-				return new Object[] { storedEnergy.getMaxEnergyStored() };
-			}
-			case 8: {// setAllowAutoInput
-				if (arguments.length == 1 && CCUtil.IsValidBool(arguments[0])) {
-					allowAutoInput = CCUtil.ToBool(arguments[0]);
-					return new Object[] { true };
-				}
-				return new Object[] { false };
-			}
-			case 9: {// isAutoInputEnabled
-				return new Object[] { allowAutoInput };
-			}
-			case 10: {// setSideConfiguration
-				if (arguments.length == 2 && CCUtil.IsValidNumber(arguments[0]) && CCUtil.IsValidNumber(arguments[1])) {
-					if (Util.ToInt(arguments[0]) < 6 && Util.ToInt(arguments[1]) < SIDES_COUNT) {
-						setSide(Util.ToInt(arguments[0]), Util.ToInt(arguments[1]));
-						updateAllBlocks();
-						return new Object[] { true };
-					}
-				}
-				return new Object[] { false };
-			}
-			case 11: {// getSideConfiguration
-				return new Object[] { Util.getRealNBTType(new NBTTagIntArray(ioConfiguration)) };
-			}
-			case 12: {// setEnergyMaxReceive
-				if (arguments.length == 1 && CCUtil.IsValidNumber(arguments[0])) {
-					if (Util.ToInt(arguments[0]) <= MAX_ENERGY_IO && Util.ToInt(arguments[0]) >= 0 && Util.ToInt(arguments[0]) % 10 == 0) {
-						storedEnergy.setMaxReceive(Util.ToInt(arguments[0]));
-						return new Object[] { true };
-					}
-				}
-				return new Object[] { false };
-			}
-			case 13: { // getEnergyMaxReceive
-				return new Object[] { storedEnergy.getMaxReceive() };
-			}
-			default:
-				break;
-		}
-		return new Object[] { null };
 	}
 
 	public void updateAllBlocks() {
@@ -477,11 +374,11 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 	}
 
 	public int getOutputFaceDir() {
-		return outputDirection;
+		return facing;
 	}
 
 	public void setOutputFaceDir(int dir) {
-		outputDirection = dir;
+		facing = dir;
 	}
 
 	public void setIOConfiguration(int side, int configuration) {
@@ -524,7 +421,7 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 	@Override
 	public boolean decrSide(int side) {
 		// int conf = getIOConfigurationWithFacing(side);
-		ioConfiguration[BlockHelper.ICON_ROTATION_MAP[outputDirection][side]] = (ioConfiguration[BlockHelper.ICON_ROTATION_MAP[outputDirection][side]] - 1 > -1) ? ioConfiguration[BlockHelper.ICON_ROTATION_MAP[outputDirection][side]] - 1
+		ioConfiguration[BlockHelper.ICON_ROTATION_MAP[facing][side]] = (ioConfiguration[BlockHelper.ICON_ROTATION_MAP[facing][side]] - 1 > -1) ? ioConfiguration[BlockHelper.ICON_ROTATION_MAP[facing][side]] - 1
 				: 3;
 		updateAllBlocks();
 		return true;
@@ -533,7 +430,7 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 	@Override
 	public boolean incrSide(int side) {
 		// int conf = getIOConfigurationWithFacing(side);
-		ioConfiguration[BlockHelper.ICON_ROTATION_MAP[outputDirection][side]] = (ioConfiguration[BlockHelper.ICON_ROTATION_MAP[outputDirection][side]] + 1 < SIDES_COUNT) ? ioConfiguration[BlockHelper.ICON_ROTATION_MAP[outputDirection][side]] + 1
+		ioConfiguration[BlockHelper.ICON_ROTATION_MAP[facing][side]] = (ioConfiguration[BlockHelper.ICON_ROTATION_MAP[facing][side]] + 1 < SIDES_COUNT) ? ioConfiguration[BlockHelper.ICON_ROTATION_MAP[facing][side]] + 1
 				: 0;
 		updateAllBlocks();
 		return true;
@@ -542,7 +439,7 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 	@Override
 	public boolean setSide(int side, int config) {
 		// int conf = getIOConfiguration(side);
-		ioConfiguration[BlockHelper.ICON_ROTATION_MAP[outputDirection][side]] = config;
+		ioConfiguration[BlockHelper.ICON_ROTATION_MAP[facing][side]] = config;
 		updateAllBlocks();
 		return true;
 	}
@@ -562,7 +459,7 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 
 	@Override
 	public int getFacing() {
-		return outputDirection;
+		return facing;
 	}
 
 	@Override
@@ -572,22 +469,22 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 
 	@Override
 	public boolean rotateBlock() {
-		outputDirection++;
-		if (outputDirection > 5)
-			outputDirection = 0;
+		facing++;
+		if (facing > 5)
+			facing = 0;
 		updateAllBlocks();
 		return true;
 	}
 
 	@Override
 	public boolean setFacing(int side) {
-		outputDirection = side;
+		facing = side;
 		updateAllBlocks();
 		return true;
 	}
 
 	public int getIOConfigurationWithFacing(int side) {
-		return ioConfiguration[BlockHelper.ICON_ROTATION_MAP[outputDirection][side]];
+		return ioConfiguration[BlockHelper.ICON_ROTATION_MAP[facing][side]];
 	}
 
 	@Override
