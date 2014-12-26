@@ -33,18 +33,6 @@ public class RandomPTurtleUpgrade implements ITurtleUpgrade, IExtendablePeripher
 		peripheral.setType(unlocalizedName);
 	}
 
-	public static int IsIDValid(String value, int defaultValue) {
-		if (value.matches("[20-255]")) {
-			int valueAsInt = Util.ToInt(value);
-			for (int id : usedIDs)
-				if (valueAsInt == id)
-					return defaultValue;
-			usedIDs.addElement(valueAsInt);
-			return valueAsInt;
-		}
-		return defaultValue;
-	}
-
 	@Override
 	public int getUpgradeID() {
 		return upgradeID;

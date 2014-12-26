@@ -9,4 +9,7 @@ me.kemal.randomperipheral.maxInput=Maximale Einnahme
 me.kemal.randomperipheral.incOutput=Maximale Ausgabe erhöhen
 me.kemal.randomperipheral.decOutput=Maximale Ausgabe verringern
 me.kemal.randomperipheral.incInput=Maximale Einnahme erhöhen
-me.kemal.ranodmperipheral.decInput=Maximale Einnahme verringern
+me.kemal.randomperipheral.decInput=Maximale Einnahme verringern
+
+me.kemal.randomperipheral.idOfUpgradeInventory=ID des Inventory Turtle Upgrades
+me.kemal.randomperipheral.idOfUpgradeDispenser=ID des Dispenser Turtle Upgrades

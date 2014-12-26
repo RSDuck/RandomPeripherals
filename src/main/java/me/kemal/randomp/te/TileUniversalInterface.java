@@ -6,7 +6,6 @@ import me.kemal.randomp.RandomPeripheral;
 import me.kemal.randomp.util.CCType;
 import me.kemal.randomp.util.CCUtils;
 import me.kemal.randomp.util.FunctionNotFoundException;
-import me.kemal.randomp.util.ICCHelpCreator;
 import me.kemal.randomp.util.Util;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -292,16 +291,6 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 		}
 	}
 
-	public void updateAllBlocks() {
-		worldObj.markBlockForUpdate(xCoord + 1, yCoord, zCoord);
-		worldObj.markBlockForUpdate(xCoord - 1, yCoord, zCoord);
-		worldObj.markBlockForUpdate(xCoord, yCoord + 1, zCoord);
-		worldObj.markBlockForUpdate(xCoord, yCoord - 1, zCoord);
-		worldObj.markBlockForUpdate(xCoord, yCoord, zCoord + 1);
-		worldObj.markBlockForUpdate(xCoord, yCoord, zCoord - 1);
-		worldObj.markBlockForUpdate(xCoord, yCoord, zCoord);
-	}
-
 	@Override
 	public int getSizeInventory() {
 		return 1;
@@ -464,15 +453,6 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 
 	@Override
 	public boolean allowYAxisFacing() {
-		return true;
-	}
-
-	@Override
-	public boolean rotateBlock() {
-		facing++;
-		if (facing > 5)
-			facing = 0;
-		updateAllBlocks();
 		return true;
 	}
 

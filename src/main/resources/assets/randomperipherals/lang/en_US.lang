@@ -10,3 +10,6 @@ me.kemal.randomperipheral.incOutput=Increase maximum output
 me.kemal.randomperipheral.decOutput=Decrease maximum output
 me.kemal.randomperipheral.incInput=Increase maximum input
 me.kemal.randomperipheral.decInput=Decrease maximum input
+
+me.kemal.randomperipheral.idOfUpgradeDispenser=The ID of the Dispenser Turtle Upgrade
+me.kemal.randomperipheral.idOfUpgradeInventory=The ID of the Invetory Turtle Upgrade

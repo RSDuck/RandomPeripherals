@@ -85,10 +85,27 @@ public class TileRandomPMachine extends TileEntity implements IInventory, ISided
 	public boolean allowYAxisFacing() {
 		return false;
 	}
+	
+	public void updateAllBlocks() {
+		worldObj.markBlockForUpdate(xCoord + 1, yCoord, zCoord);
+		worldObj.markBlockForUpdate(xCoord - 1, yCoord, zCoord);
+		worldObj.markBlockForUpdate(xCoord, yCoord + 1, zCoord);
+		worldObj.markBlockForUpdate(xCoord, yCoord - 1, zCoord);
+		worldObj.markBlockForUpdate(xCoord, yCoord, zCoord + 1);
+		worldObj.markBlockForUpdate(xCoord, yCoord, zCoord - 1);
+		worldObj.markBlockForUpdate(xCoord, yCoord, zCoord);
+	}
+
 
 	@Override
 	public boolean rotateBlock() {
-		return false;
+		facing++;
+		//TODO: Amount SIDES_COUNT should not be anymore final and should be changed by classes who inherit by TileRandomPMachine
+		if (facing > SIDES_COUNT)
+			facing = 0;
+		updateAllBlocks();
+		return true;
+
 	}
 
 	@Override
@@ -105,7 +122,7 @@ public class TileRandomPMachine extends TileEntity implements IInventory, ISided
 	}
 
 	@Override
-	public boolean canInsertItem(int p_102007_1_, ItemStack p_102007_2_, int p_102007_3_) {
+	public boolean canInsertItem(int slot, ItemStack item, int side) {
 		return false;
 	}
 
