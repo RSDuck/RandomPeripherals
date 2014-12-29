@@ -18,26 +18,25 @@ import net.minecraft.tileentity.TileEntity;
 
 public class TileHologramProjector extends TileEntity {
 
-	String[] hologram;
+	int[] hologram;
 	Block[] blockCache;
 
 	public TileHologramProjector() {
-		hologram = new String[8 * (8 * 8)];
+		hologram = new int[8 * (8 * 8)];
 		blockCache = new Block[8 * (8 * 8)];
 
-		hologram[0] = Blocks.planks.getUnlocalizedName();
+		hologram[0] = Block.getIdFromBlock(Blocks.planks);
 	}
 
 	public void rebuildBlockCache() {
 		for (int i = 0; i < hologram.length; i++) {
-			/*String name = hologram[i].substring(hologram[i].indexOf("tile."),
-					hologram[i].length() - 1);*/
-			blockCache[i] = Block.getBlockFromName(hologram[i]);
+			blockCache[i] = Block.getBlockById(hologram[i]);
 		}
 	}
 
 	public void rebuildBlockCache(int x, int y, int z) {
-
+		blockCache[((z * 8) + x) + y * 64] = Block
+				.getBlockById(hologram[((z * 8) + x) + y * 64]);
 	}
 
 	@Override
@@ -57,31 +56,18 @@ public class TileHologramProjector extends TileEntity {
 	@Override
 	public void writeToNBT(NBTTagCompound tag) {
 		super.writeToNBT(tag);
-		NBTTagList list = new NBTTagList();
-		for (String blockName : hologram)
-			list.appendTag(new NBTTagString((blockName == null) ? ""
-					: blockName));
-		tag.setTag("hologram", list);
+		tag.setIntArray("hologram", hologram);
+		hologram[0] = Block.getIdFromBlock(Blocks.planks);
 	}
 
 	@Override
 	public void readFromNBT(NBTTagCompound tag) {
 		super.readFromNBT(tag);
-		HashMap<Integer, Object> map = ((HashMap<Integer, Object>) Util
-				.getRealNBTType(tag.getTag("hologram")));
-		for (int i = 0; i < map.size(); i++) {
-			hologram[i] = (String) (((String) map.get(i) == "") ? null : map
-					.get(i));
-		}
-		hologram[0] = Blocks.planks.getUnlocalizedName();
+		hologram = tag.getIntArray("hologram");
 		rebuildBlockCache();
 	}
 
 	public Block getBlockAt(int x, int y, int z) {
-		// String together = hologram[(y*8+x)+z*64];
-		// return
-		// GameRegistry.findBlock(together.substring(0,together.indexOf(":") -1
-		// ), together.substring(together.indexOf(":")+1, together.length()-1));
-		return blockCache[(y * 8 + x) + z * 64];
+		return blockCache[((z * 8) + x) + y * 64];
 	}
 }

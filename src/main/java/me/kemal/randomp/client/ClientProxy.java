@@ -1,14 +1,17 @@
 package me.kemal.randomp.client;
 
+import cpw.mods.fml.client.registry.ClientRegistry;
 import cpw.mods.fml.client.registry.RenderingRegistry;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraft.command.CommandBase;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.TextureStitchEvent.Pre;
 import me.kemal.randomp.RandomPeripheral;
-import me.kemal.randomp.client.renderer.HologramRenderer;
+import me.kemal.randomp.client.renderer.TileHologramProjectorRenderer;
 import me.kemal.randomp.common.CommonProxy;
+import me.kemal.randomp.te.TileHologramProjector;
 
 public class ClientProxy extends CommonProxy {
 	@Override
@@ -28,6 +31,6 @@ public class ClientProxy extends CommonProxy {
 	
 	@Override
 	public void registerRenderer() {
-		RenderingRegistry.registerBlockHandler(new HologramRenderer());
+		ClientRegistry.bindTileEntitySpecialRenderer(TileHologramProjector.class, new TileHologramProjectorRenderer());
 	}
 }

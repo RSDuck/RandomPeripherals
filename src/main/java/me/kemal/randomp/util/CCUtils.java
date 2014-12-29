@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import cofh.lib.util.helpers.BlockHelper;
+import cpw.mods.fml.common.registry.GameRegistry;
 import dan200.computercraft.api.lua.LuaException;
 import me.kemal.randomp.RandomPeripheral;
 import net.minecraft.item.ItemStack;
@@ -15,7 +16,10 @@ public class CCUtils {
 		if (stack == null)
 			return null;
 		HashMap<String, Object> map = new HashMap<String, Object>();
-		map.put("unlocalizedName", stack.getItem().getUnlocalizedName());
+		map.put("unlocalizedName",
+				GameRegistry.findUniqueIdentifierFor(stack.getItem()).modId
+						+ ":"
+						+ GameRegistry.findUniqueIdentifierFor(stack.getItem()));
 		map.put("damage", stack.getItemDamage());
 		map.put("amount", stack.stackSize);
 		map.put("name", stack.getDisplayName());
@@ -37,7 +41,9 @@ public class CCUtils {
 		int iterator = 0;
 		boolean isCCType = (array instanceof CCType[]);
 		for (Object obj : array) {
-			map.put(iterator + 1, (isCCType) ? ((CCType[]) array)[iterator].toHashMap() : array[iterator]);
+			map.put(iterator + 1,
+					(isCCType) ? ((CCType[]) array)[iterator].toHashMap()
+							: array[iterator]);
 			iterator++;
 		}
 		return map;
@@ -53,20 +59,20 @@ public class CCUtils {
 
 	public static int[] DirToCoord(int dir) {
 		switch (dir) {
-			case 0:
-				return new int[] { 0, -1, 0 };
-			case 1:
-				return new int[] { 0, 1, 0 };
-			case 2:
-				return new int[] { 0, 0, 1 };
-			case 3:
-				return new int[] { 0, 0, -1 };
-			case 4:
-				return new int[] { -1, 0, 0 };
-			case 5:
-				return new int[] { 1, 0, 0 };
-			default:
-				return new int[] { 0, 0, 0 };
+		case 0:
+			return new int[] { 0, -1, 0 };
+		case 1:
+			return new int[] { 0, 1, 0 };
+		case 2:
+			return new int[] { 0, 0, 1 };
+		case 3:
+			return new int[] { 0, 0, -1 };
+		case 4:
+			return new int[] { -1, 0, 0 };
+		case 5:
+			return new int[] { 1, 0, 0 };
+		default:
+			return new int[] { 0, 0, 0 };
 		}
 	}
 
@@ -74,7 +80,8 @@ public class CCUtils {
 		HashMap<String, Object> nbtMap = new HashMap<String, Object>();
 		Object[] nbtSet = compound.func_150296_c().toArray();
 		for (int i = 0; i < nbtSet.length; i++) {
-			nbtMap.put(nbtSet[i].toString(), Util.getRealNBTType(compound.getTag((String) nbtSet[i])));
+			nbtMap.put(nbtSet[i].toString(),
+					Util.getRealNBTType(compound.getTag((String) nbtSet[i])));
 		}
 		return nbtMap;
 	}
@@ -83,7 +90,8 @@ public class CCUtils {
 		int output = -1;
 		// RandomPeripheral.logger.info("Turtle Dir: " + turtleDir + " Dir: " +
 		// dir);
-		final String[] dirs = new String[] { "left", "right", "back", "front", "bottom", "top" };
+		final String[] dirs = new String[] { "left", "right", "back", "front",
+				"bottom", "top" };
 		for (int i = 0; i < dirs.length; i++) {
 			// RandomPeripheral.logger.info("dirs[i] = " + dirs[i] +
 			// "|dirs[i] == dir = " + (dirs[i] == dir));
@@ -97,7 +105,8 @@ public class CCUtils {
 
 	public static int ReadableRelDirToRelForgeDir(String dir) {
 		int output = -1;
-		final String[] dirs = new String[] { "bottom", "top", "back", "front", "left", "right" };
+		final String[] dirs = new String[] { "bottom", "top", "back", "front",
+				"left", "right" };
 		for (int i = 0; i < dirs.length; i++)
 			if (dirs[i].indexOf(dir) != -1) {
 				output = i;

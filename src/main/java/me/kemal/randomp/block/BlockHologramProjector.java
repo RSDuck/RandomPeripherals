@@ -1,11 +1,8 @@
 package me.kemal.randomp.block;
 
-import java.awt.image.TileObserver;
-
 import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-import me.kemal.randomp.client.renderer.HologramRenderer;
 import me.kemal.randomp.te.TileHologramProjector;
 import net.minecraft.block.Block;
 import net.minecraft.block.ITileEntityProvider;
@@ -37,7 +34,7 @@ public class BlockHologramProjector extends Block implements
 	@Override
 	@SideOnly(Side.CLIENT)
 	public int getRenderType() {
-		return HologramRenderer.rendererID;
+		return -1;
 	}
 
 	@Override
@@ -52,11 +49,5 @@ public class BlockHologramProjector extends Block implements
 		return false;
 	}
 
-	@Override
-	@SideOnly(Side.CLIENT)
-	public boolean shouldSideBeRendered(IBlockAccess world, int x, int y,
-			int z, int side) {
-		return true;
-	}
 
 }

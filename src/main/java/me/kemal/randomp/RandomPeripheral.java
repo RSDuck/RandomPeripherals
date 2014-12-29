@@ -59,7 +59,7 @@ import org.apache.logging.log4j.Logger;
 public class RandomPeripheral {
 	public static final String modid = "RandomPeripherals";
 
-	@SidedProxy(clientSide = "me.kemal.randomp.client.ClientProxy", serverSide = "me.kemal.common.randomp.CommonProxy")
+	@SidedProxy(clientSide = "me.kemal.randomp.client.ClientProxy", serverSide = "me.kemal.randomp.common.CommonProxy")
 	public static CommonProxy proxy;
 
 	public static final String modnetworkchannel = "RandomP";
@@ -105,7 +105,7 @@ public class RandomPeripheral {
 
 		blockUniversalInterface = new BlockUniversalInterface(Material.iron);
 		blockDebugBlock = new BlockDebugPeripheral(Material.piston);
-		blockHologramProjector = new BlockHologramProjector();
+		//blockHologramProjector = new BlockHologramProjector();
 
 		// randompTab;
 	}
