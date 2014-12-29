@@ -1,11 +1,13 @@
 package me.kemal.randomp.client;
 
+import cpw.mods.fml.client.registry.RenderingRegistry;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.TextureStitchEvent.Pre;
 import me.kemal.randomp.RandomPeripheral;
+import me.kemal.randomp.client.renderer.HologramRenderer;
 import me.kemal.randomp.common.CommonProxy;
 
 public class ClientProxy extends CommonProxy {
@@ -22,5 +24,10 @@ public class ClientProxy extends CommonProxy {
 			IconRegistry.addIcon("IconMinus", "randomperipherals:icons/Icon_Minus", event.map);
 			IconRegistry.addIcon("IconButton", "cofh:icons/Icon_Button", event.map);
 		}
+	}
+	
+	@Override
+	public void registerRenderer() {
+		RenderingRegistry.registerBlockHandler(new HologramRenderer());
 	}
 }

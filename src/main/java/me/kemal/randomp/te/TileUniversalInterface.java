@@ -170,7 +170,6 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 		super.readFromNBT(tag);
 		heldStack = ItemStack.loadItemStackFromNBT(tag.getCompoundTag("heldStack"));
 		tank = tank.readFromNBT(tag.getCompoundTag("tank"));
-		facing = tag.getInteger("outputDir");
 		ioConfiguration = tag.getIntArray("configuration");
 		allowAutoInput = tag.getBoolean("allowAutoInput");
 	}
@@ -178,7 +177,6 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 	@Override
 	public void writeToNBT(NBTTagCompound tag) {
 		super.writeToNBT(tag);
-		tag.setByte("outputDir", (byte) facing);
 		tag.setIntArray("configuration", ioConfiguration);
 		if (heldStack != null) {
 			NBTTagCompound heldStackTag = new NBTTagCompound();

@@ -3,10 +3,12 @@ package me.kemal.randomp;
 import java.io.File;
 
 import cofh.api.item.IToolHammer;
+import cofh.api.modhelpers.ThaumcraftHelper;
 import cofh.api.modhelpers.ThermalExpansionHelper;
 import cofh.lib.util.ItemWrapper;
 import cofh.lib.util.helpers.FluidHelper;
 import me.kemal.randomp.block.BlockDebugPeripheral;
+import me.kemal.randomp.block.BlockHologramProjector;
 import me.kemal.randomp.block.BlockUniversalInterface;
 import me.kemal.randomp.common.CommonProxy;
 import me.kemal.randomp.computercraft.RandomPPeripheralProvider;
@@ -70,6 +72,7 @@ public class RandomPeripheral {
 
 	public static Block blockUniversalInterface;
 	public static Block blockDebugBlock;
+	public static Block blockHologramProjector;
 
 	public static Logger logger;
 
@@ -93,13 +96,16 @@ public class RandomPeripheral {
 			config = new Configuration(event.getSuggestedConfigurationFile());
 			loadConfig();
 		}
-
+		
 		networkWrapper = new SimpleNetworkWrapper(modnetworkchannel);
 		networkWrapper.registerMessage(ServerPacketHandler.class,
 				RandomPMSG.class, 0, Side.SERVER);
+		
+		proxy.registerRenderer();
 
 		blockUniversalInterface = new BlockUniversalInterface(Material.iron);
 		blockDebugBlock = new BlockDebugPeripheral(Material.piston);
+		blockHologramProjector = new BlockHologramProjector();
 
 		// randompTab;
 	}

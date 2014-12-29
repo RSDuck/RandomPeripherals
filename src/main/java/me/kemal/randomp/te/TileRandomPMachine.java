@@ -17,6 +17,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.ISidedInventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.IIcon;
 
@@ -34,6 +35,18 @@ public class TileRandomPMachine extends TileEntity implements IInventory, ISided
 		peripheral.setType(peripheralType);
 		facing = 1;
 		ioConfiguration = new int[6];
+	}
+	
+	@Override
+	public void writeToNBT(NBTTagCompound tag) {
+		super.writeToNBT(tag);
+		tag.setByte("outputDir", (byte) facing);
+	}
+	
+	@Override
+	public void readFromNBT(NBTTagCompound tag) {
+		super.readFromNBT(tag);
+		facing = tag.getInteger("outputDir");
 	}
 
 	public Peripheral getPeripheral() {
