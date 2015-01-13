@@ -3,6 +3,7 @@ package me.kemal.randomp.block;
 import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import me.kemal.randomp.client.renderer.RendererHologramProjector;
 import me.kemal.randomp.te.TileHologramProjector;
 import net.minecraft.block.Block;
 import net.minecraft.block.ITileEntityProvider;
@@ -34,7 +35,7 @@ public class BlockHologramProjector extends Block implements
 	@Override
 	@SideOnly(Side.CLIENT)
 	public int getRenderType() {
-		return -1;
+		return RendererHologramProjector.id;
 	}
 
 	@Override

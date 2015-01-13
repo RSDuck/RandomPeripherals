@@ -105,7 +105,7 @@ public class RandomPeripheral {
 
 		blockUniversalInterface = new BlockUniversalInterface(Material.iron);
 		blockDebugBlock = new BlockDebugPeripheral(Material.piston);
-		//blockHologramProjector = new BlockHologramProjector();
+		blockHologramProjector = new BlockHologramProjector();
 
 		// randompTab;
 	}
