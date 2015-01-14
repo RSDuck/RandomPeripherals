@@ -28,6 +28,39 @@ public class RendererHologramProjector implements ISimpleBlockRenderingHandler {
 
 	}
 
+	public void renderMiniBlock(RenderBlocks renderer, Block block, int meta, double blockSize, int worldX, int worldY, int worldZ,
+			int xOff, int yOff, int zOff) {
+		Tessellator t = Tessellator.instance;
+
+		double minX = (double) worldX + ((double) xOff * blockSize);
+		double minY = (double) worldY + ((double) yOff * blockSize);
+		double minZ = (double) worldZ + ((double) zOff * blockSize);
+		double maxX = (block.getBlockBoundsMaxX() * blockSize) + (double) worldX + ((double) xOff * blockSize);
+		double maxY = (block.getBlockBoundsMaxY() * blockSize) + (double) worldY + ((double) yOff * blockSize);
+		double maxZ = (block.getBlockBoundsMaxZ() * blockSize) + (double) worldZ + ((double) zOff * blockSize);
+
+		IIcon iconBottom = block.getIcon(0, meta);
+		IIcon iconTop = block.getIcon(1, meta);
+		IIcon iconNorth = block.getIcon(2, meta);
+		IIcon iconSouth = block.getIcon(3, meta);
+		IIcon iconWest = block.getIcon(4, meta);
+		IIcon iconEast = block.getIcon(5, meta);
+
+		t.addVertexWithUV(minX, minY, maxZ, iconSouth.getMinU(), iconSouth.getMinV());
+		t.addVertexWithUV(maxX, minY, maxZ, iconSouth.getMaxU(), iconSouth.getMinV());
+		t.addVertexWithUV(maxX, maxY, maxZ, iconSouth.getMaxU(), iconSouth.getMaxV());
+		t.addVertexWithUV(minX, maxY, maxZ, iconSouth.getMinU(), iconSouth.getMaxV());
+
+		t.addVertexWithUV(minX, minY, minZ, iconNorth.getMaxU(), iconNorth.getMinV());
+		t.addVertexWithUV(minX, maxY, minZ, iconNorth.getMaxU(), iconNorth.getMaxV());
+		t.addVertexWithUV(maxX, maxY, minZ, iconNorth.getMinU(), iconNorth.getMaxV());
+		t.addVertexWithUV(maxX, minY, minZ, iconNorth.getMinU(), iconNorth.getMinV());
+		//
+		//
+		//
+		//
+	}
+
 	@Override
 	public boolean renderWorldBlock(IBlockAccess world, int x, int y, int z, Block block, int modelId, RenderBlocks renderer) {
 		if (modelId == id) {
@@ -37,43 +70,10 @@ public class RendererHologramProjector implements ISimpleBlockRenderingHandler {
 
 			IIcon icon = Blocks.planks.getIcon(0, 0);
 			renderer.setOverrideBlockTexture(icon);
-			double blockSize = 0.25f;
 
 			t.setColorRGBA(255, 255, 255, 128);
 
-			t.addVertexWithUV((double) x, (double) y + blockSize, (double) z + blockSize, icon.getMinU(), icon.getMinV());
-			t.addVertexWithUV((double) x, (double) y, (double) z + blockSize, icon.getMinU(), icon.getMaxV());
-			t.addVertexWithUV((double) x + blockSize, (double) y, (double) z + blockSize, icon.getMaxU(), icon.getMaxV());
-			t.addVertexWithUV((double) x + blockSize, (double) y + blockSize, (double) z + blockSize, icon.getMaxU(), icon.getMinV());
-
-			t.addVertexWithUV((double) x + blockSize, (double) y + blockSize, (double) z, icon.getMinU(), icon.getMinV());
-			t.addVertexWithUV((double) x + blockSize, (double) y, (double) z, icon.getMinU(), icon.getMaxV());
-			t.addVertexWithUV((double) x, (double) y, (double) z, icon.getMaxU(), icon.getMaxV());
-			t.addVertexWithUV((double) x, (double) y + blockSize, (double) z, icon.getMaxU(), icon.getMinV());
-
-			t.addVertexWithUV((double) x, (double) y + blockSize, (double) z + blockSize, icon.getMaxU(), icon.getMinV());
-			t.addVertexWithUV((double) x, (double) y + blockSize, (double) z, icon.getMinU(), icon.getMinV());
-			t.addVertexWithUV((double) x, (double) y, (double) z, icon.getMinU(), icon.getMaxV());
-			t.addVertexWithUV((double) x, (double) y, (double) z + blockSize, icon.getMaxU(), icon.getMaxV());
-
-			t.addVertexWithUV((double) x, (double) y, (double) z, icon.getMaxU(), icon.getMinV());
-			t.addVertexWithUV((double) x, (double) y + blockSize, (double) z, icon.getMaxU(), icon.getMaxV());
-			t.addVertexWithUV((double) x + blockSize, (double) y + blockSize, (double) z, icon.getMinU(), icon.getMaxV());
-			t.addVertexWithUV((double) x + blockSize, (double) y, (double) z, icon.getMinU(), icon.getMinV());
-
-			t.addVertexWithUV((double) x, (double) y + blockSize, (double) z, icon.getMaxU(), icon.getMinV());
-			t.addVertexWithUV((double) x, (double) y + blockSize, (double) z + blockSize, icon.getMaxU(), icon.getMaxV());
-			t.addVertexWithUV((double) x + blockSize, (double) y + blockSize, (double) z + blockSize, icon.getMinU(), icon.getMaxV());
-			t.addVertexWithUV((double) x + blockSize, (double) y + blockSize, (double) z, icon.getMinU(), icon.getMinV());
-
-			t.addVertexWithUV((double) x, (double) y, (double) z, icon.getMinU(), icon.getMinV());
-			t.addVertexWithUV((double) x + blockSize, (double) y, (double) z, icon.getMaxU(), icon.getMinV());
-			t.addVertexWithUV((double) x + blockSize, (double) y, (double) z + blockSize, icon.getMaxU(), icon.getMaxV());
-			t.addVertexWithUV((double) x, (double) y, (double) z + blockSize, icon.getMinU(), icon.getMaxV());
-			//
-			//
-			//
-			//
+			renderMiniBlock(renderer, Blocks.brick_block, 0, 0.5f, x, y, z, 0, 0, 0);
 
 			return true;
 		}
