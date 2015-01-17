@@ -21,13 +21,13 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.IIcon;
 
-public class TileRandomPMachine extends TileEntity implements IInventory, ISidedInventory, IExtendablePeripheral, IReconfigurableFacing, IReconfigurableSides,
-		ISidedTexture {
-	protected Peripheral peripheral;
+public class TileRandomPMachine extends TileEntity implements IInventory, ISidedInventory, IExtendablePeripheral,
+		IReconfigurableFacing, IReconfigurableSides, ISidedTexture {
+	protected static Peripheral peripheral;
 	protected int[] ioConfiguration;
 	protected ItemStack[] inventory;
 	protected int facing;
-
+	
 	public static final int SIDES_COUNT = 5;
 
 	public TileRandomPMachine(String peripheralType) {
@@ -36,26 +36,27 @@ public class TileRandomPMachine extends TileEntity implements IInventory, ISided
 		facing = 1;
 		ioConfiguration = new int[6];
 	}
-	
+
 	@Override
 	public void writeToNBT(NBTTagCompound tag) {
 		super.writeToNBT(tag);
 		tag.setByte("outputDir", (byte) facing);
 	}
-	
+
 	@Override
 	public void readFromNBT(NBTTagCompound tag) {
 		super.readFromNBT(tag);
 		facing = tag.getInteger("outputDir");
 	}
 
+	@Override
 	public Peripheral getPeripheral() {
 		return peripheral;
 	}
 
 	@Override
-	public Object[] callMethod(IComputerAccess computer, ILuaContext context, String method, Object[] arguments, ITurtleAccess turtle) throws LuaException,
-			FunctionNotFoundException {
+	public Object[] callMethod(IComputerAccess computer, ILuaContext context, String method, Object[] arguments, ITurtleAccess turtle)
+			throws LuaException, FunctionNotFoundException {
 		throw new FunctionNotFoundException();
 	}
 
@@ -98,7 +99,7 @@ public class TileRandomPMachine extends TileEntity implements IInventory, ISided
 	public boolean allowYAxisFacing() {
 		return false;
 	}
-	
+
 	public void updateAllBlocks() {
 		worldObj.markBlockForUpdate(xCoord + 1, yCoord, zCoord);
 		worldObj.markBlockForUpdate(xCoord - 1, yCoord, zCoord);
@@ -109,11 +110,11 @@ public class TileRandomPMachine extends TileEntity implements IInventory, ISided
 		worldObj.markBlockForUpdate(xCoord, yCoord, zCoord);
 	}
 
-
 	@Override
 	public boolean rotateBlock() {
 		facing++;
-		//TODO: Amount SIDES_COUNT should not be anymore final and should be changed by classes who inherit by TileRandomPMachine
+		// TODO: Amount SIDES_COUNT should not be anymore final and should be
+		// changed by classes who inherit by TileRandomPMachine
 		if (facing > SIDES_COUNT)
 			facing = 0;
 		updateAllBlocks();

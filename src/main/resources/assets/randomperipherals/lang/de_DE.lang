@@ -13,3 +13,8 @@ me.kemal.randomperipheral.decInput=Maximale Einnahme verringern
 
 me.kemal.randomperipheral.idOfUpgradeInventory=ID des Inventory Turtle Upgrades
 me.kemal.randomperipheral.idOfUpgradeDispenser=ID des Dispenser Turtle Upgrades
+
+itemGroup.tabRandomP=Random Peripherals
+
+me.kemal.randomperipheral.chat.heldItemName=Der Unlokalisierte Name(den du in Kommandos und ComputerCraft Programmen benutzen kannst) des Items welches du gerade in der Hand hälts lautet:
+me.kemal.randomperipheral.chat.noItem=Um das Kommando benutzen zu können musst du etwas in der Hand halten

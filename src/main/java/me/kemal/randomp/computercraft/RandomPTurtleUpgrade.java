@@ -77,4 +77,9 @@ public class RandomPTurtleUpgrade implements ITurtleUpgrade, IExtendablePeripher
 		return null;
 	}
 
+	@Override
+	public Peripheral getPeripheral() {
+		return null;
+	}
+
 }

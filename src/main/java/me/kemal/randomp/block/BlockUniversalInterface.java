@@ -47,7 +47,7 @@ public class BlockUniversalInterface extends Block implements ITileEntityProvide
 	public BlockUniversalInterface(Material mat) {
 		super(mat);
 		setBlockName(blockName);
-		setCreativeTab(CreativeTabs.tabRedstone);
+		setCreativeTab(RandomPeripheral.tabRandomP);
 		GameRegistry.registerBlock(this, blockName);
 	}
 
@@ -92,7 +92,8 @@ public class BlockUniversalInterface extends Block implements ITileEntityProvide
 	}
 
 	@Override
-	public boolean onBlockActivated(World world, int x, int y, int z, EntityPlayer player, int side, float clickX, float clickY, float clickZ) {
+	public boolean onBlockActivated(World world, int x, int y, int z, EntityPlayer player, int side, float clickX, float clickY,
+			float clickZ) {
 		if (!player.isSneaking()) {
 			if (player.inventory.getCurrentItem() != null) {
 				if (player.inventory.getCurrentItem().getItem() instanceof IToolHammer) {
@@ -128,18 +129,18 @@ public class BlockUniversalInterface extends Block implements ITileEntityProvide
 		if (world.getTileEntity(x, y, z) instanceof TileUniversalInterface) {
 			TileUniversalInterface te = (TileUniversalInterface) world.getTileEntity(x, y, z);
 			switch (te.getIOConfigurationWithFacing(side)) {
-				case 0:
-					return neutralFace;
-				case 1:
-					return universalFace;
-				case 2:
-					return itemFace;
-				case 3:
-					return energyFace;
-				case 4:
-					return fluidFace;
-				default:
-					return neutralFace;
+			case 0:
+				return neutralFace;
+			case 1:
+				return universalFace;
+			case 2:
+				return itemFace;
+			case 3:
+				return energyFace;
+			case 4:
+				return fluidFace;
+			default:
+				return neutralFace;
 			}
 		}
 		return neutralFace;
@@ -155,7 +156,8 @@ public class BlockUniversalInterface extends Block implements ITileEntityProvide
 	public void debugBlock(IBlockAccess world, int x, int y, int z, ForgeDirection side, EntityPlayer player) {
 		TileUniversalInterface te = (TileUniversalInterface) world.getTileEntity(x, y, z);
 		if (te != null && te.getTank().getFluid() != null)
-			player.addChatMessage(new ChatComponentText("Fluid: " + te.getTank().getFluidAmount() + " Name: " + te.getTank().getFluid().getLocalizedName()));
+			player.addChatMessage(new ChatComponentText("Fluid: " + te.getTank().getFluidAmount() + " Name: "
+					+ te.getTank().getFluid().getLocalizedName()));
 		player.addChatMessage(new ChatComponentText("Energy: Receive: " + te.getEnergyStorage().getMaxReceive() + " Extract: "
 				+ te.getEnergyStorage().getMaxReceive() + " Stored: " + te.getEnergyStorage().getEnergyStored()));
 		// player.addChatMessage(new ChatComponentText(""));

@@ -3,7 +3,11 @@ package me.kemal.randomp.client.renderer;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.glu.GLU;
 
+import me.kemal.randomp.RandomPeripheral;
+import me.kemal.randomp.te.TileHologramProjector;
+import me.kemal.randomp.te.TileUniversalInterface;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockAir;
 import net.minecraft.client.renderer.RenderBlocks;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.init.Blocks;
@@ -28,8 +32,8 @@ public class RendererHologramProjector implements ISimpleBlockRenderingHandler {
 
 	}
 
-	public void renderMiniBlock(RenderBlocks renderer, Block block, int meta, double blockSize, int worldX, int worldY, int worldZ,
-			int xOff, int yOff, int zOff) {
+	public static void renderMiniBlock(Block block, int meta, double blockSize, int worldX, int worldY, int worldZ, int xOff,
+			int yOff, int zOff) {
 		Tessellator t = Tessellator.instance;
 
 		double minX = (double) worldX + ((double) xOff * blockSize);
@@ -46,19 +50,48 @@ public class RendererHologramProjector implements ISimpleBlockRenderingHandler {
 		IIcon iconWest = block.getIcon(4, meta);
 		IIcon iconEast = block.getIcon(5, meta);
 
-		t.addVertexWithUV(minX, minY, maxZ, iconSouth.getMinU(), iconSouth.getMinV());
-		t.addVertexWithUV(maxX, minY, maxZ, iconSouth.getMaxU(), iconSouth.getMinV());
-		t.addVertexWithUV(maxX, maxY, maxZ, iconSouth.getMaxU(), iconSouth.getMaxV());
-		t.addVertexWithUV(minX, maxY, maxZ, iconSouth.getMinU(), iconSouth.getMaxV());
+		if (iconSouth != null) {
+			t.addVertexWithUV(minX, minY, maxZ, iconSouth.getMinU(), iconSouth.getMaxV());
+			t.addVertexWithUV(maxX, minY, maxZ, iconSouth.getMaxU(), iconSouth.getMaxV());
+			t.addVertexWithUV(maxX, maxY, maxZ, iconSouth.getMaxU(), iconSouth.getMinV());
+			t.addVertexWithUV(minX, maxY, maxZ, iconSouth.getMinU(), iconSouth.getMinV());
+		}
 
-		t.addVertexWithUV(minX, minY, minZ, iconNorth.getMaxU(), iconNorth.getMinV());
-		t.addVertexWithUV(minX, maxY, minZ, iconNorth.getMaxU(), iconNorth.getMaxV());
-		t.addVertexWithUV(maxX, maxY, minZ, iconNorth.getMinU(), iconNorth.getMaxV());
-		t.addVertexWithUV(maxX, minY, minZ, iconNorth.getMinU(), iconNorth.getMinV());
-		//
-		//
-		//
-		//
+		if (iconNorth != null) {
+			t.addVertexWithUV(minX, minY, minZ, iconNorth.getMaxU(), iconNorth.getMaxV());
+			t.addVertexWithUV(minX, maxY, minZ, iconNorth.getMaxU(), iconNorth.getMinV());
+			t.addVertexWithUV(maxX, maxY, minZ, iconNorth.getMinU(), iconNorth.getMinV());
+			t.addVertexWithUV(maxX, minY, minZ, iconNorth.getMinU(), iconNorth.getMaxV());
+		}
+
+		if (iconTop != null) {
+			t.addVertexWithUV(minX, maxY, minZ, iconTop.getMinU(), iconTop.getMinV());
+			t.addVertexWithUV(minX, maxY, maxZ, iconTop.getMinU(), iconTop.getMaxV());
+			t.addVertexWithUV(maxX, maxY, maxZ, iconTop.getMaxU(), iconTop.getMaxV());
+			t.addVertexWithUV(maxX, maxY, minZ, iconTop.getMaxU(), iconTop.getMinV());
+		}
+
+		if (iconBottom != null) {
+			t.addVertexWithUV(minX, minY, minZ, iconBottom.getMaxU(), iconBottom.getMinV());
+			t.addVertexWithUV(maxX, minY, minZ, iconBottom.getMinU(), iconBottom.getMinV());
+			t.addVertexWithUV(maxX, minY, maxZ, iconBottom.getMinU(), iconBottom.getMaxV());
+			t.addVertexWithUV(minX, minY, maxZ, iconBottom.getMaxU(), iconBottom.getMaxV());
+		}
+
+		if (iconEast != null) {
+			t.addVertexWithUV(maxX, minY, minZ, iconEast.getMaxU(), iconEast.getMaxV());
+			t.addVertexWithUV(maxX, maxY, minZ, iconEast.getMaxU(), iconEast.getMinV());
+			t.addVertexWithUV(maxX, maxY, maxZ, iconEast.getMinU(), iconEast.getMinV());
+			t.addVertexWithUV(maxX, minY, maxZ, iconEast.getMinU(), iconEast.getMaxV());
+		}
+
+		if (iconWest != null) {
+			t.addVertexWithUV(minX, minY, minZ, iconWest.getMinU(), iconWest.getMaxV());
+			t.addVertexWithUV(minX, minY, maxZ, iconWest.getMaxU(), iconWest.getMaxV());
+			t.addVertexWithUV(minX, maxY, maxZ, iconWest.getMaxU(), iconWest.getMinV());
+			t.addVertexWithUV(minX, maxY, minZ, iconWest.getMinU(), iconWest.getMinV());
+		}
+
 	}
 
 	@Override
@@ -66,14 +99,27 @@ public class RendererHologramProjector implements ISimpleBlockRenderingHandler {
 		if (modelId == id) {
 			// renderer.renderStandardBlock(block, x, y, z);
 
+			GL11.glEnable(GL11.GL_BLEND);
+
 			Tessellator t = Tessellator.instance;
 
-			IIcon icon = Blocks.planks.getIcon(0, 0);
-			renderer.setOverrideBlockTexture(icon);
+			renderer.renderStandardBlock(block, x, y, z);
 
-			t.setColorRGBA(255, 255, 255, 128);
+			t.addTranslation(0.f, 0.7f, 0.f);
 
-			renderMiniBlock(renderer, Blocks.brick_block, 0, 0.5f, x, y, z, 0, 0, 0);
+			t.setColorRGBA(0, 191, 255, 255);
+
+			TileHologramProjector tile = (TileHologramProjector) world.getTileEntity(x, y, z);
+
+			for (int zI = 0; zI < 8; zI++) {
+				for (int yI = 0; yI < 8; yI++) {
+					for (int xI = 0; xI < 8; xI++) {
+						renderMiniBlock(tile.getBlockAt(xI, yI, zI), 0, 1.f / 8, x, y, z, xI, yI, zI);
+					}
+				}
+			}
+
+			t.addTranslation(0.f, -0.7f, 0.f);
 
 			return true;
 		}

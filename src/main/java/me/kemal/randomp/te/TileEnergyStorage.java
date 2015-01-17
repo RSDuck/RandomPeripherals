@@ -5,6 +5,7 @@ import java.util.Random;
 import me.kemal.randomp.RandomPeripheral;
 import me.kemal.randomp.util.CCType;
 import me.kemal.randomp.util.FunctionNotFoundException;
+import me.kemal.randomp.util.Peripheral;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraftforge.common.util.ForgeDirection;

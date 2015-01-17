@@ -13,3 +13,8 @@ me.kemal.randomperipheral.decInput=Decrease maximum input
 
 me.kemal.randomperipheral.idOfUpgradeDispenser=The ID of the Dispenser Turtle Upgrade
 me.kemal.randomperipheral.idOfUpgradeInventory=The ID of the Invetory Turtle Upgrade
+
+itemGroup.tabRandomP=Random Peripherals
+
+me.kemal.randomperipheral.chat.heldItemName=The unlocalized name(which you can use in commands and Computercraft programs) is:
+me.kemal.randomperipheral.chat.noItem=To use this command you have to hold something in your hand
