@@ -3,6 +3,7 @@ package me.kemal.randomp;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Timer;
 
 import cofh.api.item.IToolHammer;
 import cofh.api.modhelpers.ThaumcraftHelper;
@@ -99,7 +100,7 @@ public class RandomPeripheral {
 	@EventHandler
 	public void preInit(FMLPreInitializationEvent event) {
 		logger = event.getModLog();
-		logger.info("Random Peripheral starts to work");
+		logger.info("Random Peripheral starts to work...");
 
 		if (config == null) {
 			config = new Configuration(event.getSuggestedConfigurationFile());
@@ -128,7 +129,6 @@ public class RandomPeripheral {
 		MinecraftForge.EVENT_BUS.register(proxy);
 		MinecraftForge.EVENT_BUS.register(instance);
 
-		// 153, 154
 		ComputerCraftAPI.registerTurtleUpgrade(new TurtleUpgradeInventory(inventoryTurtleUpgradeID));
 		ComputerCraftAPI.registerTurtleUpgrade(new TurtleUpgradeDispense(dispenserTurtleUpgradeID));
 		ComputerCraftAPI.registerPeripheralProvider(new RandomPPeripheralProvider());
@@ -139,7 +139,7 @@ public class RandomPeripheral {
 		GameRegistry.addRecipe(new ItemStack(blockUniversalInterface), "axa", "zyz", "zxz", 'z', new ItemStack(Items.iron_ingot), 'x',
 				new ItemStack(Items.diamond), 'y', new ItemStack(Items.redstone), 'a', new ItemStack(Items.ender_eye));
 
-		logger.info("Random Peripheral is finish loading!");
+		logger.info("Random Peripheral has finished loading!");
 	}
 	
 	@EventHandler

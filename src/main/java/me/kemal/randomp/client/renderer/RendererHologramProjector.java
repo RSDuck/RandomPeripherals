@@ -1,5 +1,7 @@
 package me.kemal.randomp.client.renderer;
 
+import java.security.spec.ECFieldF2m;
+
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.glu.GLU;
 
@@ -36,13 +38,13 @@ public class RendererHologramProjector implements ISimpleBlockRenderingHandler {
 			int yOff, int zOff) {
 		Tessellator t = Tessellator.instance;
 
-		double minX = (double) worldX + ((double) xOff * blockSize);
-		double minY = (double) worldY + ((double) yOff * blockSize);
-		double minZ = (double) worldZ + ((double) zOff * blockSize);
+		double minX = (double) worldX + ((double) xOff * blockSize) + (block.getBlockBoundsMinX() * blockSize);
+		double minY = (double) worldY + ((double) yOff * blockSize) + (block.getBlockBoundsMinY() * blockSize);
+		double minZ = (double) worldZ + ((double) zOff * blockSize) + (block.getBlockBoundsMinZ() * blockSize);
 		double maxX = (block.getBlockBoundsMaxX() * blockSize) + (double) worldX + ((double) xOff * blockSize);
 		double maxY = (block.getBlockBoundsMaxY() * blockSize) + (double) worldY + ((double) yOff * blockSize);
 		double maxZ = (block.getBlockBoundsMaxZ() * blockSize) + (double) worldZ + ((double) zOff * blockSize);
-
+		
 		IIcon iconBottom = block.getIcon(0, meta);
 		IIcon iconTop = block.getIcon(1, meta);
 		IIcon iconNorth = block.getIcon(2, meta);
@@ -111,12 +113,19 @@ public class RendererHologramProjector implements ISimpleBlockRenderingHandler {
 
 			TileHologramProjector tile = (TileHologramProjector) world.getTileEntity(x, y, z);
 
-			for (int zI = 0; zI < 8; zI++) {
-				for (int yI = 0; yI < 8; yI++) {
-					for (int xI = 0; xI < 8; xI++) {
-						renderMiniBlock(tile.getBlockAt(xI, yI, zI), 0, 1.f / 8, x, y, z, xI, yI, zI);
+			try {
+
+				for (int zI = 0; zI < 8; zI++) {
+					for (int yI = 0; yI < 8; yI++) {
+						for (int xI = 0; xI < 8; xI++) {
+							
+							renderMiniBlock(tile.getBlockAt(xI, yI, zI), tile.getMetaAt(xI, yI, zI), 1.f / 8, x, y, z, xI, yI, zI);
+						}
 					}
 				}
+
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
 
 			t.addTranslation(0.f, -0.7f, 0.f);

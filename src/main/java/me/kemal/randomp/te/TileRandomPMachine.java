@@ -23,7 +23,7 @@ import net.minecraft.util.IIcon;
 
 public class TileRandomPMachine extends TileEntity implements IInventory, ISidedInventory, IExtendablePeripheral,
 		IReconfigurableFacing, IReconfigurableSides, ISidedTexture {
-	protected static Peripheral peripheral;
+	protected Peripheral peripheral;
 	protected int[] ioConfiguration;
 	protected ItemStack[] inventory;
 	protected int facing;
