@@ -9,12 +9,7 @@ And yes, I toke some code from CofhCore(the IconRegister completely the side con
 
 License
 =================
-This Mod is provided 'as is' with no warranties, implied or otherwise. The devolopers of this mod takes no responsibility for any damages incurred from the use of this mod. Also it's not allowed to sell or make anyway else money with the mod. You may learn and copy portions of the code(if you can look through my messy code)
-
-About Modpacks
-----------------
-Feel free to include the mod in your modpack along modpack may not be commercial, and you follow the licensing rules above, give Credits(if your Modpack is Public) and please(you don't must) open an issue where you tell about your modpack so I know if somebody includes my mod into an modpack.
-
+Moved to: https://github.com/RSDuck/RandomPeripherals/wiki/Licensing-stuff
 
 Installing
 ================
