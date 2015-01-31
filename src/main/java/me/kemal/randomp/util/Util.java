@@ -1,6 +1,10 @@
 package me.kemal.randomp.util;
 
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import cofh.lib.inventory.ComparableItemStack;
 import cofh.lib.inventory.ComparableItemStackNBT;
@@ -25,6 +29,58 @@ import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.util.ForgeDirection;
 
 public class Util {
+
+	public static String NBTToString(NBTBase obj) {
+		if (obj instanceof NBTPrimitive) {
+			// System.out.println("Type: Primitive");
+			return ((Double) ((NBTPrimitive) obj).func_150286_g()).toString();
+		}
+		if (obj instanceof NBTTagIntArray) {
+			// System.out.println("Type: Int Array");
+			int[] array = ((NBTTagIntArray) obj).func_150302_c();
+			String output = "[";
+			for (int i = 0; i < array.length; i++) {
+				output += array[i] + ((i == array.length - 1) ? "" : ", ");
+			}
+			return output + "]";
+		}
+		if (obj instanceof NBTTagByteArray) {
+			// System.out.println("Type: Byte Array");
+			byte[] array = ((NBTTagByteArray) obj).func_150292_c();
+			String output = "[";
+			for (int i = 0; i < array.length; i++) {
+				output += array[i] + ((i == array.length - 1) ? "" : ", ");
+			}
+			return output + "]";
+		}
+		if (obj instanceof NBTTagString) {
+			// System.out.println("Type: String");
+			return ((NBTTagString) obj).func_150285_a_();
+		}
+		if (obj instanceof NBTTagCompound) {
+			String output = "{";
+			Object[] nbtSet = ((NBTTagCompound) obj).func_150296_c().toArray();
+			for (int i = 0; i < nbtSet.length; i++) {
+				output += (String) nbtSet[i] + " : " + NBTToString(((NBTTagCompound) obj).getTag((String) nbtSet[i]))
+						+ ((i == nbtSet.length - 1) ? "" : ", ");
+			}
+			return output + "}";
+		}
+		if (obj instanceof NBTTagList) {
+			// System.out.println("Type: List ");
+			NBTTagList list = ((NBTTagList) obj);
+			String output = " [ ";
+			NBTTagList copy = (NBTTagList) list.copy();
+			int i = 0;
+			while (copy.tagCount() > 0) {
+				output += NBTToString(copy.removeTag(0)) + ((i == list.tagCount() - 1) ? "" : ", ");
+				i++;
+			}
+			return output;
+		}
+		return "{}";
+	}
+
 	public static Object getRealNBTType(NBTBase obj) {
 		if (obj instanceof NBTPrimitive) {
 			System.out.println("Type: Primitive");
@@ -105,7 +161,8 @@ public class Util {
 		if (stack1 == null) {
 			return 64;
 		}
-		if (stack2 != null && stack2.getItem().equals(stack1.getItem()) && (!stack1.getHasSubtypes() || stack1.getItemDamage() == stack2.getItemDamage())
+		if (stack2 != null && stack2.getItem().equals(stack1.getItem())
+				&& (!stack1.getHasSubtypes() || stack1.getItemDamage() == stack2.getItemDamage())
 				&& ItemStack.areItemStackTagsEqual(stack1, stack2)) {
 			if (stack1.stackSize + stack2.stackSize > 64) {
 				return stack1.getMaxStackSize() - (((stack2.stackSize + stack1.stackSize) - 64));

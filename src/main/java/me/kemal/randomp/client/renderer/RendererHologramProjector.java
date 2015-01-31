@@ -52,6 +52,13 @@ public class RendererHologramProjector implements ISimpleBlockRenderingHandler {
 		IIcon iconWest = block.getIcon(4, meta);
 		IIcon iconEast = block.getIcon(5, meta);
 
+		float bMinX = (float) block.getBlockBoundsMinX();
+		float bMinY = (float) block.getBlockBoundsMinY();
+		float bMinZ = (float) block.getBlockBoundsMinZ();
+		float bMaxX = (float) block.getBlockBoundsMaxX();
+		float bMaxY = (float) block.getBlockBoundsMaxY();
+		float bMaxZ = (float) block.getBlockBoundsMaxZ();
+
 		if (iconSouth != null) {
 			t.addVertexWithUV(minX, minY, maxZ, iconSouth.getMinU(), iconSouth.getMaxV());
 			t.addVertexWithUV(maxX, minY, maxZ, iconSouth.getMaxU(), iconSouth.getMaxV());
@@ -118,7 +125,7 @@ public class RendererHologramProjector implements ISimpleBlockRenderingHandler {
 				for (int zI = 0; zI < 8; zI++) {
 					for (int yI = 0; yI < 8; yI++) {
 						for (int xI = 0; xI < 8; xI++) {
-							
+
 							renderMiniBlock(tile.getBlockAt(xI, yI, zI), tile.getMetaAt(xI, yI, zI), 1.f / 8, x, y, z, xI, yI, zI);
 						}
 					}

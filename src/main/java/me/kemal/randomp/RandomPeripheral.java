@@ -25,6 +25,7 @@ import me.kemal.randomp.net.RandomPMSG;
 import me.kemal.randomp.net.ServerPacketHandler;
 import me.kemal.randomp.te.TileRandomPMachine;
 import me.kemal.randomp.te.TileUniversalInterface;
+import me.kemal.randomp.util.CCUtils;
 import me.kemal.randomp.util.Util;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
@@ -38,6 +39,7 @@ import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import cpw.mods.fml.client.event.ConfigChangedEvent;
 import cpw.mods.fml.client.registry.RenderingRegistry;
 import cpw.mods.fml.common.FMLCommonHandler;
+import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.SidedProxy;
 import cpw.mods.fml.common.Mod.EventHandler;
@@ -56,6 +58,7 @@ import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import cpw.mods.fml.common.registry.EntityRegistry;
 import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.common.registry.LanguageRegistry;
+import cpw.mods.fml.common.toposort.ModSorter;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import dan200.computercraft.api.ComputerCraftAPI;
@@ -136,14 +139,18 @@ public class RandomPeripheral {
 
 	@EventHandler
 	public void postInit(FMLPostInitializationEvent event) {
-		GameRegistry.addRecipe(new ItemStack(blockUniversalInterface), "axa", "zyz", "zxz", 'z', new ItemStack(Items.iron_ingot), 'x',
-				new ItemStack(Items.diamond), 'y', new ItemStack(Items.redstone), 'a', new ItemStack(Items.ender_eye));
+		if (Loader.isModLoaded("ThermalFoundation")) {
+			
+		} else {
+			GameRegistry.addRecipe(new ItemStack(blockUniversalInterface), "axa", "zyz", "zxz", 'z', new ItemStack(Items.iron_ingot),
+					'x', new ItemStack(Items.diamond), 'y', new ItemStack(Items.redstone), 'a', new ItemStack(Items.ender_eye));
+		}
 
 		logger.info("Random Peripheral has finished loading!");
 	}
-	
+
 	@EventHandler
-	public void serverLoad(FMLServerStartingEvent event){
+	public void serverLoad(FMLServerStartingEvent event) {
 		event.registerServerCommand(new CommandItemName());
 	}
 
