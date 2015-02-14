@@ -12,6 +12,7 @@
   "logoFile": "",
   "screenshots": [],
   "useDependencyInformation": "true",
-  "dependencies": [ "ComputerCraft","CCTurtle","CoFHCore" ] 
+  "dependencies": [ "ComputerCraft","CC-Turtle","CoFHCore" ,"ThermalFoundation","ThermalExpansion"],
+  "requiredMods": [ "ComputerCraft", "CC-Turtle","CoFHCore" ]
 }
 ]

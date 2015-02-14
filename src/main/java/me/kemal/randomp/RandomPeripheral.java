@@ -30,12 +30,15 @@ import me.kemal.randomp.util.Util;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.crafting.CraftingManager;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.oredict.OreDictionary;
 import cpw.mods.fml.client.event.ConfigChangedEvent;
 import cpw.mods.fml.client.registry.RenderingRegistry;
 import cpw.mods.fml.common.FMLCommonHandler;
@@ -62,8 +65,11 @@ import cpw.mods.fml.common.toposort.ModSorter;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import dan200.computercraft.api.ComputerCraftAPI;
+import dan200.computercraft.api.peripheral.IPeripheral;
 
 import org.apache.logging.log4j.Logger;
+
+import com.google.gson.JsonParser;
 
 @Mod(modid = RandomPeripheral.modid)
 public class RandomPeripheral {
@@ -99,7 +105,7 @@ public class RandomPeripheral {
 
 	public static int inventoryTurtleUpgradeID;
 	public static int dispenserTurtleUpgradeID;
-
+	
 	@EventHandler
 	public void preInit(FMLPreInitializationEvent event) {
 		logger = event.getModLog();
@@ -120,8 +126,6 @@ public class RandomPeripheral {
 		blockHologramProjector = new BlockHologramProjector();
 
 		itemCreativeTabDummy = new ItemCreativeTabDummy();
-
-		// randompTab;
 	}
 
 	@EventHandler
@@ -139,11 +143,32 @@ public class RandomPeripheral {
 
 	@EventHandler
 	public void postInit(FMLPostInitializationEvent event) {
-		if (Loader.isModLoaded("ThermalFoundation")) {
-			
+		if (Loader.isModLoaded("ThermalFoundation") && Loader.isModLoaded("ThermalExpansion")) {
+			try {
+				Item teMaterial = GameRegistry.findItem("ThermalExpansion", "material");
+				ItemStack invar = OreDictionary.getOres("ingotInvar").get(0);
+				ItemStack signalumGear = OreDictionary.getOres("gearSignalum").get(0);
+				ItemStack lumiumIngot = OreDictionary.getOres("ingotLumium").get(0);
+				ItemStack silverIngot = OreDictionary.getOres("ingotSilver").get(0);
+				ItemStack leadGear = OreDictionary.getOres("gearLead").get(0);
+
+				GameRegistry.addRecipe(new ItemStack(blockUniversalInterface), "xyx", "yzy", "xax", 'x', invar, 'y', new ItemStack(
+						teMaterial, 1, 1), 'a', new ItemStack(teMaterial), 'z', signalumGear);
+
+				GameRegistry
+						.addRecipe(new ItemStack(blockHologramProjector), " x ", "yiy", "zkz", 'x', new ItemStack(Blocks.glass), 'y',
+								silverIngot, 'i', lumiumIngot, 'z', new ItemStack(teMaterial, 1, 2), 'k', new ItemStack(
+										Items.comparator));
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		} else {
 			GameRegistry.addRecipe(new ItemStack(blockUniversalInterface), "axa", "zyz", "zxz", 'z', new ItemStack(Items.iron_ingot),
 					'x', new ItemStack(Items.diamond), 'y', new ItemStack(Items.redstone), 'a', new ItemStack(Items.ender_eye));
+
+			GameRegistry.addRecipe(new ItemStack(blockHologramProjector), " z ", "xyx", "ral", 'z', new ItemStack(Blocks.glass), 'x',
+					new ItemStack(Items.iron_ingot), 'y', new ItemStack(Blocks.glowstone), 'r', new ItemStack(Items.redstone), 'a',
+					new ItemStack(Items.comparator), 'l', new ItemStack(Blocks.redstone_torch));
 		}
 
 		logger.info("Random Peripheral has finished loading!");
@@ -173,7 +198,6 @@ public class RandomPeripheral {
 				"The ID of the Inventory Turtle Upgrade", "me.kemal.randomperipheral.idOfUpgradeInventory");
 		dispenserTurtleUpgradeID = config.getInt("dispenserTurtleUpgrade", config.CATEGORY_GENERAL, 154, 63, 255,
 				"The ID of the Dispenser Turtle Upgrade", "me.kemal.randomperipheral.idOfUpgradeDispenser");
-
 		if (config.hasChanged()) {
 			config.save();
 		}

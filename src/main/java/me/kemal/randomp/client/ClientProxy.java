@@ -6,8 +6,10 @@ import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.command.CommandBase;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.IWorldAccess;
 import net.minecraftforge.client.event.TextureStitchEvent.Post;
 import net.minecraftforge.client.event.TextureStitchEvent.Pre;
 import me.kemal.randomp.RandomPeripheral;
@@ -34,6 +36,7 @@ public class ClientProxy extends CommonProxy {
 	@Override
 	public void registerRenderer() {
 		RenderingRegistry.registerBlockHandler(new RendererHologramProjector());
+		
 	}
 	
 	@Override

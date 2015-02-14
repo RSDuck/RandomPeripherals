@@ -85,7 +85,9 @@ public class TileHologramProjector extends TileEntity implements IExtendablePeri
 						new CCType[] { new CCType(HashMap.class, "hologram",
 								"An table which contains the following content: {{name=\"block id\", meta=0, x=\"The X-Coordinate\", y=0, z=0}, other blocks...}") },
 						new CCType[] {}, this);
-		peripheral.AddMethod("clear", "Clears the whole hologram, so all blocks are air", new CCType[] {}, new CCType[] {}, this);
+		peripheral.AddMethod("clear", "Clears the whole hologram with the given block and metadata", new CCType[] {
+				new CCType(String.class, "block", "The block to that all blocks should be converted"),
+				new CCType(String.class, "meta", "The metadata that should be set on all blocks") }, new CCType[] {}, this);
 	}
 
 	@Override
@@ -187,9 +189,11 @@ public class TileHologramProjector extends TileEntity implements IExtendablePeri
 		}
 		case "clear": {
 			for (int i = 0; i < hologram.length; i++)
-				hologram[i] = "minecraft:air";
+				hologram[i] = (String) arguments[0];
 			for (int i = 0; i < hologramMeta.length; i++)
-				hologramMeta[i] = 0;
+				hologramMeta[i] = ((Number) arguments[1]).byteValue();
+			worldObj.markBlockRangeForRenderUpdate(xCoord, yCoord, zCoord, xCoord, yCoord, zCoord);
+			worldObj.markBlockForUpdate(xCoord, yCoord, zCoord);
 			return new Object[] {};
 		}
 		default:
