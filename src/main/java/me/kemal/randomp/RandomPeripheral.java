@@ -3,6 +3,7 @@ package me.kemal.randomp;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.Timer;
 
 import cofh.api.item.IToolHammer;
@@ -66,6 +67,7 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import dan200.computercraft.api.ComputerCraftAPI;
 import dan200.computercraft.api.peripheral.IPeripheral;
+import dan200.computercraft.api.turtle.ITurtleUpgrade;
 
 import org.apache.logging.log4j.Logger;
 
@@ -105,7 +107,9 @@ public class RandomPeripheral {
 
 	public static int inventoryTurtleUpgradeID;
 	public static int dispenserTurtleUpgradeID;
-	
+
+	public static String[] tileEntitiesWithAutoRead;
+
 	@EventHandler
 	public void preInit(FMLPreInitializationEvent event) {
 		logger = event.getModLog();
@@ -198,8 +202,16 @@ public class RandomPeripheral {
 				"The ID of the Inventory Turtle Upgrade", "me.kemal.randomperipheral.idOfUpgradeInventory");
 		dispenserTurtleUpgradeID = config.getInt("dispenserTurtleUpgrade", config.CATEGORY_GENERAL, 154, 63, 255,
 				"The ID of the Dispenser Turtle Upgrade", "me.kemal.randomperipheral.idOfUpgradeDispenser");
+		tileEntitiesWithAutoRead = config.getStringList("autoWrappedPeripherals", config.CATEGORY_GENERAL, new String[] {},
+				"If you add an block name to this list, it can be used as peripheral and you can read its NBT Data");
 		if (config.hasChanged()) {
 			config.save();
+		}
+	}
+
+	public static void registerTurtleUpgrade(ITurtleUpgrade upgrade) {
+		if (upgrade != null) {
+			logger.info("Upgrade register " + upgrade.getUnlocalisedAdjective());
 		}
 	}
 

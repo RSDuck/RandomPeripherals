@@ -35,7 +35,7 @@ public class ClientProxy extends CommonProxy {
 	
 	@Override
 	public void registerRenderer() {
-		RenderingRegistry.registerBlockHandler(new RendererHologramProjector());
+		RenderingRegistry.
 		
 	}
 	
