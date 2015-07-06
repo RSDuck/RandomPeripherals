@@ -4,6 +4,7 @@ import static net.minecraftforge.oredict.OreDictionary.WILDCARD_VALUE;
 
 import cofh.api.item.IEmpowerableItem;
 import cofh.api.item.IInventoryContainerItem;
+import cofh.api.item.IMultiModeItem;
 import cofh.lib.util.OreDictionaryProxy;
 import cpw.mods.fml.common.event.FMLInterModComms;
 import cpw.mods.fml.common.registry.GameRegistry;
@@ -161,6 +162,10 @@ public final class ItemHelper {
 
 	public static ItemStack consumeItem(ItemStack stack) {
 
+		if (stack == null) {
+			return null;
+		}
+
 		Item item = stack.getItem();
 		boolean largerStack = stack.stackSize > 1;
 		// vanilla only alters the stack passed to hasContainerItem/etc. when the size is >1
@@ -168,7 +173,6 @@ public final class ItemHelper {
 		if (largerStack) {
 			stack.stackSize -= 1;
 		}
-
 		if (item.hasContainerItem(stack)) {
 			ItemStack ret = item.getContainerItem(stack);
 
@@ -180,7 +184,62 @@ public final class ItemHelper {
 			}
 			return ret;
 		}
+
 		return largerStack ? stack : null;
+	}
+
+	public static ItemStack consumeItem(ItemStack stack, EntityPlayer player) {
+
+		if (stack == null) {
+			return null;
+		}
+
+		Item item = stack.getItem();
+		boolean largerStack = stack.stackSize > 1;
+		// vanilla only alters the stack passed to hasContainerItem/etc. when the size is >1
+
+		if (largerStack) {
+			stack.stackSize -= 1;
+		}
+		if (item.hasContainerItem(stack)) {
+			ItemStack ret = item.getContainerItem(stack);
+
+			if (ret == null || (ret.isItemStackDamageable() && ret.getItemDamage() > ret.getMaxDamage())) {
+				ret = null;
+			}
+			if (stack.stackSize < 1) {
+				return ret;
+			}
+			if (ret != null && !player.inventory.addItemStackToInventory(ret)) {
+				player.func_146097_a(ret, false, true);
+			}
+		}
+
+		return largerStack ? stack : null;
+	}
+
+	public static boolean disposePlayerItem(ItemStack stack, ItemStack dropStack, EntityPlayer entityplayer, boolean allowDrop) {
+
+		return disposePlayerItem(stack, dropStack, entityplayer, allowDrop, true);
+	}
+
+	public static boolean disposePlayerItem(ItemStack stack, ItemStack dropStack, EntityPlayer entityplayer, boolean allowDrop, boolean allowReplace) {
+
+		if (entityplayer == null || entityplayer.capabilities.isCreativeMode) {
+			return true;
+		}
+		if (allowReplace && stack.stackSize <= 1) {
+			entityplayer.inventory.setInventorySlotContents(entityplayer.inventory.currentItem, null);
+			entityplayer.inventory.addItemStackToInventory(dropStack);
+			return true;
+		} else if (allowDrop) {
+			stack.stackSize -= 1;
+			if (dropStack != null && !entityplayer.inventory.addItemStackToInventory(dropStack)) {
+				entityplayer.func_146097_a(dropStack, false, true);
+			}
+			return true;
+		}
+		return false;
 	}
 
 	/**
@@ -343,7 +402,7 @@ public final class ItemHelper {
 		return new ItemStack(t, s, WILDCARD_VALUE);
 	}
 
-	/* CREATING *OreRecipes */
+	/* CREATING OreRecipes */
 	public static final IRecipe ShapedRecipe(Block result, Object... recipe) {
 
 		return new ShapedOreRecipe(result, recipe);
@@ -646,6 +705,7 @@ public final class ItemHelper {
 
 		return addSmallStorageRecipe(one, four_ore) && addSmallReverseStorageRecipe(four, one_ore);
 	}
+
 	// }
 
 	// SMELTING{
@@ -844,6 +904,37 @@ public final class ItemHelper {
 		return empowerableItem.setEmpoweredState(equipped, !empowerableItem.isEmpowered(equipped));
 	}
 
+	/* MULTIMODE ITEM HELPERS */
+	public static boolean isPlayerHoldingMultiModeItem(EntityPlayer player) {
+
+		Item equipped = player.getCurrentEquippedItem() != null ? player.getCurrentEquippedItem().getItem() : null;
+		return equipped instanceof IMultiModeItem;
+	}
+
+	public static boolean incrHeldMultiModeItemState(EntityPlayer player) {
+
+		ItemStack equipped = player.getCurrentEquippedItem();
+		IMultiModeItem multiModeItem = (IMultiModeItem) equipped.getItem();
+
+		return multiModeItem.incrMode(equipped);
+	}
+
+	public static boolean decrHeldMultiModeItemState(EntityPlayer player) {
+
+		ItemStack equipped = player.getCurrentEquippedItem();
+		IMultiModeItem multiModeItem = (IMultiModeItem) equipped.getItem();
+
+		return multiModeItem.incrMode(equipped);
+	}
+
+	public static boolean setHeldMultiModeItemState(EntityPlayer player, int mode) {
+
+		ItemStack equipped = player.getCurrentEquippedItem();
+		IMultiModeItem multiModeItem = (IMultiModeItem) equipped.getItem();
+
+		return multiModeItem.setMode(equipped, mode);
+	}
+
 	/**
 	 * Determine if a player is holding a registered Fluid Container.
 	 */
@@ -874,13 +965,10 @@ public final class ItemHelper {
 
 	public static boolean areItemsEqual(Item itemA, Item itemB) {
 
-		if (itemA == itemB) {
-			return true;
-		}
 		if (itemA == null | itemB == null) {
 			return false;
 		}
-		return itemA.equals(itemB);
+		return itemA == itemB || itemA.equals(itemB);
 	}
 
 	public static final boolean isPlayerHoldingItem(Class<?> item, EntityPlayer player) {
@@ -904,53 +992,64 @@ public final class ItemHelper {
 		return itemsEqualWithMetadata(stack, player.getCurrentEquippedItem());
 	}
 
-	public static boolean itemsEqualWithoutMetadata(ItemStack stackA, ItemStack stackB) {
+	/**
+	 * Determine if the damage of two ItemStacks is equal. Assumes both itemstacks are of type A.
+	 */
+	public static boolean itemsDamageEqual(ItemStack stackA, ItemStack stackB) {
 
-		if (stackA == stackB) {
-			return true;
-		}
-		if (stackA == null | stackB == null) {
-			return false;
-		}
-		return stackA.getItem().equals(stackB.getItem());
+		return (!stackA.getHasSubtypes() && stackA.getMaxDamage() == 0) || (getItemDamage(stackA) == getItemDamage(stackB));
 	}
 
+	/**
+	 * Determine if two ItemStacks have the same Item.
+	 */
+	public static boolean itemsEqualWithoutMetadata(ItemStack stackA, ItemStack stackB) {
+
+		if (stackA == null || stackB == null) {
+			return false;
+		}
+		return areItemsEqual(stackA.getItem(), stackB.getItem());
+	}
+
+	/**
+	 * Determine if two ItemStacks have the same Item and NBT.
+	 */
 	public static boolean itemsEqualWithoutMetadata(ItemStack stackA, ItemStack stackB, boolean checkNBT) {
 
-		if (stackA == stackB) {
-			return true;
-		}
 		return itemsEqualWithoutMetadata(stackA, stackB) && (!checkNBT || doNBTsMatch(stackA.stackTagCompound, stackB.stackTagCompound));
 	}
 
+	/**
+	 * Determine if two ItemStacks have the same Item and damage.
+	 */
 	public static boolean itemsEqualWithMetadata(ItemStack stackA, ItemStack stackB) {
 
-		if (stackA == stackB) {
-			return true;
-		}
-		return itemsEqualWithoutMetadata(stackA, stackB) && (stackA.getHasSubtypes() == false || stackA.getItemDamage() == stackB.getItemDamage());
+		return itemsEqualWithoutMetadata(stackA, stackB) && itemsDamageEqual(stackA, stackB);
 	}
 
+	/**
+	 * Determine if two ItemStacks have the same Item, damage, and NBT.
+	 */
 	public static boolean itemsEqualWithMetadata(ItemStack stackA, ItemStack stackB, boolean checkNBT) {
 
-		if (stackA == stackB) {
-			return true;
-		}
 		return itemsEqualWithMetadata(stackA, stackB) && (!checkNBT || doNBTsMatch(stackA.stackTagCompound, stackB.stackTagCompound));
 	}
 
+	/**
+	 * Determine if two ItemStacks have the same Item, identical damage, and NBT.
+	 */
 	public static boolean itemsIdentical(ItemStack stackA, ItemStack stackB) {
 
-		if (stackA == stackB) {
-			return true;
-		}
-		return itemsEqualWithoutMetadata(stackA, stackB) && (stackA.getItemDamage() == stackB.getItemDamage())
+		return itemsEqualWithoutMetadata(stackA, stackB) && getItemDamage(stackA) == getItemDamage(stackB)
 				&& doNBTsMatch(stackA.stackTagCompound, stackB.stackTagCompound);
 	}
 
+	/**
+	 * Determine if two NBTTagCompounds are equal.
+	 */
 	public static boolean doNBTsMatch(NBTTagCompound nbtA, NBTTagCompound nbtB) {
 
-		if (nbtA == nbtB) {
+		if (nbtA == null & nbtB == null) {
 			return true;
 		}
 		if (nbtA != null & nbtB != null) {
@@ -962,8 +1061,7 @@ public final class ItemHelper {
 	public static boolean itemsEqualForCrafting(ItemStack stackA, ItemStack stackB) {
 
 		return itemsEqualWithoutMetadata(stackA, stackB)
-				&& (!stackA.getHasSubtypes() || ((stackA.getItemDamage() == OreDictionary.WILDCARD_VALUE || stackB.getItemDamage() == OreDictionary.WILDCARD_VALUE) || stackB
-						.getItemDamage() == stackA.getItemDamage()));
+				&& (!stackA.getHasSubtypes() || ((getItemDamage(stackA) == OreDictionary.WILDCARD_VALUE || getItemDamage(stackB) == OreDictionary.WILDCARD_VALUE) || getItemDamage(stackB) == getItemDamage(stackA)));
 	}
 
 	public static boolean craftingEquivalent(ItemStack checked, ItemStack source, String oreDict, ItemStack output) {

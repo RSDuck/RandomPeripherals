@@ -7,14 +7,18 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.command.CommandBase;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.IWorldAccess;
 import net.minecraftforge.client.event.TextureStitchEvent.Post;
 import net.minecraftforge.client.event.TextureStitchEvent.Pre;
 import me.kemal.randomp.RandomPeripheral;
 import me.kemal.randomp.client.renderer.RendererHologramProjector;
+import me.kemal.randomp.client.renderer.TileHologramSpecialRenderer;
 import me.kemal.randomp.common.CommonProxy;
+import me.kemal.randomp.te.TileHologram;
 import me.kemal.randomp.te.TileHologramProjector;
 
 public class ClientProxy extends CommonProxy {
@@ -32,14 +36,16 @@ public class ClientProxy extends CommonProxy {
 			IconRegistry.addIcon("IconButton", "cofh:icons/Icon_Button", event.map);
 		}
 	}
-	
+
 	@Override
+	@SideOnly(Side.CLIENT)
 	public void registerRenderer() {
-		RenderingRegistry.
-		
+		ClientRegistry.bindTileEntitySpecialRenderer(TileHologram.class, new TileHologramSpecialRenderer());
 	}
-	
+
 	@Override
+	@SideOnly(Side.CLIENT)
+	@SubscribeEvent
 	public void getTextureAtlas(Post event) {
 		blockResLoc = event.map.locationBlocksTexture;
 		itemResLoc = event.map.locationItemsTexture;

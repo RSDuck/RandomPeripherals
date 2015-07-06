@@ -45,7 +45,6 @@ import dan200.computercraft.api.peripheral.IComputerAccess;
 import dan200.computercraft.api.peripheral.IPeripheral;
 import dan200.computercraft.api.turtle.ITurtleAccess;
 
-//TODO: DE: Mehr Unter- und Unterklassen EN: More Sub Classes
 public class TileUniversalInterface extends TileEnergyStorage implements ISidedInventory, IFluidHandler {
 	public static final int capacity = 400000;
 	public static final int fluid_capacity = 4000;
@@ -75,6 +74,8 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 				SIDE_NEUTRAL // Osten
 		};
 		tank = new FluidTank(fluid_capacity);
+		peripheral.setType("universalInterface");
+		peripheral.setDescription("The Universally Interface in an Computer controlled proxy for item, fluids and energy");
 		peripheral.AddMethod("getHeldStack", "Returns the current hold stack", new CCType[] {}, new CCType[] { new CCType(HashMap.class,
 				"An table which holds informations about the item, or nil if no item is in inventory") }, this);
 		peripheral

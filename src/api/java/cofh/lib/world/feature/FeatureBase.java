@@ -15,7 +15,18 @@ import net.minecraft.world.biome.BiomeGenBase;
 public abstract class FeatureBase implements IFeatureGenerator {
 
 	public static enum GenRestriction {
-		NONE, BLACKLIST, WHITELIST
+		NONE, BLACKLIST, WHITELIST;
+
+		public static GenRestriction get(String restriction) {
+
+			if (restriction.equalsIgnoreCase("blacklist")) {
+				return BLACKLIST;
+			}
+			if (restriction.equalsIgnoreCase("whitelist")) {
+				return WHITELIST;
+			}
+			return NONE;
+		}
 	}
 
 	public final String name;
@@ -59,6 +70,7 @@ public abstract class FeatureBase implements IFeatureGenerator {
 	}
 
 	public void setRarity(int rarity) {
+
 		this.rarity = rarity;
 	}
 

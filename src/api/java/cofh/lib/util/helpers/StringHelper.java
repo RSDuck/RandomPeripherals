@@ -62,6 +62,11 @@ public final class StringHelper {
 		return StatCollector.translateToLocal(key);
 	}
 
+	public static String getKeyName(int key) {
+
+        return key < 0 ? StatCollector.translateToLocalFormatted("key.mouseButton", key + 101): Keyboard.getKeyName(key);
+    }
+
 	public static String getFluidName(FluidStack stack) {
 
 		Fluid fluid = stack.getFluid();
@@ -137,9 +142,14 @@ public final class StringHelper {
 		return BRIGHT_GREEN + localize(key) + END;
 	}
 
+	public static String getNoticeText(String key) {
+
+		return ORANGE + localize(key) + END;
+	}
+
 	public static String getFlavorText(String key) {
 
-		return WHITE + ITALIC + localize(key) + END;
+		return LIGHT_GRAY + localize(key) + END;
 	}
 
 	public static String getRarity(int level) {
@@ -171,9 +181,14 @@ public final class StringHelper {
 		return localize("info.cofh.tutorial.tabConfiguration.0");
 	}
 
-	public static String tutorialTabOperation() {
+	public static String tutorialTabConfigurationEnergy() {
 
 		return localize("info.cofh.tutorial.tabConfiguration.1");
+	}
+
+	public static String tutorialTabConfigurationOperation() {
+
+		return localize("info.cofh.tutorial.tabConfiguration.2");
 	}
 
 	public static String tutorialTabRedstone() {

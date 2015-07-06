@@ -11,7 +11,9 @@ import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.init.Blocks;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.IIcon;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
@@ -57,11 +59,12 @@ public class BlockHologramProjector extends Block implements ITileEntityProvider
 		return new TileHologramProjector();
 	}
 
-	@Override
-	@SideOnly(Side.CLIENT)
-	public int getRenderType() {
-		return RendererHologramProjector.id;
-	}
+	/*
+	 * @Override
+	 * 
+	 * @SideOnly(Side.CLIENT) public int getRenderType() { return
+	 * RendererHologramProjector.id; }
+	 */
 
 	@Override
 	@SideOnly(Side.CLIENT)
@@ -74,10 +77,27 @@ public class BlockHologramProjector extends Block implements ITileEntityProvider
 	public boolean renderAsNormalBlock() {
 		return false;
 	}
-	
+
 	@Override
 	public int getLightValue() {
 		return 12;
 	}
 
+	@Override
+	public void onBlockAdded(World world, int x, int y, int z) {
+		if (!world.isRemote) {
+			RandomPeripheral.logger.info("Added Hologram above projector");
+			world.setBlock(x, y + 1, z, RandomPeripheral.blockHologram, 0, 1 | 2);
+			world.markBlockForUpdate(x, y + 1, z);
+			world.markBlockRangeForRenderUpdate(x, y + 1, z, 1, 1, 1);
+		}
+	}
+
+	@Override
+	public void onBlockPreDestroy(World world, int x, int y, int z, int oldMeta) {
+		// if (!world.isRemote) {
+		world.setBlock(x, y + 1, z, Blocks.air, 0, 1 | 2);
+		world.markBlockForUpdate(x, y + 1, z);
+		// }
+	}
 }

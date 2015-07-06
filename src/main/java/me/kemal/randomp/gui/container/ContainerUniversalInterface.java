@@ -149,7 +149,7 @@ public class ContainerUniversalInterface extends Container {
 			// }
 			if (te.getTank().getFluid() != null) {
 				int amount = te.getTank().getFluid().amount;
-				int fluidID = te.getTank().getFluid().fluidID;
+				int fluidID = te.getTank().getFluid().getFluidID();
 				// if (lastFluidAmount != amount) {
 				icrafting.sendProgressBarUpdate(this, 1, amount);
 				icrafting.sendProgressBarUpdate(this, 2, fluidID);

@@ -1,5 +1,7 @@
 package cofh.lib.world.feature;
 
+import static cofh.lib.world.WorldGenMinableCluster.canGenerateInBlock;
+
 import cofh.lib.util.WeightedRandomBlock;
 import cofh.lib.util.helpers.BlockHelper;
 
@@ -14,15 +16,15 @@ public class FeatureGenTopBlock extends FeatureBase {
 
 	final WorldGenerator worldGen;
 	final int count;
-	final List<WeightedRandomBlock> matList;
+	final WeightedRandomBlock[] matList;
 
-	public FeatureGenTopBlock(String name, WorldGenerator worldGen, List<WeightedRandomBlock> matList, int count, GenRestriction biomeRes,
-			boolean regen, GenRestriction dimRes) {
+	public FeatureGenTopBlock(String name, WorldGenerator worldGen, List<WeightedRandomBlock> matList, int count, GenRestriction biomeRes, boolean regen,
+			GenRestriction dimRes) {
 
 		super(name, biomeRes, regen, dimRes);
 		this.worldGen = worldGen;
 		this.count = count;
-		this.matList = matList;
+		this.matList = matList.toArray(new WeightedRandomBlock[matList.size()]);
 	}
 
 	@Override
@@ -35,18 +37,17 @@ public class FeatureGenTopBlock extends FeatureBase {
 		for (int i = 0; i < count; i++) {
 			int x = blockX + random.nextInt(16);
 			int z = blockZ + random.nextInt(16);
-			if (!canGenerateInBiome(world, x, z, random))
+			if (!canGenerateInBiome(world, x, z, random)) {
 				continue;
+			}
 
 			int y = BlockHelper.getTopBlockY(world, x, z);
 			l: {
 				Block block = world.getBlock(x, y, z);
 				if (!block.isAir(world, x, y, z)) {
 
-					for (WeightedRandomBlock mat : matList) {
-						if (block.isReplaceableOreGen(world, x, y, z, mat.block)) {
-							break l;
-						}
+					if (canGenerateInBlock(world, x, y, z, matList)) {
+						break l;
 					}
 				}
 				continue;

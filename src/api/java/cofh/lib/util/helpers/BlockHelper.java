@@ -153,7 +153,7 @@ public final class BlockHelper {
 
 		if (x * x + y * y > degreeCenter * degreeCenter) {
 
-			int a = (int) ((Math.atan2(x,  y) + Math.PI) * 4 / Math.PI);
+			int a = (int) ((Math.atan2(x, y) + Math.PI) * 4 / Math.PI);
 			a = ++a & 7;
 			switch (a >> 1) {
 			case 0:
@@ -192,12 +192,12 @@ public final class BlockHelper {
 
 		Block block;
 		do {
-			if (--y <= 0) {
+			if (--y < 0) {
 				break;
 			}
 			block = world.getBlock(x, y, z);
-		} while (block.isAir(world, x, y, z) || block.isReplaceable(world, x, y, z) || block.isLeaves(world, x, y, z)
-				|| block.isFoliage(world, x, y, z) || block.canBeReplacedByLeaves(world, x, y, z));
+		} while (block.isAir(world, x, y, z) || block.isReplaceable(world, x, y, z) || block.isLeaves(world, x, y, z) || block.isFoliage(world, x, y, z)
+				|| block.canBeReplacedByLeaves(world, x, y, z));
 		return y;
 	}
 
@@ -207,7 +207,7 @@ public final class BlockHelper {
 
 		Block block;
 		do {
-			if (--y <= 0) {
+			if (--y < 0) {
 				break;
 			}
 			block = world.getBlock(x, y, z);
@@ -215,18 +215,28 @@ public final class BlockHelper {
 		return y;
 	}
 
-	public static MovingObjectPosition getCurrentMovingObjectPosition(EntityPlayer player, double distance) {
+	public static MovingObjectPosition getCurrentMovingObjectPosition(EntityPlayer player, double distance, boolean fluid) {
 
 		Vec3 posVec = Vec3.createVectorHelper(player.posX, player.posY, player.posZ);
 		Vec3 lookVec = player.getLook(1);
 		posVec.yCoord += player.getEyeHeight();
 		lookVec = posVec.addVector(lookVec.xCoord * distance, lookVec.yCoord * distance, lookVec.zCoord * distance);
-		return player.worldObj.rayTraceBlocks(posVec, lookVec);
+		return player.worldObj.rayTraceBlocks(posVec, lookVec, fluid);
+	}
+
+	public static MovingObjectPosition getCurrentMovingObjectPosition(EntityPlayer player, double distance) {
+
+		return getCurrentMovingObjectPosition(player, distance, false);
+	}
+
+	public static MovingObjectPosition getCurrentMovingObjectPosition(EntityPlayer player, boolean fluid) {
+
+		return getCurrentMovingObjectPosition(player, player.capabilities.isCreativeMode ? 5.0F : 4.5F, fluid);
 	}
 
 	public static MovingObjectPosition getCurrentMovingObjectPosition(EntityPlayer player) {
 
-		return getCurrentMovingObjectPosition(player, player.capabilities.isCreativeMode ? 5.0F : 4.5F);
+		return getCurrentMovingObjectPosition(player, player.capabilities.isCreativeMode ? 5.0F : 4.5F, false);
 	}
 
 	public static int getCurrentMousedOverSide(EntityPlayer player) {
@@ -292,7 +302,10 @@ public final class BlockHelper {
 	/* Safe Tile Entity Retrieval */
 	public static TileEntity getAdjacentTileEntity(World world, int x, int y, int z, ForgeDirection dir) {
 
-		return world == null ? null : world.getTileEntity(x + dir.offsetX, y + dir.offsetY, z + dir.offsetZ);
+		x += dir.offsetX;
+		y += dir.offsetY;
+		z += dir.offsetZ;
+		return world == null || !world.blockExists(x, y, z) ? null : world.getTileEntity(x, y, z);
 	}
 
 	public static TileEntity getAdjacentTileEntity(World world, int x, int y, int z, int side) {

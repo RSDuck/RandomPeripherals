@@ -34,8 +34,8 @@ public class RendererHologramProjector implements ISimpleBlockRenderingHandler {
 
 	}
 
-	public static void renderMiniBlock(Block block, int meta, double blockSize, int worldX, int worldY, int worldZ, int xOff,
-			int yOff, int zOff) {
+	public static void renderMiniBlock(Block block, int meta, double blockSize, int worldX, int worldY, int worldZ,
+			int xOff, int yOff, int zOff) {
 		Tessellator t = Tessellator.instance;
 
 		double minX = (double) worldX + ((double) xOff * blockSize) + (block.getBlockBoundsMinX() * blockSize);
@@ -44,7 +44,7 @@ public class RendererHologramProjector implements ISimpleBlockRenderingHandler {
 		double maxX = (block.getBlockBoundsMaxX() * blockSize) + (double) worldX + ((double) xOff * blockSize);
 		double maxY = (block.getBlockBoundsMaxY() * blockSize) + (double) worldY + ((double) yOff * blockSize);
 		double maxZ = (block.getBlockBoundsMaxZ() * blockSize) + (double) worldZ + ((double) zOff * blockSize);
-		
+
 		IIcon iconBottom = block.getIcon(0, meta);
 		IIcon iconTop = block.getIcon(1, meta);
 		IIcon iconNorth = block.getIcon(2, meta);
@@ -104,11 +104,10 @@ public class RendererHologramProjector implements ISimpleBlockRenderingHandler {
 	}
 
 	@Override
-	public boolean renderWorldBlock(IBlockAccess world, int x, int y, int z, Block block, int modelId, RenderBlocks renderer) {
+	public boolean renderWorldBlock(IBlockAccess world, int x, int y, int z, Block block, int modelId,
+			RenderBlocks renderer) {
 		if (modelId == id) {
 			// renderer.renderStandardBlock(block, x, y, z);
-
-			GL11.glEnable(GL11.GL_BLEND);
 
 			Tessellator t = Tessellator.instance;
 
@@ -119,14 +118,14 @@ public class RendererHologramProjector implements ISimpleBlockRenderingHandler {
 			t.setColorRGBA(0, 191, 255, 255);
 
 			TileHologramProjector tile = (TileHologramProjector) world.getTileEntity(x, y, z);
-
 			try {
 
 				for (int zI = 0; zI < 8; zI++) {
 					for (int yI = 0; yI < 8; yI++) {
 						for (int xI = 0; xI < 8; xI++) {
 
-							renderMiniBlock(tile.getBlockAt(xI, yI, zI), tile.getMetaAt(xI, yI, zI), 1.f / 8, x, y, z, xI, yI, zI);
+							renderMiniBlock(tile.getBlock(xI, yI, zI), tile.getBlockMetadata(xI, yI, zI), 1.f / 8, x,
+									y, z, xI, yI, zI);
 						}
 					}
 				}

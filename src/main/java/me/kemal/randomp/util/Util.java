@@ -195,7 +195,8 @@ public class Util {
 		if (te instanceof IInventory) {
 			int side = fromWhere;
 			IInventory inv = (IInventory) te;
-			int invSize = (sided) ? ((ISidedInventory) inv).getAccessibleSlotsFromSide(side).length : inv.getSizeInventory();
+			int invSize = (sided) ? ((ISidedInventory) inv).getAccessibleSlotsFromSide(side).length : inv
+					.getSizeInventory();
 			int[] slots = (sided) ? ((ISidedInventory) inv).getAccessibleSlotsFromSide(side) : new int[] {};
 			for (int i = 0; i < invSize; i++) {
 				int slot = (sided) ? slots[i] : i;
@@ -234,7 +235,8 @@ public class Util {
 		if (te instanceof IInventory) {
 			IInventory inv = (IInventory) te;
 			int side = fromWhere;
-			int invSize = (sided) ? ((ISidedInventory) inv).getAccessibleSlotsFromSide(side).length : inv.getSizeInventory();
+			int invSize = (sided) ? ((ISidedInventory) inv).getAccessibleSlotsFromSide(side).length : inv
+					.getSizeInventory();
 			int[] slots = (sided) ? ((ISidedInventory) inv).getAccessibleSlotsFromSide(side) : new int[] {};
 			for (int i = 0; i < invSize; i++) {
 				int slot = (sided) ? slots[i] : i;
@@ -255,5 +257,13 @@ public class Util {
 			}
 		}
 		return null;
+	}
+
+	public String getModIDofStr(String input) {
+		return input.substring(0, input.indexOf(":"));
+	}
+	
+	public String getBlockNameofStr(String input){
+		return input.substring(input.indexOf(":")+1, input.length());
 	}
 }

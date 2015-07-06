@@ -12,6 +12,7 @@ import cofh.api.modhelpers.ThermalExpansionHelper;
 import cofh.lib.util.ItemWrapper;
 import cofh.lib.util.helpers.FluidHelper;
 import me.kemal.randomp.block.BlockDebugPeripheral;
+import me.kemal.randomp.block.BlockHologram;
 import me.kemal.randomp.block.BlockHologramProjector;
 import me.kemal.randomp.block.BlockUniversalInterface;
 import me.kemal.randomp.common.CommonProxy;
@@ -31,14 +32,17 @@ import me.kemal.randomp.util.Util;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.CraftingManager;
+import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.event.world.BlockEvent.BreakEvent;
 import net.minecraftforge.oredict.OreDictionary;
 import cpw.mods.fml.client.event.ConfigChangedEvent;
 import cpw.mods.fml.client.registry.RenderingRegistry;
@@ -100,6 +104,7 @@ public class RandomPeripheral {
 	public static Block blockUniversalInterface;
 	public static Block blockDebugBlock;
 	public static Block blockHologramProjector;
+	public static Block blockHologram;
 
 	public static Item itemCreativeTabDummy;
 
@@ -128,6 +133,7 @@ public class RandomPeripheral {
 		blockUniversalInterface = new BlockUniversalInterface(Material.iron);
 		blockDebugBlock = new BlockDebugPeripheral(Material.piston);
 		blockHologramProjector = new BlockHologramProjector();
+		blockHologram = new BlockHologram();
 
 		itemCreativeTabDummy = new ItemCreativeTabDummy();
 	}
@@ -156,23 +162,24 @@ public class RandomPeripheral {
 				ItemStack silverIngot = OreDictionary.getOres("ingotSilver").get(0);
 				ItemStack leadGear = OreDictionary.getOres("gearLead").get(0);
 
-				GameRegistry.addRecipe(new ItemStack(blockUniversalInterface), "xyx", "yzy", "xax", 'x', invar, 'y', new ItemStack(
-						teMaterial, 1, 1), 'a', new ItemStack(teMaterial), 'z', signalumGear);
+				GameRegistry.addRecipe(new ItemStack(blockUniversalInterface), "xyx", "yzy", "xax", 'x', invar, 'y',
+						new ItemStack(teMaterial, 1, 1), 'a', new ItemStack(teMaterial), 'z', signalumGear);
 
-				GameRegistry
-						.addRecipe(new ItemStack(blockHologramProjector), " x ", "yiy", "zkz", 'x', new ItemStack(Blocks.glass), 'y',
-								silverIngot, 'i', lumiumIngot, 'z', new ItemStack(teMaterial, 1, 2), 'k', new ItemStack(
-										Items.comparator));
+				GameRegistry.addRecipe(new ItemStack(blockHologramProjector), " x ", "yiy", "zkz", 'x', new ItemStack(
+						Blocks.glass), 'y', silverIngot, 'i', lumiumIngot, 'z', new ItemStack(teMaterial, 1, 2), 'k',
+						new ItemStack(Items.comparator));
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		} else {
-			GameRegistry.addRecipe(new ItemStack(blockUniversalInterface), "axa", "zyz", "zxz", 'z', new ItemStack(Items.iron_ingot),
-					'x', new ItemStack(Items.diamond), 'y', new ItemStack(Items.redstone), 'a', new ItemStack(Items.ender_eye));
+			GameRegistry.addRecipe(new ItemStack(blockUniversalInterface), "axa", "zyz", "zxz", 'z', new ItemStack(
+					Items.iron_ingot), 'x', new ItemStack(Items.diamond), 'y', new ItemStack(Items.redstone), 'a',
+					new ItemStack(Items.ender_eye));
 
-			GameRegistry.addRecipe(new ItemStack(blockHologramProjector), " z ", "xyx", "ral", 'z', new ItemStack(Blocks.glass), 'x',
-					new ItemStack(Items.iron_ingot), 'y', new ItemStack(Blocks.glowstone), 'r', new ItemStack(Items.redstone), 'a',
-					new ItemStack(Items.comparator), 'l', new ItemStack(Blocks.redstone_torch));
+			GameRegistry.addRecipe(new ItemStack(blockHologramProjector), " z ", "xyx", "ral", 'z', new ItemStack(
+					Blocks.glass), 'x', new ItemStack(Items.iron_ingot), 'y', new ItemStack(Blocks.glowstone), 'r',
+					new ItemStack(Items.redstone), 'a', new ItemStack(Items.comparator), 'l', new ItemStack(
+							Blocks.redstone_torch));
 		}
 
 		logger.info("Random Peripheral has finished loading!");
@@ -197,12 +204,19 @@ public class RandomPeripheral {
 		}
 	}
 
+	@SubscribeEvent
+	public void blockBreak(BreakEvent event) {
+		if (event.block == blockHologram)
+			event.setCanceled(true);
+	}
+
 	private void loadConfig() {
 		inventoryTurtleUpgradeID = config.getInt("inventoryTurtleUpgrade", config.CATEGORY_GENERAL, 153, 63, 255,
 				"The ID of the Inventory Turtle Upgrade", "me.kemal.randomperipheral.idOfUpgradeInventory");
 		dispenserTurtleUpgradeID = config.getInt("dispenserTurtleUpgrade", config.CATEGORY_GENERAL, 154, 63, 255,
 				"The ID of the Dispenser Turtle Upgrade", "me.kemal.randomperipheral.idOfUpgradeDispenser");
-		tileEntitiesWithAutoRead = config.getStringList("autoWrappedPeripherals", config.CATEGORY_GENERAL, new String[] {},
+		tileEntitiesWithAutoRead = config.getStringList("autoWrappedPeripherals", config.CATEGORY_GENERAL,
+				new String[] {},
 				"If you add an block name to this list, it can be used as peripheral and you can read its NBT Data");
 		if (config.hasChanged()) {
 			config.save();
