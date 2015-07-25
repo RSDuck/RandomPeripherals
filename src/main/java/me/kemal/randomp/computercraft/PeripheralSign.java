@@ -1,6 +1,6 @@
 package me.kemal.randomp.computercraft;
 
-import me.kemal.randomp.RandomPeripheral;
+import me.kemal.randomp.RandomPeripherals;
 import me.kemal.randomp.util.CCUtils;
 import me.kemal.randomp.util.Util;
 import net.minecraft.tileentity.TileEntitySign;
@@ -38,9 +38,9 @@ public class PeripheralSign implements IPeripheral {
 			} else if (method == 1) {
 				try {
 					
-					return new Object[] { CCUtils.ArrayToLuaArray(sign.signText) };
+					return new Object[] { CCUtils.arrayToLuaArray(sign.signText) };
 				} catch (Exception e) {
-					RandomPeripheral.logger.info("An Exception ocurred: "+e.getMessage()+"");
+					RandomPeripherals.logger.info("An Exception ocurred: "+e.getMessage()+"");
 				}
 			}
 		}

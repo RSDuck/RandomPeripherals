@@ -2,10 +2,11 @@ package me.kemal.randomp.te;
 
 import java.util.Random;
 
-import me.kemal.randomp.RandomPeripheral;
+import me.kemal.randomp.RandomPeripherals;
 import me.kemal.randomp.util.CCType;
 import me.kemal.randomp.util.FunctionNotFoundException;
 import me.kemal.randomp.util.Peripheral;
+import me.kemal.randomp.util.Util;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraftforge.common.util.ForgeDirection;
@@ -23,30 +24,38 @@ import dan200.computercraft.api.turtle.ITurtleAccess;
 public class TileEnergyStorage extends TileRandomPMachine implements IEnergyHandler {
 	protected EnergyStorage storedEnergy;
 	protected Object neightborCache[];
+	protected int maxEnergyInput[];
+	protected int maxEnergyOutput[];
 
 	public TileEnergyStorage(int capacity) {
 		super("EnergyStorage");
-		storedEnergy = new EnergyStorage(capacity, 0);
+		storedEnergy = new EnergyStorage(capacity, 1000);
 		neightborCache = new Object[6];
-		peripheral
-				.AddMethod("setMaxEnergyOutput", "Sets the maximum amount of energy that goes out",
-						new CCType[] { new CCType(Double.class, "newOutput", "The new amount of maximum energy output",
-								0, 1000) }, new CCType[] {}, this);
-		peripheral
-				.AddMethod("setMaxEnergyInput", "Sets the maximum amount of energy that goes in",
-						new CCType[] { new CCType(Double.class, "newInput", "The new amount of maximum energy input",
-								0, 1000) }, new CCType[] {}, this);
+
+		maxEnergyInput = new int[6];
+		maxEnergyOutput = new int[6];
+
+		peripheral.AddMethod("setMaxEnergyOutput",
+				"Sets the maximum amount of energy that goes out on the specified side",
+				new CCType[] {
+						new CCType(Double.class, "newOutput", "The new amount of maximum energy output", 0, 1000),
+						new CCType(String.class, "The side where the maximum energy output should be changed") },
+				new CCType[] {}, this);
+		peripheral.AddMethod("setMaxEnergyInput", "Sets the maximum amount of energy that goes in",
+				new CCType[] { new CCType(Double.class, "newInput", "The new amount of maximum energy input", 0, 1000),
+						new CCType(String.class, "The side where the maximum energy input should be changed") },
+				new CCType[] {}, this);
 		peripheral.AddMethod("getMaxEnergyOutput", "Returns the maximum amount of energy that goes out",
-				new CCType[] {}, new CCType[] { new CCType(Double.class,
-						"The current maximum amount of energy that goes out") }, this);
+				new CCType[] {},
+				new CCType[] { new CCType(Double.class, "The current maximum amount of energy that goes out") }, this);
 		peripheral.AddMethod("getMaxEnergyInput", "Returns the maximum amount of energy that will goes in",
-				new CCType[] {}, new CCType[] { new CCType(Double.class,
-						"The current maximum amount of energy that comes in") }, this);
+				new CCType[] {},
+				new CCType[] { new CCType(Double.class, "The current maximum amount of energy that comes in") }, this);
 		peripheral.AddMethod("getEnergyStored", "Returns the current amount of stored energy", new CCType[] {},
 				new CCType[] { new CCType(Double.class, "The current amount of stored energy") }, this);
 		peripheral.AddMethod("getMaxEnergyStored", "Return the maximum amount of energy that can be stored",
-				new CCType[] {}, new CCType[] { new CCType(Double.class,
-						"The maximum amount of energy that can be stored") }, this);
+				new CCType[] {},
+				new CCType[] { new CCType(Double.class, "The maximum amount of energy that can be stored") }, this);
 	}
 
 	public TileEnergyStorage() {
@@ -59,11 +68,13 @@ public class TileEnergyStorage extends TileRandomPMachine implements IEnergyHand
 		switch (method) {
 		case "setMaxEnergyOutput": {
 			int arg0 = ((Number) arguments[0]).intValue();
+			int arg1 = Util.relDirToAbsDir(facing, Util.readableRelDirToRelForgeDir((String) arguments[1]));
 			storedEnergy.setMaxExtract(arg0);
 			return new Object[] {};
 		}
 		case "setMaxEnergyInput": {
 			int arg0 = ((Number) arguments[0]).intValue();
+			int arg1 = Util.relDirToAbsDir(facing, Util.readableRelDirToRelForgeDir((String) arguments[1]));
 			storedEnergy.setMaxReceive(arg0);
 			return new Object[] {};
 		}
@@ -95,16 +106,16 @@ public class TileEnergyStorage extends TileRandomPMachine implements IEnergyHand
 	public void readFromNBT(NBTTagCompound tag) {
 		super.readFromNBT(tag);
 		storedEnergy.readFromNBT(tag);
-		storedEnergy.setMaxExtract(tag.getInteger("maxEnergyExtract"));
-		storedEnergy.setMaxReceive(tag.getInteger("maxEnergyReceive"));
+		maxEnergyOutput = tag.getIntArray("maxEnergyExtract");
+		maxEnergyInput = tag.getIntArray("maxEnergyReceive");
 	}
 
 	@Override
 	public void writeToNBT(NBTTagCompound tag) {
 		super.writeToNBT(tag);
 		storedEnergy.writeToNBT(tag);
-		tag.setInteger("maxEnergyExtract", storedEnergy.getMaxExtract());
-		tag.setInteger("maxEnergyReceive", storedEnergy.getMaxReceive());
+		tag.setIntArray("maxEnergyExtract", maxEnergyOutput);
+		tag.setIntArray("maxEnergyReceive", maxEnergyInput);
 	}
 
 	@Override
@@ -125,6 +136,7 @@ public class TileEnergyStorage extends TileRandomPMachine implements IEnergyHand
 
 	@Override
 	public int extractEnergy(ForgeDirection from, int maxExtract, boolean simulate) {
+		storedEnergy.setMaxExtract(getMaxEnergyOutput(from.ordinal()));
 		return storedEnergy.extractEnergy(maxExtract, simulate);
 	}
 
@@ -145,6 +157,7 @@ public class TileEnergyStorage extends TileRandomPMachine implements IEnergyHand
 
 	@Override
 	public int receiveEnergy(ForgeDirection from, int maxReceive, boolean simulate) {
+		storedEnergy.setMaxReceive(getMaxEnergyOutput(from.ordinal()));
 		return storedEnergy.receiveEnergy(maxReceive, simulate);
 	}
 
@@ -177,6 +190,14 @@ public class TileEnergyStorage extends TileRandomPMachine implements IEnergyHand
 
 	public EnergyStorage getEnergyStorage() {
 		return storedEnergy;
+	}
+
+	public int getMaxEnergyOutput(int relSide) {
+		return maxEnergyOutput[BlockHelper.ICON_ROTATION_MAP[facing][relSide]];
+	}
+
+	public int getMaxEnergyInput(int relSide) {
+		return maxEnergyInput[BlockHelper.ICON_ROTATION_MAP[facing][relSide]];
 	}
 
 }

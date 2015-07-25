@@ -6,10 +6,10 @@ import javax.vecmath.Color3f;
 
 import org.lwjgl.util.Color;
 
-import me.kemal.randomp.RandomPeripheral;
+import me.kemal.randomp.RandomPeripherals;
 import me.kemal.randomp.client.IconRegistry;
 import me.kemal.randomp.gui.container.ContainerUniversalInterface;
-import me.kemal.randomp.te.TileUniversalInterface;
+import me.kemal.randomp.te.TileUniversalInterface_;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.renderer.texture.IIconRegister;
@@ -35,10 +35,10 @@ public class GuiUniveralInterface extends GuiBase {
 	private TabEnergyConf maxOutputTab;
 	private TabEnergyConf maxInputTab;
 
-	private TileUniversalInterface te;
+	private TileUniversalInterface_ te;
 
-	public GuiUniveralInterface(InventoryPlayer playerInv, TileUniversalInterface te) {
-		super(new ContainerUniversalInterface(playerInv, te), new ResourceLocation(RandomPeripheral.modid.toLowerCase()
+	public GuiUniveralInterface(InventoryPlayer playerInv, TileUniversalInterface_ te) {
+		super(new ContainerUniversalInterface(playerInv, te), new ResourceLocation(RandomPeripherals.modid.toLowerCase()
 				+ ":textures/gui/univeralInterface.png"));
 		this.te = te;
 	}
@@ -54,8 +54,8 @@ public class GuiUniveralInterface extends GuiBase {
 		this.elements.add(energyDisplay);
 		this.elements.add(fluidDisplay);
 		this.tabs.add(maxEnergyOutputTab);
-		this.tabs.add(maxOutputTab);
-		this.tabs.add(maxInputTab);
+		//this.tabs.add(maxOutputTab);
+		//this.tabs.add(maxInputTab);
 		
 	}
 

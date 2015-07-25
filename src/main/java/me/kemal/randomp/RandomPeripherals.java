@@ -26,7 +26,7 @@ import me.kemal.randomp.item.ItemCreativeTabDummy;
 import me.kemal.randomp.net.RandomPMSG;
 import me.kemal.randomp.net.ServerPacketHandler;
 import me.kemal.randomp.te.TileRandomPMachine;
-import me.kemal.randomp.te.TileUniversalInterface;
+import me.kemal.randomp.te.TileUniversalInterface_;
 import me.kemal.randomp.util.CCUtils;
 import me.kemal.randomp.util.Util;
 import net.minecraft.block.Block;
@@ -77,8 +77,8 @@ import org.apache.logging.log4j.Logger;
 
 import com.google.gson.JsonParser;
 
-@Mod(modid = RandomPeripheral.modid)
-public class RandomPeripheral {
+@Mod(modid = RandomPeripherals.modid)
+public class RandomPeripherals {
 	public static final String modid = "RandomPeripherals";
 
 	@SidedProxy(clientSide = "me.kemal.randomp.client.ClientProxy", serverSide = "me.kemal.randomp.common.CommonProxy")
@@ -88,7 +88,7 @@ public class RandomPeripheral {
 	public static SimpleNetworkWrapper networkWrapper;
 
 	@Instance
-	public static RandomPeripheral instance;
+	public static RandomPeripherals instance;
 
 	@SideOnly(Side.CLIENT)
 	public static CreativeTabs tabRandomP = new CreativeTabs("tabRandomP") {
@@ -165,21 +165,21 @@ public class RandomPeripheral {
 				GameRegistry.addRecipe(new ItemStack(blockUniversalInterface), "xyx", "yzy", "xax", 'x', invar, 'y',
 						new ItemStack(teMaterial, 1, 1), 'a', new ItemStack(teMaterial), 'z', signalumGear);
 
-				GameRegistry.addRecipe(new ItemStack(blockHologramProjector), " x ", "yiy", "zkz", 'x', new ItemStack(
-						Blocks.glass), 'y', silverIngot, 'i', lumiumIngot, 'z', new ItemStack(teMaterial, 1, 2), 'k',
-						new ItemStack(Items.comparator));
+				GameRegistry.addRecipe(new ItemStack(blockHologramProjector), " x ", "yiy", "zkz", 'x',
+						new ItemStack(Blocks.glass), 'y', silverIngot, 'i', lumiumIngot, 'z',
+						new ItemStack(teMaterial, 1, 2), 'k', new ItemStack(Items.comparator));
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		} else {
-			GameRegistry.addRecipe(new ItemStack(blockUniversalInterface), "axa", "zyz", "zxz", 'z', new ItemStack(
-					Items.iron_ingot), 'x', new ItemStack(Items.diamond), 'y', new ItemStack(Items.redstone), 'a',
-					new ItemStack(Items.ender_eye));
+			GameRegistry.addRecipe(new ItemStack(blockUniversalInterface), "axa", "zyz", "zxz", 'z',
+					new ItemStack(Items.iron_ingot), 'x', new ItemStack(Items.diamond), 'y',
+					new ItemStack(Items.redstone), 'a', new ItemStack(Items.ender_eye));
 
-			GameRegistry.addRecipe(new ItemStack(blockHologramProjector), " z ", "xyx", "ral", 'z', new ItemStack(
-					Blocks.glass), 'x', new ItemStack(Items.iron_ingot), 'y', new ItemStack(Blocks.glowstone), 'r',
-					new ItemStack(Items.redstone), 'a', new ItemStack(Items.comparator), 'l', new ItemStack(
-							Blocks.redstone_torch));
+			GameRegistry.addRecipe(new ItemStack(blockHologramProjector), " z ", "xyx", "ral", 'z',
+					new ItemStack(Blocks.glass), 'x', new ItemStack(Items.iron_ingot), 'y',
+					new ItemStack(Blocks.glowstone), 'r', new ItemStack(Items.redstone), 'a',
+					new ItemStack(Items.comparator), 'l', new ItemStack(Blocks.redstone_torch));
 		}
 
 		logger.info("Random Peripheral has finished loading!");
@@ -191,23 +191,8 @@ public class RandomPeripheral {
 	}
 
 	@SubscribeEvent
-	public void playerInteract(PlayerInteractEvent event) {
-		if (event.world.getTileEntity(event.x, event.y, event.z) instanceof TileRandomPMachine
-				&& event.action == event.action.RIGHT_CLICK_BLOCK) {
-			if (event.entityPlayer.inventory.getCurrentItem() != null) {
-				Item usedItem = event.entityPlayer.inventory.getCurrentItem().getItem();
-				if (usedItem instanceof IToolHammer) {
-					// logger.info("Rotate Block!");
-					((TileUniversalInterface) event.world.getTileEntity(event.x, event.y, event.z)).rotateBlock();
-				}
-			}
-		}
-	}
-
-	@SubscribeEvent
 	public void blockBreak(BreakEvent event) {
-		if (event.block == blockHologram)
-			event.setCanceled(true);
+		event.setCanceled(event.block == blockHologram ? true : false);
 	}
 
 	private void loadConfig() {
@@ -216,7 +201,7 @@ public class RandomPeripheral {
 		dispenserTurtleUpgradeID = config.getInt("dispenserTurtleUpgrade", config.CATEGORY_GENERAL, 154, 63, 255,
 				"The ID of the Dispenser Turtle Upgrade", "me.kemal.randomperipheral.idOfUpgradeDispenser");
 		tileEntitiesWithAutoRead = config.getStringList("autoWrappedPeripherals", config.CATEGORY_GENERAL,
-				new String[] {},
+				new String[] { "minecraft:furnace" },
 				"If you add an block name to this list, it can be used as peripheral and you can read its NBT Data");
 		if (config.hasChanged()) {
 			config.save();

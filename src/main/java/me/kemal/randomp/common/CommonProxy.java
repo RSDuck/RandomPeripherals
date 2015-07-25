@@ -5,7 +5,7 @@ import net.minecraftforge.client.event.TextureStitchEvent;
 import me.kemal.randomp.te.TileEnergyStorage;
 import me.kemal.randomp.te.TileHologram;
 import me.kemal.randomp.te.TileHologramProjector;
-import me.kemal.randomp.te.TileUniversalInterface;
+import me.kemal.randomp.te.TileUniversalInterface_;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.relauncher.Side;
@@ -18,7 +18,7 @@ public class CommonProxy {
 	public ResourceLocation itemResLoc;
 
 	public void registerTileEntities() {
-		GameRegistry.registerTileEntity(TileUniversalInterface.class, "TEUniversalInterface");
+		GameRegistry.registerTileEntity(TileUniversalInterface_.class, "TEUniversalInterface");
 		GameRegistry.registerTileEntity(TileEnergyStorage.class, "TEEnergyStorage");
 		GameRegistry.registerTileEntity(TileHologramProjector.class, "TEHologramProjector");
 		GameRegistry.registerTileEntity(TileHologram.class, "TEHologram");

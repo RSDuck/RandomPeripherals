@@ -82,4 +82,12 @@ public class RandomPTurtleUpgrade implements ITurtleUpgrade, IExtendablePeripher
 		return null;
 	}
 
+	@Override
+	public void attachToComputer(IComputerAccess computer) {
+	}
+
+	@Override
+	public void detachFromComputer(IComputerAccess computer) {
+	}
+
 }

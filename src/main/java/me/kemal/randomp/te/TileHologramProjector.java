@@ -1,5 +1,6 @@
 package me.kemal.randomp.te;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
@@ -9,7 +10,7 @@ import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.lua.LuaException;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 import dan200.computercraft.api.turtle.ITurtleAccess;
-import me.kemal.randomp.RandomPeripheral;
+import me.kemal.randomp.RandomPeripherals;
 import me.kemal.randomp.util.CCType;
 import me.kemal.randomp.util.CCUtils;
 import me.kemal.randomp.util.FunctionNotFoundException;
@@ -17,6 +18,7 @@ import me.kemal.randomp.util.IExtendablePeripheral;
 import me.kemal.randomp.util.Peripheral;
 import me.kemal.randomp.util.Util;
 import net.minecraft.block.Block;
+import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -37,119 +39,91 @@ public class TileHologramProjector extends TileEntity implements IExtendablePeri
 	public static final int hologramHeight = 8;
 	public static final int hologramDepth = 8;
 
+	// HologramWorldProxy worldProxy;
+	IComputerAccess attachedComputer;
 	String[] hologram;
 	byte[] hologramMeta;
+	// ArrayList<TileEntity> tileentities;
 	int xOffset;
 	int yOffset;
 	int zOffset;
+	boolean dirty;
 	protected Peripheral peripheral;
 
 	public TileHologramProjector() {
+		dirty = false;
 		peripheral = new Peripheral();
 		peripheral.setType("hologram_projector");
-		peripheral
-				.setDescription("The Hologram Projector projects an field of blocks into the air. Note: all functions that take coordinates are zerobased while Lua arrays(and in most cases loops) are onebased(to fill an complete row don't use for 1,8 do instead use for 0,7)");
+		peripheral.setDescription(
+				"The Hologram Projector projects an field of blocks into the air. Note: all functions that take coordinates are zerobased while Lua arrays(and in most cases loops) are onebased(to fill an complete row don't use for 1,8 do instead use for 0,7)");
 		hologram = new String[hologramHeight * (hologramWidth * hologramDepth)];
 		hologramMeta = new byte[hologramHeight * (hologramWidth * hologramDepth)];
 		for (int i = 0; i < hologram.length; i++)
 			hologram[i] = Block.blockRegistry.getNameForObject(Blocks.air);
 		for (int i = 0; i < hologramMeta.length; i++)
 			hologramMeta[i] = 0;
+
+		// tileentities = new ArrayList<TileEntity>();
+		// worldProxy = new HologramWorldProxy(this);
+
 		hologram[0] = Block.blockRegistry.getNameForObject(Blocks.glowstone);
 		hologram[(hologramHeight * (hologramWidth * hologramDepth)) - 1] = Block.blockRegistry
 				.getNameForObject(Blocks.diamond_ore);
 
-		peripheral
-				.AddMethod(
-						"setBlock",
-						"Sets the projected block at the specific coordinates",
-						new CCType[] {
-								new CCType(Double.class, "x",
-										"The X-Coordinate of the block, has to be more than 0 and less than 8", 0, 7),
-								new CCType(Double.class, "y",
-										"The Y-Coordinate of the block, has to be more than 0 and less than 8", 0, 7),
-								new CCType(Double.class, "z",
-										"The Z-Coordinate of the block, has to be more than 0 and less than 8", 0, 7),
-								new CCType(String.class, "block",
-										"The unlocalized name of the block to which it should be set. It's the same name you use in commands") },
-						new CCType[] { new CCType(Boolean.class, "True if the block was sucsessfull set") }, this);
-		peripheral
-				.AddMethod(
-						"getBlock",
-						"Returns the id name of the projected block at the specific coordinates",
-						new CCType[] {
-								new CCType(
-										Double.class,
-										"x",
-										"The X-Coordinate of the block, you want to get, has to be more than 0 and less than 8",
-										0, 7),
-								new CCType(
-										Double.class,
-										"y",
-										"The Y-Coordinate of the block, you want to get, has to be more than 0 and less than 8",
-										0, 7),
-								new CCType(
-										Double.class,
-										"z",
-										"The Z-Coordinate of the block, you want to get, has to be more than 0 and less than 8",
-										0, 7) }, new CCType[] { new CCType(String.class, "The id name of the block") },
-						this);
-		peripheral
-				.AddMethod(
-						"setMeta",
-						"Sets the meta data of an projected block at the specified coordinates",
-						new CCType[] {
-								new CCType(
-										Double.class,
-										"x",
-										"The X-Coordinate of the block, you want to set, has to be more than 0 and less than 8",
-										0, 7),
-								new CCType(
-										Double.class,
-										"y",
-										"The Y-Coordinate of the block, you want to set, has to be more than 0 and less than 8",
-										0, 7),
-								new CCType(
-										Double.class,
-										"z",
-										"The Z-Coordinate of the block, you want to set, has to be more than 0 and less than 8",
-										0, 7),
-								new CCType(Double.class, "meta", "The new meta data of the block", 0, 16) },
-						new CCType[] {}, this);
-		peripheral
-				.AddMethod(
-						"getMeta",
-						"Returns the meta data of the projected block at the specific coordinates",
-						new CCType[] {
-								new CCType(
-										Double.class,
-										"x",
-										"The X-Coordinate of the block, you want to get the meta data, has to be more than 0 and less than 8",
-										0, 7),
-								new CCType(
-										Double.class,
-										"y",
-										"The Y-Coordinate of the block, you want to get the meta data, has to be more than 0 and less than 8",
-										0, 7),
-								new CCType(
-										Double.class,
-										"z",
-										"The Z-Coordinate of the block, you want to get the meta data, has to be more than 0 and less than 8",
-										0, 7) },
-						new CCType[] { new CCType(Double.class, "The meta data of the block") }, this);
-		peripheral
-				.AddMethod(
-						"draw",
-						"Uses the given table to set the blocks of the hologram",
-						new CCType[] { new CCType(
-								HashMap.class,
-								"hologram",
-								"An table which contains the following content: {{name=The Block ID, [meta=The Block Meta Data], x=The X-Coordinate, y=The Y-Coordinate, z=The Z-Coordinate}, ...}") },
-						new CCType[] {}, this);
-		peripheral.AddMethod("clear", "Clears the whole hologram with the given block and metadata", new CCType[] {
-				new CCType(String.class, "block", "The block to that all blocks should be converted"),
-				new CCType(Double.class, "meta", "The metadata that should be set on all blocks") }, new CCType[] {},
-				this);
+		peripheral.AddMethod("setBlock", "Sets the projected block at the specific coordinates",
+				new CCType[] {
+						new CCType(Double.class, "x",
+								"The X-Coordinate of the block, has to be more than 0 and less than 8", 0, 7),
+						new CCType(Double.class, "y",
+								"The Y-Coordinate of the block, has to be more than 0 and less than 8", 0, 7),
+				new CCType(Double.class, "z", "The Z-Coordinate of the block, has to be more than 0 and less than 8", 0,
+						7),
+				new CCType(String.class, "block",
+						"The internal name of the block to which it should be set. It's the same name you use in commands"), },
+				new CCType[] { new CCType(Boolean.class, "True if the block was sucsessfull set") }, this);
+		peripheral.AddMethod("getBlock", "Returns the id name of the projected block at the specific coordinates",
+				new CCType[] { new CCType(Double.class, "x",
+						"The X-Coordinate of the block, you want to get, has to be more than 0 and less than 8", 0, 7),
+						new CCType(Double.class, "y",
+								"The Y-Coordinate of the block, you want to get, has to be more than 0 and less than 8",
+								0, 7),
+						new CCType(Double.class, "z",
+								"The Z-Coordinate of the block, you want to get, has to be more than 0 and less than 8",
+								0, 7) },
+				new CCType[] { new CCType(String.class, "The id name of the block") }, this);
+
+		peripheral.AddMethod("setMeta", "Sets the meta data of an projected block at the specified coordinates",
+				new CCType[] { new CCType(Double.class, "x",
+						"The X-Coordinate of the block, you want to set, has to be more than 0 and less than 8", 0, 7),
+						new CCType(Double.class, "y",
+								"The Y-Coordinate of the block, you want to set, has to be more than 0 and less than 8",
+								0, 7),
+						new CCType(Double.class, "z",
+								"The Z-Coordinate of the block, you want to set, has to be more than 0 and less than 8",
+								0, 7),
+						new CCType(Double.class, "meta", "The new meta data of the block", 0, 16) },
+				new CCType[] {}, this);
+
+		peripheral.AddMethod("getMeta", "Returns the meta data of the projected block at the specific coordinates",
+				new CCType[] {
+						new CCType(Double.class, "x",
+								"The X-Coordinate of the block, you want to get the meta data, has to be more than 0 and less than 8",
+								0, 7),
+						new CCType(Double.class, "y",
+								"The Y-Coordinate of the block, you want to get the meta data, has to be more than 0 and less than 8",
+								0, 7),
+						new CCType(Double.class, "z",
+								"The Z-Coordinate of the block, you want to get the meta data, has to be more than 0 and less than 8",
+								0, 7) },
+				new CCType[] { new CCType(Double.class, "The meta data of the block") }, this);
+		peripheral.AddMethod("draw", "Uses the given table to set the blocks of the hologram",
+				new CCType[] { new CCType(HashMap.class, "hologram",
+						"An table which contains the following content: {{name=The Block ID, [meta=The Block Meta Data], x=The X-Coordinate, y=The Y-Coordinate, z=The Z-Coordinate}, ...}") },
+				new CCType[] {}, this);
+		peripheral.AddMethod("clear", "Clears the whole hologram with the given block and metadata",
+				new CCType[] { new CCType(String.class, "block", "The block to that all blocks should be converted"),
+						new CCType(Double.class, "meta", "The metadata that should be set on all blocks") },
+				new CCType[] {}, this);
 	}
 
 	@Override
@@ -187,19 +161,39 @@ public class TileHologramProjector extends TileEntity implements IExtendablePeri
 			i++;
 		}
 		hologramMeta = tag.getByteArray("hologramMeta");
+		dirty = true;
 	}
 
-	public void setBlock(int x, int y, int z, Block block) {
+	public boolean setBlock(int x, int y, int z, Block block) {
 		if (x >= 0 && y >= 0 && z >= 0 && x < hologramWidth && y < hologramHeight && z < hologramDepth) {
 			String blockName = Block.blockRegistry.getNameForObject(block);
-			hologram[((z * hologramWidth) + x) + y * (hologramWidth * hologramDepth)] = (blockName == null) ? "minecraft:air"
-					: blockName;
+			hologram[((z * hologramWidth) + x) + y * (hologramWidth * hologramDepth)] = (blockName == null)
+					? "minecraft:air" : blockName;
+			dirty = true;
+			/*
+			 * for (int i = 0; i < tileentities.size(); i++) { if
+			 * (tileentities.get(i).xCoord == x && tileentities.get(i).yCoord ==
+			 * z && tileentities.get(i).zCoord == z) { tileentities.remove(i);
+			 * break; } }
+			 */
+			return true;
 		}
+		return false;
 	}
 
-	public void setBlockMetaData(int x, int y, int z, byte meta) {
-		if (x >= 0 && y >= 0 && z >= 0 && x < hologramWidth && y < hologramHeight && z < hologramDepth)
+	public boolean setBlockMetaData(int x, int y, int z, byte meta) {
+		if (x >= 0 && y >= 0 && z >= 0 && x < hologramWidth && y < hologramHeight && z < hologramDepth) {
 			hologramMeta[((z * hologramWidth) + x) + y * (hologramWidth * hologramDepth)] = meta;
+			dirty = true;
+			/*
+			 * for (int i = 0; i < tileentities.size(); i++) { if
+			 * (tileentities.get(i).xCoord == x && tileentities.get(i).yCoord ==
+			 * z && tileentities.get(i).zCoord == z) { tileentities.remove(i);
+			 * break; } }
+			 */
+			return true;
+		}
+		return false;
 	}
 
 	@Override
@@ -207,7 +201,7 @@ public class TileHologramProjector extends TileEntity implements IExtendablePeri
 			ITurtleAccess turtle) throws LuaException, FunctionNotFoundException {
 		switch (method) {
 		case "setBlock": {
-			//GameRegistry.findBlock(Util.);
+			// GameRegistry.findBlock(Util.);
 			Block block = Block.getBlockFromName((String) arguments[3]);
 			int x = ((Number) arguments[0]).intValue();
 			int y = ((Number) arguments[1]).intValue();
@@ -215,7 +209,8 @@ public class TileHologramProjector extends TileEntity implements IExtendablePeri
 			if (block == null)
 				return new Object[] { false };
 			setBlock(x, y, z, block);
-			// RandomPeripheral.logger.info("Set block in hologram at holo coords X: "
+			// RandomPeripheral.logger.info("Set block in hologram at holo
+			// coords X: "
 			// + x + " Y: " + y + " Z:" + z + " to "
 			// + block.getUnlocalizedName());
 			getWorldObj().markBlockForUpdate(xCoord, yCoord, zCoord);
@@ -303,6 +298,23 @@ public class TileHologramProjector extends TileEntity implements IExtendablePeri
 
 	@Override
 	public TileEntity getTileEntity(int x, int y, int z) {
+		/*
+		 * Block block = getBlock(x, y, z); if (block instanceof
+		 * ITileEntityProvider) { ITileEntityProvider tileProvider =
+		 * (ITileEntityProvider) block; try { for (int i = 0; i <
+		 * tileentities.size(); i++) { if (tileentities.get(i).xCoord == x &&
+		 * tileentities.get(i).yCoord == z && tileentities.get(i).zCoord == z) {
+		 * // tileentities.get(i).updateEntity(); return tileentities.get(i); }
+		 * } TileEntity newTe = tileProvider.createNewTileEntity(worldProxy,
+		 * getBlockMetadata(x, y, z)); newTe.blockMetadata = getBlockMetadata(x,
+		 * y, z); newTe.blockType = getBlock(x, y, z); newTe.xCoord = x;
+		 * newTe.yCoord = y; newTe.zCoord = z; newTe.setWorldObj(worldProxy);
+		 * newTe.updateEntity(); tileentities.add(newTe); //
+		 * RandomPeripheral.logger.info("Setup"); return newTe; } catch
+		 * (Exception e) { RandomPeripheral.logger.info(
+		 * "Exception while creating or updating TileEntity");
+		 * e.printStackTrace(); } }
+		 */
 		return null;
 	}
 
@@ -352,5 +364,27 @@ public class TileHologramProjector extends TileEntity implements IExtendablePeri
 	@Override
 	public boolean isSideSolid(int x, int y, int z, ForgeDirection side, boolean _default) {
 		return getBlock(x, y, z).isSideSolid(this, x, y, z, side);
+	}
+
+	public void setDirty(boolean val) {
+		dirty = val;
+	}
+
+	@Override
+	public void attachToComputer(IComputerAccess computer) {
+		attachedComputer = computer;
+	}
+
+	@Override
+	public void detachFromComputer(IComputerAccess computer) {
+		attachedComputer = null;
+	}
+
+	public void onBlockActivated(float clickX, float clickY, float clickZ) {
+		if (attachedComputer != null) {
+			RandomPeripherals.logger.info("Clicked at: X: " + clickX + " Y: " + clickY + " Z: " + clickZ);
+			attachedComputer.queueEvent("hologramTouch", new Object[] { (int) (Math.floor(clickX) * 16.f),
+					(int) (Math.floor(clickY) * 16.f), (int) (Math.floor(clickZ) * 16.f) });
+		}
 	}
 }

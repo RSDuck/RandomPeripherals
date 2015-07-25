@@ -14,7 +14,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.IWorldAccess;
 import net.minecraftforge.client.event.TextureStitchEvent.Post;
 import net.minecraftforge.client.event.TextureStitchEvent.Pre;
-import me.kemal.randomp.RandomPeripheral;
+import me.kemal.randomp.RandomPeripherals;
 import me.kemal.randomp.client.renderer.RendererHologramProjector;
 import me.kemal.randomp.client.renderer.TileHologramSpecialRenderer;
 import me.kemal.randomp.common.CommonProxy;

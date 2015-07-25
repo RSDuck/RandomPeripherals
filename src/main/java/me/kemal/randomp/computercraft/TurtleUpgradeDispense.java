@@ -1,8 +1,8 @@
 package me.kemal.randomp.computercraft;
 
 import me.kemal.randomp.util.CCType;
-import me.kemal.randomp.util.CCUtils;
 import me.kemal.randomp.util.TurtlePeripheral;
+import me.kemal.randomp.util.Util;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockDispenser;
 import net.minecraft.block.BlockSourceImpl;
@@ -89,7 +89,7 @@ public class TurtleUpgradeDispense extends RandomPTurtleUpgrade {
 			String method, Object[] arguments, ITurtleAccess turtle)
 			throws LuaException {
 		if (method == "dispense") {
-			int dir = CCUtils.TurtleDirToForgeDir(turtle.getDirection(),
+			int dir = Util.turtleDirToAbsDir(turtle.getDirection(),
 					(String) arguments[0]);
 			if (dir != -1) {
 				return new Object[] { dispense(dir, turtle) };

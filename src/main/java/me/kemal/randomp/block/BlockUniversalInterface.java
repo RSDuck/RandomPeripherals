@@ -11,10 +11,13 @@ import cpw.mods.fml.common.event.FMLMissingMappingsEvent.Action;
 import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-import me.kemal.randomp.RandomPeripheral;
+import me.kemal.randomp.RandomPeripherals;
 import me.kemal.randomp.gui.RandomPGUIs;
+import me.kemal.randomp.net.Packets;
+import me.kemal.randomp.net.RandomPMSG;
 import me.kemal.randomp.te.TileEnergyStorage;
 import me.kemal.randomp.te.TileUniversalInterface;
+import me.kemal.randomp.te.TileUniversalInterface_;
 import me.kemal.randomp.util.Util;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockPistonBase;
@@ -41,13 +44,14 @@ import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 public class BlockUniversalInterface extends Block implements ITileEntityProvider, IDismantleable, IBlockDebug {
 	@SideOnly(Side.CLIENT)
 	private IIcon universalFace, itemFace, energyFace, fluidFace, neutralFace;
+	private IIcon universalFace_faceDir, itemFace_faceDir, energyFace_faceDir, fluidFace_faceDir, neutralFace_faceDir;
 
 	public final static String blockName = "universalInterface";
 
 	public BlockUniversalInterface(Material mat) {
 		super(mat);
 		setBlockName(blockName);
-		setCreativeTab(RandomPeripheral.tabRandomP);
+		setCreativeTab(RandomPeripherals.tabRandomP);
 		GameRegistry.registerBlock(this, blockName);
 	}
 
@@ -58,11 +62,12 @@ public class BlockUniversalInterface extends Block implements ITileEntityProvide
 
 	@Override
 	public TileEntity createNewTileEntity(World world, int meta) {
-		return new TileUniversalInterface();
+		return new TileUniversalInterface_();
 	}
 
 	@Override
-	public ArrayList<ItemStack> dismantleBlock(EntityPlayer player, World world, int x, int y, int z, boolean returnDrops) {
+	public ArrayList<ItemStack> dismantleBlock(EntityPlayer player, World world, int x, int y, int z,
+			boolean returnDrops) {
 		ArrayList<ItemStack> list = getDrops(world, x, y, z, world.getBlockMetadata(x, y, z), 0);
 		world.setBlockToAir(x, y, z);
 		if (!returnDrops)
@@ -78,30 +83,35 @@ public class BlockUniversalInterface extends Block implements ITileEntityProvide
 
 	@Override
 	public void onBlockPlacedBy(World world, int x, int y, int z, EntityLivingBase entity, ItemStack stack) {
-		if (world.getTileEntity(x, y, z) instanceof TileUniversalInterface) {
+		if (world.getTileEntity(x, y, z) instanceof TileUniversalInterface_) {
 			int rotation = BlockPistonBase.determineOrientation(world, x, y, z, entity);
-			TileUniversalInterface tile = (TileUniversalInterface) world.getTileEntity(x, y, z);
+			TileUniversalInterface_ tile = (TileUniversalInterface_) world.getTileEntity(x, y, z);
 			tile.setOutputFaceDir(rotation);
-			tile.setIOConfiguration(rotation, TileUniversalInterface.SIDE_IO);
+			tile.setIOConfiguration(rotation, TileUniversalInterface_.SIDE_IO);
 		}
 	}
 
 	@Override
 	public boolean rotateBlock(World world, int x, int y, int z, ForgeDirection axis) {
-		return true;
+		return false;
 	}
 
 	@Override
-	public boolean onBlockActivated(World world, int x, int y, int z, EntityPlayer player, int side, float clickX, float clickY,
-			float clickZ) {
+	public boolean onBlockActivated(World world, int x, int y, int z, EntityPlayer player, int side, float clickX,
+			float clickY, float clickZ) {
 		if (!player.isSneaking()) {
 			if (player.inventory.getCurrentItem() != null) {
 				if (player.inventory.getCurrentItem().getItem() instanceof IToolHammer) {
+					//RandomPeripherals.logger.info("Sending Packet " + world.isRemote + ", current facing: "
+					//		+ ((TileUniversalInterface_) world.getTileEntity(x, y, z)).getFacing());
+					if (world.isRemote)
+						Packets.sendToServer(Packets.RotateBlock, world.getTileEntity(x, y, z));
 					return true;
 				}
 			}
 			if (world.getTileEntity(x, y, z) != null) {
-				player.openGui(RandomPeripheral.instance, RandomPGUIs.GUI_UNIVERSALINTERFACE.ordinal(), world, x, y, z);
+				player.openGui(RandomPeripherals.instance, RandomPGUIs.GUI_UNIVERSALINTERFACE.ordinal(), world, x, y,
+						z);
 			}
 		}
 		return true;
@@ -115,6 +125,11 @@ public class BlockUniversalInterface extends Block implements ITileEntityProvide
 		universalFace = ir.registerIcon("randomperipherals:uiIOFace");
 		neutralFace = ir.registerIcon("randomperipherals:uiNeutralFace");
 		fluidFace = ir.registerIcon("randomperipherals:uiFluidFace");
+		itemFace_faceDir = ir.registerIcon("randomperipherals:uiItemFace_faceDir");
+		energyFace_faceDir = ir.registerIcon("randomperipherals:uiEnergyFace_faceDir");
+		universalFace_faceDir = ir.registerIcon("randomperipherals:uiIOFace_faceDir");
+		neutralFace_faceDir = ir.registerIcon("randomperipherals:uiNeutralFace_faceDir");
+		fluidFace_faceDir = ir.registerIcon("randomperipherals:uiFluidFace_faceDir");
 	}
 
 	@Override
@@ -126,21 +141,38 @@ public class BlockUniversalInterface extends Block implements ITileEntityProvide
 	@Override
 	@SideOnly(Side.CLIENT)
 	public IIcon getIcon(IBlockAccess world, int x, int y, int z, int side) {
-		if (world.getTileEntity(x, y, z) instanceof TileUniversalInterface) {
-			TileUniversalInterface te = (TileUniversalInterface) world.getTileEntity(x, y, z);
-			switch (te.getIOConfigurationWithFacing(side)) {
-			case 0:
-				return neutralFace;
-			case 1:
-				return universalFace;
-			case 2:
-				return itemFace;
-			case 3:
-				return energyFace;
-			case 4:
-				return fluidFace;
-			default:
-				return neutralFace;
+		if (world.getTileEntity(x, y, z) instanceof TileUniversalInterface_) {
+			TileUniversalInterface_ te = (TileUniversalInterface_) world.getTileEntity(x, y, z);
+			if (side != te.getFacing()) {
+				switch (te.getIOConfigurationWithFacing(side)) {
+				case 0:
+					return neutralFace;
+				case 1:
+					return universalFace;
+				case 2:
+					return itemFace;
+				case 3:
+					return energyFace;
+				case 4:
+					return fluidFace;
+				default:
+					return neutralFace;
+				}
+			} else {
+				switch (te.getIOConfigurationWithFacing(side)) {
+				case 0:
+					return neutralFace_faceDir;
+				case 1:
+					return universalFace_faceDir;
+				case 2:
+					return itemFace_faceDir;
+				case 3:
+					return energyFace_faceDir;
+				case 4:
+					return fluidFace_faceDir;
+				default:
+					return neutralFace_faceDir;
+				}
 			}
 		}
 		return neutralFace;
@@ -154,12 +186,13 @@ public class BlockUniversalInterface extends Block implements ITileEntityProvide
 
 	@Override
 	public void debugBlock(IBlockAccess world, int x, int y, int z, ForgeDirection side, EntityPlayer player) {
-		TileUniversalInterface te = (TileUniversalInterface) world.getTileEntity(x, y, z);
+		TileUniversalInterface_ te = (TileUniversalInterface_) world.getTileEntity(x, y, z);
 		if (te != null && te.getTank().getFluid() != null)
 			player.addChatMessage(new ChatComponentText("Fluid: " + te.getTank().getFluidAmount() + " Name: "
 					+ te.getTank().getFluid().getLocalizedName()));
-		player.addChatMessage(new ChatComponentText("Energy: Receive: " + te.getEnergyStorage().getMaxReceive() + " Extract: "
-				+ te.getEnergyStorage().getMaxReceive() + " Stored: " + te.getEnergyStorage().getEnergyStored()));
+		player.addChatMessage(new ChatComponentText("Energy: Receive: " + te.getEnergyStorage().getMaxReceive()
+				+ " Extract: " + te.getEnergyStorage().getMaxReceive() + " Stored: "
+				+ te.getEnergyStorage().getEnergyStored()));
 		// player.addChatMessage(new ChatComponentText(""));
 	}
 }

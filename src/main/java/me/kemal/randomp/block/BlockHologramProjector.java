@@ -3,7 +3,7 @@ package me.kemal.randomp.block;
 import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-import me.kemal.randomp.RandomPeripheral;
+import me.kemal.randomp.RandomPeripherals;
 import me.kemal.randomp.client.renderer.RendererHologramProjector;
 import me.kemal.randomp.te.TileHologramProjector;
 import net.minecraft.block.Block;
@@ -30,7 +30,7 @@ public class BlockHologramProjector extends Block implements ITileEntityProvider
 		super(Material.circuits);
 		setBlockName(blockName);
 		setBlockBounds(0.f, 0.f, 0.f, 1.f, 0.6f, 1.f);
-		setCreativeTab(RandomPeripheral.tabRandomP);
+		setCreativeTab(RandomPeripherals.tabRandomP);
 
 		GameRegistry.registerBlock(this, blockName);
 	}
@@ -86,8 +86,8 @@ public class BlockHologramProjector extends Block implements ITileEntityProvider
 	@Override
 	public void onBlockAdded(World world, int x, int y, int z) {
 		if (!world.isRemote) {
-			RandomPeripheral.logger.info("Added Hologram above projector");
-			world.setBlock(x, y + 1, z, RandomPeripheral.blockHologram, 0, 1 | 2);
+			RandomPeripherals.logger.info("Added Hologram above projector");
+			world.setBlock(x, y + 1, z, RandomPeripherals.blockHologram, 0, 1 | 2);
 			world.markBlockForUpdate(x, y + 1, z);
 			world.markBlockRangeForRenderUpdate(x, y + 1, z, 1, 1, 1);
 		}

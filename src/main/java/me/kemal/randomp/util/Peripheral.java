@@ -3,11 +3,12 @@ package me.kemal.randomp.util;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Vector;
 
-import me.kemal.randomp.RandomPeripheral;
+import me.kemal.randomp.RandomPeripherals;
 import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.lua.LuaException;
 import dan200.computercraft.api.peripheral.IComputerAccess;
@@ -23,6 +24,7 @@ public class Peripheral implements IExtendablePeripheral, IPeripheral {
 	private HashMap<String, CCType[]> functionArgs;
 	private HashMap<String, CCType[]> functionReturns;
 	private HashMap<String, IExtendablePeripheral> peripheralHolders;
+	private Vector<IExtendablePeripheral> peripheralCallbacks;
 
 	public Peripheral() {
 		functionNames = new Vector<String>();
@@ -30,13 +32,15 @@ public class Peripheral implements IExtendablePeripheral, IPeripheral {
 		functionDescriptions = new HashMap<String, String>();
 		functionReturns = new HashMap<String, CCType[]>();
 		peripheralHolders = new HashMap<String, IExtendablePeripheral>();
+		peripheralCallbacks = new Vector<IExtendablePeripheral>();
 		peripheralDescription = "";
 
-		AddMethod("help", "Get Help about an function", new CCType[] { new CCType(String.class, "functionName",
-				"the name of the function you need help with") }, new CCType[] { new CCType(HashMap.class,
-				"an help like this") }, this);
-		AddMethod("getMethods", "Lists all function of this peripheral", new CCType[] {}, new CCType[] { new CCType(
-				HashMap.class, "An table filled with the names of all function") }, this);
+		AddMethod("help", "Get Help about an function",
+				new CCType[] {
+						new CCType(String.class, "functionName", "the name of the function you need help with") },
+				new CCType[] { new CCType(HashMap.class, "an help like this") }, this);
+		AddMethod("getMethods", "Lists all function of this peripheral", new CCType[] {},
+				new CCType[] { new CCType(HashMap.class, "An table filled with the names of all function") }, this);
 		AddMethod("getDescription", "Returns an description of the peripheral", new CCType[] {},
 				new CCType[] { new CCType(String.class, "description", "An description what the peripheral does") },
 				this);
@@ -49,6 +53,9 @@ public class Peripheral implements IExtendablePeripheral, IPeripheral {
 		functionArgs.put(name, args);
 		functionReturns.put(name, returns);
 		peripheralHolders.put(name, classToCall);
+
+		if (!peripheralCallbacks.contains(classToCall))
+			peripheralCallbacks.add(classToCall);
 	}
 
 	@Override
@@ -88,8 +95,9 @@ public class Peripheral implements IExtendablePeripheral, IPeripheral {
 					i++;
 				}
 			} else
-				throw new LuaException(((arguments.length < requiredTypes.length) ? "To few arguments"
-						: "To many arguments") + " to call" + functionName);
+				throw new LuaException(
+						((arguments.length < requiredTypes.length) ? "To few arguments " : "To many arguments ")
+								+ " to call " + functionName);
 			return peripheralHolders.get(functionName).callMethod(computer, context, functionNames.get(method),
 					arguments, turtle);
 		} catch (LuaException e) {
@@ -111,10 +119,16 @@ public class Peripheral implements IExtendablePeripheral, IPeripheral {
 
 	@Override
 	public void attach(IComputerAccess computer) {
+		for (int i = 0; i < peripheralCallbacks.size(); i++) {
+			peripheralCallbacks.get(i).attachToComputer(computer);
+		}
 	}
 
 	@Override
 	public void detach(IComputerAccess computer) {
+		for (int i = 0; i < peripheralCallbacks.size(); i++) {
+			 peripheralCallbacks.get(i).detachFromComputer(computer);
+		}
 	}
 
 	@Override
@@ -134,8 +148,8 @@ public class Peripheral implements IExtendablePeripheral, IPeripheral {
 				HashMap<String, Object> functionInfo = new HashMap<String, Object>();
 				functionInfo.put("name", arg1);
 				functionInfo.put("description", functionDescriptions.get(arg1));
-				functionInfo.put("arguments", CCUtils.ArrayToLuaArray(functionArgs.get(arg1)));
-				functionInfo.put("returns", CCUtils.ArrayToLuaArray(functionReturns.get(arg1)));
+				functionInfo.put("arguments", CCUtils.arrayToLuaArray(functionArgs.get(arg1)));
+				functionInfo.put("returns", CCUtils.arrayToLuaArray(functionReturns.get(arg1)));
 				return new Object[] { functionInfo };
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -143,7 +157,7 @@ public class Peripheral implements IExtendablePeripheral, IPeripheral {
 			}
 		}
 		case "getMethods": {
-			return new Object[] { CCUtils.ArrayToLuaArray(functionNames.toArray()) };
+			return new Object[] { CCUtils.arrayToLuaArray(functionNames.toArray()) };
 		}
 		case "getDescription": {
 			return new Object[] { peripheralDescription };
@@ -155,5 +169,13 @@ public class Peripheral implements IExtendablePeripheral, IPeripheral {
 	@Override
 	public Peripheral getPeripheral() {
 		return this;
+	}
+
+	@Override
+	public void attachToComputer(IComputerAccess computer) {
+	}
+
+	@Override
+	public void detachFromComputer(IComputerAccess computer) {
 	}
 }

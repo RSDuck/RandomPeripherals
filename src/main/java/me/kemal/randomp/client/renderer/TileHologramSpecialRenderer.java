@@ -7,7 +7,7 @@ import org.lwjgl.opengl.GL11;
 import cpw.mods.fml.client.registry.RenderingRegistry;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-import me.kemal.randomp.RandomPeripheral;
+import me.kemal.randomp.RandomPeripherals;
 import me.kemal.randomp.client.ClientProxy;
 import me.kemal.randomp.te.TileHologramProjector;
 import net.minecraft.block.Block;
@@ -34,22 +34,40 @@ public class TileHologramSpecialRenderer extends TileEntitySpecialRenderer {
 
 			RenderBlocks.getInstance().blockAccess = (IBlockAccess) projector;
 
-			t.setBrightness(((TileHologramProjector) projector).getLightBrightnessForSkyBlocks(0, 0, 0, 0));
-			t.setColorOpaque(255, 255, 255);
-			for (int y1 = 0; y1 < TileHologramProjector.hologramHeight; y1++) {
-				for (int z1 = 0; z1 < TileHologramProjector.hologramDepth; z1++) {
-					for (int x1 = 0; x1 < TileHologramProjector.hologramWidth; x1++) {
-						RenderBlocks.getInstance().renderBlockByRenderType(
-								((TileHologramProjector) projector).getBlock(x1, y1, z1), x1, y1, z1);
+			Field vertexCount;
+			try {
+				vertexCount = Tessellator.class.getDeclaredField("vertexCount");
+
+				vertexCount.setAccessible(true);
+
+				t.setBrightness(((TileHologramProjector) projector).getLightBrightnessForSkyBlocks(0, 0, 0, 0));
+				t.setColorOpaque(255, 255, 255);
+				
+				int previousVertexCount = vertexCount.getInt(t);
+				
+				for (int y1 = 0; y1 < TileHologramProjector.hologramHeight; y1++) {
+					for (int z1 = 0; z1 < TileHologramProjector.hologramDepth; z1++) {
+						for (int x1 = 0; x1 < TileHologramProjector.hologramWidth; x1++) {
+							RenderBlocks.getInstance().renderBlockByRenderType(
+									((TileHologramProjector) projector).getBlock(x1, y1, z1), x1, y1, z1);
+							if (vertexCount.getInt(t) == previousVertexCount
+									&& !((TileHologramProjector) projector).isAirBlock(x1, y1, z1)) {
+								RenderBlocks.getInstance().renderStandardBlock(
+										((TileHologramProjector) projector).getBlock(x1, y1, z1), x1, y1, z1);
+								RandomPeripherals.logger.info("Fallback renderer!");
+							}
+						}
 					}
 				}
+			} catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e1) {
+				e1.printStackTrace();
 			}
 
 			RenderBlocks.getInstance().blockAccess = backupAccess;
 
 			GL11.glPushMatrix();
 
-			bindTexture(RandomPeripheral.proxy.blockResLoc);
+			bindTexture(RandomPeripherals.proxy.blockResLoc);
 
 			GL11.glColor3f(1.f, 1.f, 1.f);
 

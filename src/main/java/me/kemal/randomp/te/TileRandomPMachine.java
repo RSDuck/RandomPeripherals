@@ -18,6 +18,9 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.ISidedInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.network.NetworkManager;
+import net.minecraft.network.Packet;
+import net.minecraft.network.play.server.S35PacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.IIcon;
 
@@ -92,7 +95,7 @@ public class TileRandomPMachine extends TileEntity implements IInventory, ISided
 
 	@Override
 	public int getFacing() {
-		return 0;
+		return facing;
 	}
 
 	@Override
@@ -113,9 +116,7 @@ public class TileRandomPMachine extends TileEntity implements IInventory, ISided
 	@Override
 	public boolean rotateBlock() {
 		facing++;
-		// TODO: Amount SIDES_COUNT should not be anymore final and should be
-		// changed by classes who inherit by TileRandomPMachine
-		if (facing > SIDES_COUNT)
+		if (facing > 5)
 			facing = 0;
 		updateAllBlocks();
 		return true;
@@ -124,7 +125,8 @@ public class TileRandomPMachine extends TileEntity implements IInventory, ISided
 
 	@Override
 	public boolean setFacing(int side) {
-		return false;
+		facing = side;
+		return true;
 	}
 
 	@Override
@@ -207,5 +209,28 @@ public class TileRandomPMachine extends TileEntity implements IInventory, ISided
 	public boolean isItemValidForSlot(int slot, ItemStack stack) {
 		return false;
 	}
+
+	@Override
+	public void attachToComputer(IComputerAccess computer) {
+	}
+
+	@Override
+	public void detachFromComputer(IComputerAccess computer) {
+	}
+	
+	@Override
+	public Packet getDescriptionPacket() {
+		NBTTagCompound tag = new NBTTagCompound();
+		writeToNBT(tag);
+		return new S35PacketUpdateTileEntity(xCoord, yCoord, zCoord, 1, tag);
+	}
+
+	@Override
+	public void onDataPacket(NetworkManager net, S35PacketUpdateTileEntity pkt) {
+		super.onDataPacket(net, pkt);
+		readFromNBT(pkt.func_148857_g());
+		worldObj.markBlockForUpdate(xCoord, yCoord, zCoord);
+	}
+
 
 }

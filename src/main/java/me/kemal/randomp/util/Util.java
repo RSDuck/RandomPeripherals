@@ -9,7 +9,9 @@ import java.util.Set;
 import cofh.lib.inventory.ComparableItemStack;
 import cofh.lib.inventory.ComparableItemStackNBT;
 import cofh.lib.util.ItemWrapper;
-import me.kemal.randomp.RandomPeripheral;
+import cofh.lib.util.helpers.BlockHelper;
+import cofh.lib.util.helpers.ItemHelper;
+import me.kemal.randomp.RandomPeripherals;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.ISidedInventory;
@@ -32,11 +34,9 @@ public class Util {
 
 	public static String NBTToString(NBTBase obj) {
 		if (obj instanceof NBTPrimitive) {
-			// System.out.println("Type: Primitive");
 			return ((Double) ((NBTPrimitive) obj).func_150286_g()).toString();
 		}
 		if (obj instanceof NBTTagIntArray) {
-			// System.out.println("Type: Int Array");
 			int[] array = ((NBTTagIntArray) obj).func_150302_c();
 			String output = "[";
 			for (int i = 0; i < array.length; i++) {
@@ -45,7 +45,6 @@ public class Util {
 			return output + "]";
 		}
 		if (obj instanceof NBTTagByteArray) {
-			// System.out.println("Type: Byte Array");
 			byte[] array = ((NBTTagByteArray) obj).func_150292_c();
 			String output = "[";
 			for (int i = 0; i < array.length; i++) {
@@ -54,7 +53,6 @@ public class Util {
 			return output + "]";
 		}
 		if (obj instanceof NBTTagString) {
-			// System.out.println("Type: String");
 			return ((NBTTagString) obj).func_150285_a_();
 		}
 		if (obj instanceof NBTTagCompound) {
@@ -67,7 +65,6 @@ public class Util {
 			return output + "}";
 		}
 		if (obj instanceof NBTTagList) {
-			// System.out.println("Type: List ");
 			NBTTagList list = ((NBTTagList) obj);
 			String output = " [ ";
 			NBTTagList copy = (NBTTagList) list.copy();
@@ -127,11 +124,7 @@ public class Util {
 		return obj.toString();
 	}
 
-	public static boolean ToBool(int var) {
-		return var == 1;
-	}
-
-	public static void DropStack(World world, int x, int y, int z, ItemStack stack) {
+	public static void dropStack(World world, int x, int y, int z, ItemStack stack) {
 		EntityItem itemEntity = new EntityItem(world);
 		float xOffset = (float) (0.45f * Math.random());
 		float yOffset = (float) (0.45f * Math.random());
@@ -140,39 +133,20 @@ public class Util {
 		world.spawnEntityInWorld(itemEntity);
 	}
 
-	public static boolean IsNumber(String num) {
-		try {
-			Integer.parseInt(num);
-			return true;
-		} catch (NumberFormatException e) {
-			return false;
-		}
-	}
-
-	public static String ToString(Object string) {
-		return ((String) string);
-	}
-
-	public static int ToInt(Object number) {
-		return ((Number) number).intValue();
-	}
-
-	public static int CanStack(ItemStack stack1, ItemStack stack2) {
-		if (stack1 == null) {
-			return 64;
-		}
-		if (stack2 != null && stack2.getItem().equals(stack1.getItem())
-				&& (!stack1.getHasSubtypes() || stack1.getItemDamage() == stack2.getItemDamage())
-				&& ItemStack.areItemStackTagsEqual(stack1, stack2)) {
-			if (stack1.stackSize + stack2.stackSize > 64) {
-				return stack1.getMaxStackSize() - (((stack2.stackSize + stack1.stackSize) - 64));
-			}
-			return stack1.stackSize + stack2.stackSize;
-		} else
+	public static int canStack(ItemStack stackA, ItemStack stackB) {
+		if (stackA == null)
+			return stackB.getMaxStackSize();
+		if (stackB == null)
 			return -1;
+		if (ItemHelper.itemsEqualForCrafting(stackA, stackB) && stackA.stackSize < stackA.getMaxStackSize())
+			if (stackA.stackSize + stackB.stackSize > stackA.getMaxStackSize()) {
+				
+			}
+
+		return -1;
 	}
 
-	public static int ReadableDirToForgeDir(String dir) {
+	public static int readableDirToForgeDir(String dir) {
 		int intDir = -1;
 		final String[] dirs = new String[] { "bottom", "top", "north", "south", "west", "east" };
 		for (int i = 0; i < dirs.length; i++)
@@ -183,26 +157,26 @@ public class Util {
 		return intDir;
 	}
 
-	public static ItemStack SuckStack(TileEntity a, ItemStack stack, int whereB, int fromWhere) {
+	public static ItemStack suckStack(TileEntity a, ItemStack stack, int whereB, int fromWhere) {
 		World worldObj = a.getWorldObj();
 		int xCoord = a.xCoord;
 		int yCoord = a.yCoord;
 		int zCoord = a.zCoord;
-		int[] pos = CCUtils.DirToCoord(Util.ToInt(whereB));
+		int[] pos = Util.dirToCoord(whereB);
 		ItemStack heldStack = (stack != null) ? stack.copy() : null;
 		TileEntity te = worldObj.getTileEntity(xCoord + pos[0], yCoord + pos[1], zCoord + pos[2]);
 		boolean sided = te instanceof ISidedInventory;
 		if (te instanceof IInventory) {
 			int side = fromWhere;
 			IInventory inv = (IInventory) te;
-			int invSize = (sided) ? ((ISidedInventory) inv).getAccessibleSlotsFromSide(side).length : inv
-					.getSizeInventory();
+			int invSize = (sided) ? ((ISidedInventory) inv).getAccessibleSlotsFromSide(side).length
+					: inv.getSizeInventory();
 			int[] slots = (sided) ? ((ISidedInventory) inv).getAccessibleSlotsFromSide(side) : new int[] {};
 			for (int i = 0; i < invSize; i++) {
 				int slot = (sided) ? slots[i] : i;
 				if (inv.getStackInSlot(slot) == null)
 					continue;
-				int decr = Util.CanStack(heldStack, inv.getStackInSlot(slot));
+				int decr = Util.canStack(heldStack, inv.getStackInSlot(slot));
 				if (sided) {
 					if (!(((ISidedInventory) inv).canExtractItem(slot, inv.getStackInSlot(slot), side))) {
 						continue;
@@ -221,7 +195,8 @@ public class Util {
 		return null;
 	}
 
-	public static ItemStack PushStack(TileEntity tile, IInventory inventory, int whereB, ItemStack stack, int fromWhere) {
+	public static ItemStack pushStack(TileEntity tile, IInventory inventory, int whereB, ItemStack stack,
+			int fromWhere) {
 		World worldObj = tile.getWorldObj();
 		int xCoord = tile.xCoord;
 		int yCoord = tile.yCoord;
@@ -229,18 +204,18 @@ public class Util {
 		ItemStack heldStack = (stack != null) ? stack.copy() : null;
 		if (heldStack == null)
 			return null;
-		int[] pos = CCUtils.DirToCoord(whereB);
+		int[] pos = Util.dirToCoord(whereB);
 		TileEntity te = worldObj.getTileEntity(xCoord + pos[0], yCoord + pos[1], zCoord + pos[2]);
 		boolean sided = te instanceof ISidedInventory;
 		if (te instanceof IInventory) {
 			IInventory inv = (IInventory) te;
 			int side = fromWhere;
-			int invSize = (sided) ? ((ISidedInventory) inv).getAccessibleSlotsFromSide(side).length : inv
-					.getSizeInventory();
+			int invSize = (sided) ? ((ISidedInventory) inv).getAccessibleSlotsFromSide(side).length
+					: inv.getSizeInventory();
 			int[] slots = (sided) ? ((ISidedInventory) inv).getAccessibleSlotsFromSide(side) : new int[] {};
 			for (int i = 0; i < invSize; i++) {
 				int slot = (sided) ? slots[i] : i;
-				int stackable = Util.CanStack(inv.getStackInSlot(slot), heldStack);
+				int stackable = Util.canStack(inv.getStackInSlot(slot), heldStack);
 				if (sided) {
 					if (!((ISidedInventory) inv).canInsertItem(slot, heldStack, side)) {
 						continue;
@@ -262,8 +237,62 @@ public class Util {
 	public String getModIDofStr(String input) {
 		return input.substring(0, input.indexOf(":"));
 	}
-	
-	public String getBlockNameofStr(String input){
-		return input.substring(input.indexOf(":")+1, input.length());
+
+	public String getBlockNameofStr(String input) {
+		return input.substring(input.indexOf(":") + 1, input.length());
 	}
+
+	public static int readableRelDirToRelForgeDir(String dir) {
+		int output = -1;
+		final String[] dirs = new String[] { "bottom", "top", "back", "front", "left", "right" };
+		for (int i = 0; i < dirs.length; i++)
+			if (dirs[i].indexOf(dir) != -1) {
+				output = i;
+				break;
+			}
+		return output;
+	}
+
+	public static int turtleDirToAbsDir(int turtleDir, String dir) {
+		int output = -1;
+		final String[] dirs = new String[] { "left", "right", "back", "front", "bottom", "top" };
+		for (int i = 0; i < dirs.length; i++) {
+			if (dirs[i].indexOf(dir) != -1)
+				output = i;
+		}
+		if (output == -1)
+			return output;
+		return (int) BlockHelper.ICON_ROTATION_MAP[turtleDir][output];
+	}
+
+	public static int relDirToAbsDir(int dirA, int dirB) {
+		return (int) BlockHelper.ICON_ROTATION_MAP[dirA][dirB];
+	}
+
+	public static int[] dirToCoord(int dir) {
+		switch (dir) {
+		case 0:
+			return new int[] { 0, -1, 0 };
+		case 1:
+			return new int[] { 0, 1, 0 };
+		case 2:
+			return new int[] { 0, 0, 1 };
+		case 3:
+			return new int[] { 0, 0, -1 };
+		case 4:
+			return new int[] { -1, 0, 0 };
+		case 5:
+			return new int[] { 1, 0, 0 };
+		default:
+			return new int[] { 0, 0, 0 };
+		}
+	}
+
+	public static int whichOneMatches(String[] which, String search) {
+		int found = -1;
+		for (int i = 0; i < which.length; i++)
+			found = (which[i] == search) ? i : found;
+		return found;
+	}
+
 }

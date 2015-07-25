@@ -31,4 +31,7 @@ public interface IExtendablePeripheral {
 			FunctionNotFoundException;
 	
 	public Peripheral getPeripheral();
+	
+	public void attachToComputer(IComputerAccess computer);
+	public void detachFromComputer(IComputerAccess computer);
 }

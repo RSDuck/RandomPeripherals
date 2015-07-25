@@ -46,7 +46,7 @@ public class CommandItemName implements ICommand {
 	public void processCommand(ICommandSender sender, String[] arguments) {
 		EntityPlayer player = (EntityPlayer) sender;
 		if (player.getHeldItem() != null) {
-			sender.addChatMessage(new ChatComponentTranslation("me.kemal.randomperipheral.chat.heldItemName"));
+			//sender.addChatMessage(new ChatComponentTranslation("me.kemal.randomperipheral.chat.heldItemName"));
 			sender.addChatMessage(new ChatComponentText(StringHelper.LIGHT_BLUE
 					+ GameRegistry.findUniqueIdentifierFor(player.getHeldItem().getItem()).toString() + StringHelper.END + ":"
 					+ StringHelper.ORANGE + player.getHeldItem().getItemDamage() + StringHelper.END + " NBT: " + StringHelper.RED

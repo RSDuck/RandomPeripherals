@@ -3,12 +3,14 @@ package me.kemal.randomp.util;
 import java.util.HashMap;
 import java.util.Map;
 
-import cofh.lib.util.helpers.BlockHelper;
 import cpw.mods.fml.common.registry.GameRegistry;
 import dan200.computercraft.api.lua.LuaException;
-import me.kemal.randomp.RandomPeripheral;
+import me.kemal.randomp.RandomPeripherals;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.FluidRegistry;
+import net.minecraftforge.fluids.FluidRegistry.FluidRegisterEvent;
 
 public class CCUtils {
 
@@ -16,7 +18,7 @@ public class CCUtils {
 		if (stack == null)
 			return null;
 		HashMap<String, Object> map = new HashMap<String, Object>();
-		map.put("unlocalizedName", GameRegistry.findUniqueIdentifierFor(stack.getItem()));
+		map.put("internalName", GameRegistry.findUniqueIdentifierFor(stack.getItem()));
 		map.put("damage", stack.getItemDamage());
 		map.put("amount", stack.stackSize);
 		map.put("name", stack.getDisplayName());
@@ -25,15 +27,19 @@ public class CCUtils {
 		return map;
 	}
 
-	public static boolean IsValidNumber(Object number) {
-		return (number instanceof Double);
+	public static HashMap<String, Object> fluidStackToMap(FluidStack stack) {
+		if (stack == null)
+			return null;
+		HashMap<String, Object> map = new HashMap<String, Object>();
+		map.put("unlocalizedName", FluidRegistry.getFluidName(stack.fluid));
+		map.put("amount", stack.amount);
+		map.put("name", stack.getLocalizedName());
+		if(stack.tag != null)
+			map.put("nbtdata", CCUtils.NBTCompoundToMap(stack.tag));
+		return map;
 	}
 
-	public static boolean IsValidBool(Object bool) {
-		return (bool instanceof Boolean);
-	}
-
-	public static Map<Integer, Object> ArrayToLuaArray(Object[] array) {
+	public static Map<Integer, Object> arrayToLuaArray(Object[] array) {
 		HashMap<Integer, Object> map = new HashMap<Integer, Object>();
 		int iterator = 0;
 		boolean isCCType = (array instanceof CCType[]);
@@ -42,33 +48,6 @@ public class CCUtils {
 			iterator++;
 		}
 		return map;
-	}
-
-	public static boolean IsValidString(Object string) {
-		return (string instanceof String);
-	}
-
-	public static boolean ToBool(Object bool) {
-		return (Boolean) bool;
-	}
-
-	public static int[] DirToCoord(int dir) {
-		switch (dir) {
-		case 0:
-			return new int[] { 0, -1, 0 };
-		case 1:
-			return new int[] { 0, 1, 0 };
-		case 2:
-			return new int[] { 0, 0, 1 };
-		case 3:
-			return new int[] { 0, 0, -1 };
-		case 4:
-			return new int[] { -1, 0, 0 };
-		case 5:
-			return new int[] { 1, 0, 0 };
-		default:
-			return new int[] { 0, 0, 0 };
-		}
 	}
 
 	public static Map<String, Object> NBTCompoundToMap(NBTTagCompound compound) {
@@ -80,36 +59,9 @@ public class CCUtils {
 		return nbtMap;
 	}
 
-	public static int TurtleDirToForgeDir(int turtleDir, String dir) {
-		int output = -1;
-		// RandomPeripheral.logger.info("Turtle Dir: " + turtleDir + " Dir: " +
-		// dir);
-		final String[] dirs = new String[] { "left", "right", "back", "front", "bottom", "top" };
-		for (int i = 0; i < dirs.length; i++) {
-			// RandomPeripheral.logger.info("dirs[i] = " + dirs[i] +
-			// "|dirs[i] == dir = " + (dirs[i] == dir));
-			if (dirs[i].indexOf(dir) != -1)
-				output = i;
-		}
-		if (output == -1)
-			return output;
-		return (int) BlockHelper.ICON_ROTATION_MAP[turtleDir][output];
-	}
-
-	public static int ReadableRelDirToRelForgeDir(String dir) {
-		int output = -1;
-		final String[] dirs = new String[] { "bottom", "top", "back", "front", "left", "right" };
-		for (int i = 0; i < dirs.length; i++)
-			if (dirs[i].indexOf(dir) != -1) {
-				output = i;
-				break;
-			}
-		return output;
-	}
-
-	public static ItemStack GetTurtleWithPeripheral(boolean advanced, int upgradeID) {
-		ItemStack turtle = !advanced ? GameRegistry.findItemStack("ComputerCraft", "CC-TurtleExpanded", 1) : GameRegistry
-				.findItemStack("ComputerCraft", "CC-TurtleAdvanced", 1);
+	public static ItemStack getTurtleStackWithPeripheral(boolean advanced, int upgradeID) {
+		ItemStack turtle = !advanced ? GameRegistry.findItemStack("ComputerCraft", "CC-TurtleExpanded", 1)
+				: GameRegistry.findItemStack("ComputerCraft", "CC-TurtleAdvanced", 1);
 
 		NBTTagCompound tag = turtle.getTagCompound();
 		if (tag == null) {

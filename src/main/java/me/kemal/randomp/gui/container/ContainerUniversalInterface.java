@@ -2,8 +2,8 @@ package me.kemal.randomp.gui.container;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-import me.kemal.randomp.RandomPeripheral;
-import me.kemal.randomp.te.TileUniversalInterface;
+import me.kemal.randomp.RandomPeripherals;
+import me.kemal.randomp.te.TileUniversalInterface_;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.Container;
@@ -16,7 +16,7 @@ import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
 
 public class ContainerUniversalInterface extends Container {
-	protected TileUniversalInterface te;
+	protected TileUniversalInterface_ te;
 	protected InventoryPlayer playerInv;
 
 	private int lastFluidAmount;
@@ -28,7 +28,7 @@ public class ContainerUniversalInterface extends Container {
 	private int _tankAmount;
 	private int _tankFluidID;
 
-	public ContainerUniversalInterface(InventoryPlayer playerInv, TileUniversalInterface inv) {
+	public ContainerUniversalInterface(InventoryPlayer playerInv, TileUniversalInterface_ inv) {
 		this.te = inv;
 		this.playerInv = playerInv;
 		this.lastStoredEnergy = inv.getEnergyStored(ForgeDirection.DOWN);
