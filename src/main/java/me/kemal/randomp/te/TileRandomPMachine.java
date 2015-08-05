@@ -31,7 +31,7 @@ public class TileRandomPMachine extends TileEntity implements IInventory, ISided
 	protected ItemStack[] inventory;
 	protected int facing;
 	
-	public static final int SIDES_COUNT = 5;
+	public static final int SIDES_COUNT = 6;
 
 	public TileRandomPMachine(String peripheralType) {
 		peripheral = new Peripheral();

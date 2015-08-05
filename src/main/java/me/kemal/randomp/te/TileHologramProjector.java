@@ -6,6 +6,8 @@ import java.util.Iterator;
 import java.util.Set;
 
 import cpw.mods.fml.common.registry.GameRegistry;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.lua.LuaException;
 import dan200.computercraft.api.peripheral.IComputerAccess;
@@ -20,6 +22,8 @@ import me.kemal.randomp.util.Util;
 import net.minecraft.block.Block;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.init.Blocks;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.nbt.NBTTagString;
@@ -39,11 +43,9 @@ public class TileHologramProjector extends TileEntity implements IExtendablePeri
 	public static final int hologramHeight = 8;
 	public static final int hologramDepth = 8;
 
-	// HologramWorldProxy worldProxy;
 	IComputerAccess attachedComputer;
 	String[] hologram;
 	byte[] hologramMeta;
-	// ArrayList<TileEntity> tileentities;
 	int xOffset;
 	int yOffset;
 	int zOffset;
@@ -62,13 +64,6 @@ public class TileHologramProjector extends TileEntity implements IExtendablePeri
 			hologram[i] = Block.blockRegistry.getNameForObject(Blocks.air);
 		for (int i = 0; i < hologramMeta.length; i++)
 			hologramMeta[i] = 0;
-
-		// tileentities = new ArrayList<TileEntity>();
-		// worldProxy = new HologramWorldProxy(this);
-
-		hologram[0] = Block.blockRegistry.getNameForObject(Blocks.glowstone);
-		hologram[(hologramHeight * (hologramWidth * hologramDepth)) - 1] = Block.blockRegistry
-				.getNameForObject(Blocks.diamond_ore);
 
 		peripheral.AddMethod("setBlock", "Sets the projected block at the specific coordinates",
 				new CCType[] {
@@ -169,13 +164,6 @@ public class TileHologramProjector extends TileEntity implements IExtendablePeri
 			String blockName = Block.blockRegistry.getNameForObject(block);
 			hologram[((z * hologramWidth) + x) + y * (hologramWidth * hologramDepth)] = (blockName == null)
 					? "minecraft:air" : blockName;
-			dirty = true;
-			/*
-			 * for (int i = 0; i < tileentities.size(); i++) { if
-			 * (tileentities.get(i).xCoord == x && tileentities.get(i).yCoord ==
-			 * z && tileentities.get(i).zCoord == z) { tileentities.remove(i);
-			 * break; } }
-			 */
 			return true;
 		}
 		return false;
@@ -184,13 +172,6 @@ public class TileHologramProjector extends TileEntity implements IExtendablePeri
 	public boolean setBlockMetaData(int x, int y, int z, byte meta) {
 		if (x >= 0 && y >= 0 && z >= 0 && x < hologramWidth && y < hologramHeight && z < hologramDepth) {
 			hologramMeta[((z * hologramWidth) + x) + y * (hologramWidth * hologramDepth)] = meta;
-			dirty = true;
-			/*
-			 * for (int i = 0; i < tileentities.size(); i++) { if
-			 * (tileentities.get(i).xCoord == x && tileentities.get(i).yCoord ==
-			 * z && tileentities.get(i).zCoord == z) { tileentities.remove(i);
-			 * break; } }
-			 */
 			return true;
 		}
 		return false;
@@ -209,10 +190,8 @@ public class TileHologramProjector extends TileEntity implements IExtendablePeri
 			if (block == null)
 				return new Object[] { false };
 			setBlock(x, y, z, block);
-			// RandomPeripheral.logger.info("Set block in hologram at holo
-			// coords X: "
-			// + x + " Y: " + y + " Z:" + z + " to "
-			// + block.getUnlocalizedName());
+
+			dirty = true;
 			getWorldObj().markBlockForUpdate(xCoord, yCoord, zCoord);
 			getWorldObj().markBlockRangeForRenderUpdate(xCoord, yCoord, zCoord, 1, 1, 1);
 			return new Object[] { true };
@@ -221,6 +200,7 @@ public class TileHologramProjector extends TileEntity implements IExtendablePeri
 			int x = ((Number) arguments[0]).intValue();
 			int y = ((Number) arguments[1]).intValue();
 			int z = ((Number) arguments[2]).intValue();
+
 			return new Object[] { getBlock(x, y, z) };
 		}
 		case "setMeta": {
@@ -228,7 +208,10 @@ public class TileHologramProjector extends TileEntity implements IExtendablePeri
 			int y = ((Number) arguments[1]).intValue();
 			int z = ((Number) arguments[2]).intValue();
 			byte meta = ((Number) arguments[3]).byteValue();
+
 			setBlockMetaData(x, y, z, meta);
+
+			dirty = true;
 			getWorldObj().markBlockForUpdate(xCoord, yCoord, zCoord);
 			getWorldObj().markBlockRangeForRenderUpdate(xCoord, yCoord, zCoord, 1, 1, 1);
 			return new Object[] {};
@@ -244,6 +227,8 @@ public class TileHologramProjector extends TileEntity implements IExtendablePeri
 				hologram[i] = (String) arguments[0];
 			for (int i = 0; i < hologramMeta.length; i++)
 				hologramMeta[i] = ((Number) arguments[1]).byteValue();
+
+			dirty = true;
 
 			getWorldObj().markBlockForUpdate(xCoord, yCoord, zCoord);
 			getWorldObj().markBlockRangeForRenderUpdate(xCoord, yCoord, zCoord, 1, 1, 1);
@@ -271,6 +256,9 @@ public class TileHologramProjector extends TileEntity implements IExtendablePeri
 
 						setBlock(x, y, z, block);
 					}
+
+					dirty = true;
+
 					getWorldObj().markBlockForUpdate(xCoord, yCoord, zCoord);
 					getWorldObj().markBlockRangeForRenderUpdate(xCoord, yCoord, zCoord, 1, 1, 1);
 				} catch (NullPointerException e) {
@@ -298,36 +286,12 @@ public class TileHologramProjector extends TileEntity implements IExtendablePeri
 
 	@Override
 	public TileEntity getTileEntity(int x, int y, int z) {
-		/*
-		 * Block block = getBlock(x, y, z); if (block instanceof
-		 * ITileEntityProvider) { ITileEntityProvider tileProvider =
-		 * (ITileEntityProvider) block; try { for (int i = 0; i <
-		 * tileentities.size(); i++) { if (tileentities.get(i).xCoord == x &&
-		 * tileentities.get(i).yCoord == z && tileentities.get(i).zCoord == z) {
-		 * // tileentities.get(i).updateEntity(); return tileentities.get(i); }
-		 * } TileEntity newTe = tileProvider.createNewTileEntity(worldProxy,
-		 * getBlockMetadata(x, y, z)); newTe.blockMetadata = getBlockMetadata(x,
-		 * y, z); newTe.blockType = getBlock(x, y, z); newTe.xCoord = x;
-		 * newTe.yCoord = y; newTe.zCoord = z; newTe.setWorldObj(worldProxy);
-		 * newTe.updateEntity(); tileentities.add(newTe); //
-		 * RandomPeripheral.logger.info("Setup"); return newTe; } catch
-		 * (Exception e) { RandomPeripheral.logger.info(
-		 * "Exception while creating or updating TileEntity");
-		 * e.printStackTrace(); } }
-		 */
 		return null;
 	}
 
 	@Override
-	public int getLightBrightnessForSkyBlocks(int p_72802_1_, int p_72802_2_, int p_72802_3_, int p_72802_4_) {
-		int i1 = 15;
-		int j1 = 15;
-
-		if (j1 < p_72802_4_) {
-			j1 = p_72802_4_;
-		}
-
-		return i1 << 20 | j1 << 4;
+	public int getLightBrightnessForSkyBlocks(int x, int y, int z, int light) {
+		return 65535;
 	}
 
 	@Override
@@ -366,8 +330,12 @@ public class TileHologramProjector extends TileEntity implements IExtendablePeri
 		return getBlock(x, y, z).isSideSolid(this, x, y, z, side);
 	}
 
-	public void setDirty(boolean val) {
+	public void setHologramDirty(boolean val) {
 		dirty = val;
+	}
+
+	public boolean isHologramDirty() {
+		return dirty;
 	}
 
 	@Override
@@ -380,11 +348,15 @@ public class TileHologramProjector extends TileEntity implements IExtendablePeri
 		attachedComputer = null;
 	}
 
-	public void onBlockActivated(float clickX, float clickY, float clickZ) {
+	public void onBlockClick(float clickX, float clickY, float clickZ, int side, int button, ItemStack heldItem) {
 		if (attachedComputer != null) {
-			RandomPeripherals.logger.info("Clicked at: X: " + clickX + " Y: " + clickY + " Z: " + clickZ);
-			attachedComputer.queueEvent("hologramTouch", new Object[] { (int) (Math.floor(clickX) * 16.f),
-					(int) (Math.floor(clickY) * 16.f), (int) (Math.floor(clickZ) * 16.f) });
+			HashMap<String, Object> heldItemCC = CCUtils.stackToMap(heldItem);
+			heldItemCC.put("isBlock", Block.getBlockFromItem(heldItem.getItem()) != Blocks.air);
+
+			String[] sides = new String[] { "bottom", "top", "north", "south", "west", "east" };
+			attachedComputer.queueEvent("hologramTouch", new Object[] { button, (int) (clickX * 8.f),
+					(int) (clickY * 8.f), (int) (clickZ * 8.f), sides[side], heldItemCC });
 		}
 	}
+
 }

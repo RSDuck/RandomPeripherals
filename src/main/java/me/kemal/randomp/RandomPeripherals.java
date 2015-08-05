@@ -11,7 +11,6 @@ import cofh.api.modhelpers.ThaumcraftHelper;
 import cofh.api.modhelpers.ThermalExpansionHelper;
 import cofh.lib.util.ItemWrapper;
 import cofh.lib.util.helpers.FluidHelper;
-import me.kemal.randomp.block.BlockDebugPeripheral;
 import me.kemal.randomp.block.BlockHologram;
 import me.kemal.randomp.block.BlockHologramProjector;
 import me.kemal.randomp.block.BlockUniversalInterface;
@@ -25,19 +24,24 @@ import me.kemal.randomp.gui.RandomPGuiHandler;
 import me.kemal.randomp.item.ItemCreativeTabDummy;
 import me.kemal.randomp.net.RandomPMSG;
 import me.kemal.randomp.net.ServerPacketHandler;
+import me.kemal.randomp.te.TileHologramProjector;
 import me.kemal.randomp.te.TileRandomPMachine;
-import me.kemal.randomp.te.TileUniversalInterface_;
+import me.kemal.randomp.te.TileUniversalInterface;
 import me.kemal.randomp.util.CCUtils;
 import me.kemal.randomp.util.Util;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
+import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.CraftingManager;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.world.WorldSettings.GameType;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
@@ -102,7 +106,6 @@ public class RandomPeripherals {
 	Configuration config;
 
 	public static Block blockUniversalInterface;
-	public static Block blockDebugBlock;
 	public static Block blockHologramProjector;
 	public static Block blockHologram;
 
@@ -112,6 +115,8 @@ public class RandomPeripherals {
 
 	public static int inventoryTurtleUpgradeID;
 	public static int dispenserTurtleUpgradeID;
+	
+	public static boolean forceVanillaRecipes;
 
 	public static String[] tileEntitiesWithAutoRead;
 
@@ -131,7 +136,6 @@ public class RandomPeripherals {
 		proxy.registerRenderer();
 
 		blockUniversalInterface = new BlockUniversalInterface(Material.iron);
-		blockDebugBlock = new BlockDebugPeripheral(Material.piston);
 		blockHologramProjector = new BlockHologramProjector();
 		blockHologram = new BlockHologram();
 
@@ -191,8 +195,26 @@ public class RandomPeripherals {
 	}
 
 	@SubscribeEvent
+	public void playerInteract(PlayerInteractEvent event) {
+		RandomPeripherals.logger.info("Player Interact!" + event.world.isRemote);
+		if ((event.action == PlayerInteractEvent.Action.LEFT_CLICK_BLOCK
+				|| event.action == PlayerInteractEvent.Action.RIGHT_CLICK_BLOCK)
+				&& event.world.getBlock(event.x, event.y, event.z) instanceof BlockHologram && !event.world.isRemote) {
+
+			TileEntity te = event.world.getTileEntity(event.x, event.y - 1, event.z);
+			if (te instanceof TileHologramProjector) {
+				TileHologramProjector projector = (TileHologramProjector) te;
+				projector.onBlockClick((float) blockHologram.getBlockBoundsMinX(),
+						(float) blockHologram.getBlockBoundsMinY(), (float) blockHologram.getBlockBoundsMinZ(),
+						event.face, (event.action == PlayerInteractEvent.Action.LEFT_CLICK_BLOCK) ? 0 : 1,
+						event.entityPlayer.getHeldItem());
+			}
+		}
+	}
+
+	@SubscribeEvent
 	public void blockBreak(BreakEvent event) {
-		event.setCanceled(event.block == blockHologram ? true : false);
+		event.setCanceled(event.block instanceof BlockHologram);
 	}
 
 	private void loadConfig() {
@@ -203,14 +225,9 @@ public class RandomPeripherals {
 		tileEntitiesWithAutoRead = config.getStringList("autoWrappedPeripherals", config.CATEGORY_GENERAL,
 				new String[] { "minecraft:furnace" },
 				"If you add an block name to this list, it can be used as peripheral and you can read its NBT Data");
+		forceVanillaRecipes = config.getBoolean("forceVanillaRecipes", config.CATEGORY_GENERAL, false,"If enabled no items of external mods will be used in crafting recipes");
 		if (config.hasChanged()) {
 			config.save();
-		}
-	}
-
-	public static void registerTurtleUpgrade(ITurtleUpgrade upgrade) {
-		if (upgrade != null) {
-			logger.info("Upgrade register " + upgrade.getUnlocalisedAdjective());
 		}
 	}
 

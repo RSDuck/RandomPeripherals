@@ -9,7 +9,7 @@ import org.lwjgl.util.Color;
 import me.kemal.randomp.RandomPeripherals;
 import me.kemal.randomp.client.IconRegistry;
 import me.kemal.randomp.gui.container.ContainerUniversalInterface;
-import me.kemal.randomp.te.TileUniversalInterface_;
+import me.kemal.randomp.te.TileUniversalInterface;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.renderer.texture.IIconRegister;
@@ -35,9 +35,9 @@ public class GuiUniveralInterface extends GuiBase {
 	private TabEnergyConf maxOutputTab;
 	private TabEnergyConf maxInputTab;
 
-	private TileUniversalInterface_ te;
+	private TileUniversalInterface te;
 
-	public GuiUniveralInterface(InventoryPlayer playerInv, TileUniversalInterface_ te) {
+	public GuiUniveralInterface(InventoryPlayer playerInv, TileUniversalInterface te) {
 		super(new ContainerUniversalInterface(playerInv, te), new ResourceLocation(RandomPeripherals.modid.toLowerCase()
 				+ ":textures/gui/univeralInterface.png"));
 		this.te = te;

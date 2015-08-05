@@ -8,6 +8,7 @@ package me.kemal.randomp.gui.client;
 import java.util.List;
 
 import net.minecraft.client.gui.GuiScreen;
+import net.minecraftforge.common.util.ForgeDirection;
 
 import org.lwjgl.opengl.GL11;
 
@@ -21,6 +22,7 @@ import cofh.lib.render.RenderHelper;
 import cofh.lib.util.helpers.BlockHelper;
 import cofh.lib.util.helpers.MathHelper;
 import cofh.lib.util.helpers.StringHelper;
+import me.kemal.randomp.te.TileUniversalInterface;
 
 public class TabConfiguration extends TabBase {
 
@@ -67,8 +69,8 @@ public class TabConfiguration extends TabBase {
 		for (int i = 0; i < 2; i++) {
 			gui.drawIcon(myTileTexture.getTexture(BlockHelper.SIDE_ABOVE[myTile.getFacing()], i), posX() + 40,
 					posY + 24, 0);
-			gui.drawIcon(myTileTexture.getTexture(BlockHelper.SIDE_LEFT[myTile.getFacing()], i), posX() + 20,
-					posY + 44, 0);
+			gui.drawIcon(myTileTexture.getTexture(BlockHelper.SIDE_LEFT[myTile.getFacing()], i), posX() + 20, posY + 44,
+					0);
 			gui.drawIcon(myTileTexture.getTexture(myTile.getFacing(), i), posX() + 40, posY + 44, 0);
 			gui.drawIcon(myTileTexture.getTexture(BlockHelper.SIDE_RIGHT[myTile.getFacing()], i), posX() + 60,
 					posY + 44, 0);
@@ -87,6 +89,34 @@ public class TabConfiguration extends TabBase {
 		if (!isFullyOpened()) {
 			list.add(StringHelper.localize("info.cofh.configuration"));
 			return;
+		} else {
+			int mouseX = gui.getMouseX();
+			int mouseY = gui.getMouseY();
+			if (side == LEFT) {
+				mouseX += currentWidth;
+			}
+			mouseX -= currentShiftX;
+			mouseY -= currentShiftY;
+			TileUniversalInterface te = (TileUniversalInterface) myTile;
+			if (40 <= mouseX && mouseX < 56 && 24 <= mouseY && mouseY < 40) {
+				list.add(StringHelper.localize("me.kemal.randomperipheral.ui.sideConfig."
+						+ te.getIOConfigurationWithFacing(ForgeDirection.UP.ordinal())));
+			} else if (20 <= mouseX && mouseX < 36 && 44 <= mouseY && mouseY < 60) {
+				list.add(StringHelper.localize("me.kemal.randomperipheral.ui.sideConfig."
+						+ te.getIOConfigurationWithFacing(ForgeDirection.WEST.ordinal())));
+			} else if (40 <= mouseX && mouseX < 56 && 44 <= mouseY && mouseY < 60) {
+				list.add(StringHelper.localize("me.kemal.randomperipheral.ui.sideConfig."
+						+ te.getIOConfigurationWithFacing(ForgeDirection.SOUTH.ordinal())));
+			} else if (60 <= mouseX && mouseX < 76 && 44 <= mouseY && mouseY < 60) {
+				list.add(StringHelper.localize("me.kemal.randomperipheral.ui.sideConfig."
+						+ te.getIOConfigurationWithFacing(ForgeDirection.EAST.ordinal())));
+			} else if (40 <= mouseX && mouseX < 56 && 64 <= mouseY && mouseY < 80) {
+				list.add(StringHelper.localize("me.kemal.randomperipheral.ui.sideConfig."
+						+ te.getIOConfigurationWithFacing(ForgeDirection.DOWN.ordinal())));
+			} else if (60 <= mouseX && mouseX < 76 && 64 <= mouseY && mouseY < 80) {
+				list.add(StringHelper.localize("me.kemal.randomperipheral.ui.sideConfig."
+						+ te.getIOConfigurationWithFacing(ForgeDirection.NORTH.ordinal())));
+			}
 		}
 	}
 
@@ -105,6 +135,7 @@ public class TabConfiguration extends TabBase {
 		}
 		if (40 <= mouseX && mouseX < 56 && 24 <= mouseY && mouseY < 40) {
 			handleSideChange(BlockHelper.SIDE_ABOVE[myTile.getFacing()], mouseButton);
+
 		} else if (20 <= mouseX && mouseX < 36 && 44 <= mouseY && mouseY < 60) {
 			handleSideChange(BlockHelper.SIDE_LEFT[myTile.getFacing()], mouseButton);
 		} else if (40 <= mouseX && mouseX < 56 && 44 <= mouseY && mouseY < 60) {

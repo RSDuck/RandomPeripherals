@@ -42,12 +42,4 @@ public class ClientProxy extends CommonProxy {
 	public void registerRenderer() {
 		ClientRegistry.bindTileEntitySpecialRenderer(TileHologram.class, new TileHologramSpecialRenderer());
 	}
-
-	@Override
-	@SideOnly(Side.CLIENT)
-	@SubscribeEvent
-	public void getTextureAtlas(Post event) {
-		blockResLoc = event.map.locationBlocksTexture;
-		itemResLoc = event.map.locationItemsTexture;
-	}
 }

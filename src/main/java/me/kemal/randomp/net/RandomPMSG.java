@@ -1,6 +1,7 @@
 package me.kemal.randomp.net;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 
 import io.netty.buffer.ByteBuf;

@@ -6,6 +6,7 @@ import java.util.Map;
 import cpw.mods.fml.common.registry.GameRegistry;
 import dan200.computercraft.api.lua.LuaException;
 import me.kemal.randomp.RandomPeripherals;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.fluids.FluidStack;
@@ -18,7 +19,7 @@ public class CCUtils {
 		if (stack == null)
 			return null;
 		HashMap<String, Object> map = new HashMap<String, Object>();
-		map.put("internalName", GameRegistry.findUniqueIdentifierFor(stack.getItem()));
+		map.put("internalName", Item.itemRegistry.getNameForObject(stack.getItem()));
 		map.put("damage", stack.getItemDamage());
 		map.put("amount", stack.stackSize);
 		map.put("name", stack.getDisplayName());
@@ -31,10 +32,10 @@ public class CCUtils {
 		if (stack == null)
 			return null;
 		HashMap<String, Object> map = new HashMap<String, Object>();
-		map.put("unlocalizedName", FluidRegistry.getFluidName(stack.fluid));
+		map.put("unlocalizedName", FluidRegistry.getFluidName(stack.getFluid()));
 		map.put("amount", stack.amount);
 		map.put("name", stack.getLocalizedName());
-		if(stack.tag != null)
+		if (stack.tag != null)
 			map.put("nbtdata", CCUtils.NBTCompoundToMap(stack.tag));
 		return map;
 	}

@@ -39,17 +39,21 @@ public class TileEnergyStorage extends TileRandomPMachine implements IEnergyHand
 				"Sets the maximum amount of energy that goes out on the specified side",
 				new CCType[] {
 						new CCType(Double.class, "newOutput", "The new amount of maximum energy output", 0, 1000),
-						new CCType(String.class, "The side where the maximum energy output should be changed") },
+						new CCType(String.class, "side",
+								"The side where the maximum energy output should be changed(valid inputs: bottom, top, left, right, back, front)") },
 				new CCType[] {}, this);
 		peripheral.AddMethod("setMaxEnergyInput", "Sets the maximum amount of energy that goes in",
 				new CCType[] { new CCType(Double.class, "newInput", "The new amount of maximum energy input", 0, 1000),
-						new CCType(String.class, "The side where the maximum energy input should be changed") },
+						new CCType(String.class, "side",
+								"The side where the maximum energy input should be changed(valid inputs: bottom, top, left, right, back, front)") },
 				new CCType[] {}, this);
 		peripheral.AddMethod("getMaxEnergyOutput", "Returns the maximum amount of energy that goes out",
-				new CCType[] {},
+				new CCType[] { new CCType(String.class, "side",
+						"The side where you want to get the maximum energy output(valid inputs: bottom, top, left, right, back, front)") },
 				new CCType[] { new CCType(Double.class, "The current maximum amount of energy that goes out") }, this);
 		peripheral.AddMethod("getMaxEnergyInput", "Returns the maximum amount of energy that will goes in",
-				new CCType[] {},
+				new CCType[] { new CCType(String.class, "side",
+						"The side where you want to get the maximum energy input(valid inputs: bottom, top, left, right, back front)") },
 				new CCType[] { new CCType(Double.class, "The current maximum amount of energy that comes in") }, this);
 		peripheral.AddMethod("getEnergyStored", "Returns the current amount of stored energy", new CCType[] {},
 				new CCType[] { new CCType(Double.class, "The current amount of stored energy") }, this);
@@ -69,20 +73,30 @@ public class TileEnergyStorage extends TileRandomPMachine implements IEnergyHand
 		case "setMaxEnergyOutput": {
 			int arg0 = ((Number) arguments[0]).intValue();
 			int arg1 = Util.relDirToAbsDir(facing, Util.readableRelDirToRelForgeDir((String) arguments[1]));
-			storedEnergy.setMaxExtract(arg0);
+			if (arg1 == -1)
+				throw new LuaException("Invalid direction");
+			maxEnergyOutput[arg1] = arg0;
 			return new Object[] {};
 		}
 		case "setMaxEnergyInput": {
 			int arg0 = ((Number) arguments[0]).intValue();
 			int arg1 = Util.relDirToAbsDir(facing, Util.readableRelDirToRelForgeDir((String) arguments[1]));
-			storedEnergy.setMaxReceive(arg0);
+			if (arg1 == -1)
+				throw new LuaException("Invalid direction");
+			maxEnergyInput[arg1] = arg0;
 			return new Object[] {};
 		}
 		case "getMaxEnergyOutput": {
-			return new Object[] { storedEnergy.getMaxExtract() };
+			int arg1 = Util.relDirToAbsDir(facing, Util.readableRelDirToRelForgeDir((String) arguments[0]));
+			if (arg1 == -1)
+				throw new LuaException("Invalid direction");
+			return new Object[] { maxEnergyOutput[arg1] };
 		}
 		case "getMaxEnergyInput": {
-			return new Object[] { storedEnergy.getMaxReceive() };
+			int arg1 = Util.relDirToAbsDir(facing, Util.readableRelDirToRelForgeDir((String) arguments[0]));
+			if (arg1 == -1)
+				throw new LuaException("Invalid direction");
+			return new Object[] { maxEnergyInput[arg1] };
 		}
 		case "getEnergyStored": {
 			return new Object[] { storedEnergy.getEnergyStored() };
@@ -121,22 +135,11 @@ public class TileEnergyStorage extends TileRandomPMachine implements IEnergyHand
 	@Override
 	public void updateEntity() {
 		super.updateEntity();
-		// TODO: function for energy output
-		/*
-		 * for (ForgeDirection dir : ForgeDirection.VALID_DIRECTIONS) { if
-		 * (neightborCache[dir.ordinal()] != null) { int energyAvailable = 0;
-		 * int energyNeeded = neightborCache[dir.ordinal()].receiveEnergy(dir,
-		 * storedEnergy.getMaxExtract(), true); if (energyNeeded > 0) {
-		 * energyAvailable = this.extractEnergy(dir, energyNeeded, true); }
-		 * neightborCache[dir.ordinal()].receiveEnergy(dir, energyAvailable,
-		 * false); this.extractEnergy(dir.getOpposite(), energyAvailable,
-		 * false); } }
-		 */
 	}
 
 	@Override
 	public int extractEnergy(ForgeDirection from, int maxExtract, boolean simulate) {
-		storedEnergy.setMaxExtract(getMaxEnergyOutput(from.ordinal()));
+		storedEnergy.setMaxExtract(maxEnergyOutput[from.ordinal()]);
 		return storedEnergy.extractEnergy(maxExtract, simulate);
 	}
 
@@ -157,7 +160,7 @@ public class TileEnergyStorage extends TileRandomPMachine implements IEnergyHand
 
 	@Override
 	public int receiveEnergy(ForgeDirection from, int maxReceive, boolean simulate) {
-		storedEnergy.setMaxReceive(getMaxEnergyOutput(from.ordinal()));
+		storedEnergy.setMaxReceive(maxEnergyInput[from.ordinal()]);
 		return storedEnergy.receiveEnergy(maxReceive, simulate);
 	}
 
@@ -192,12 +195,20 @@ public class TileEnergyStorage extends TileRandomPMachine implements IEnergyHand
 		return storedEnergy;
 	}
 
-	public int getMaxEnergyOutput(int relSide) {
+	public int getMaxEnergyOutputRel(int relSide) {
 		return maxEnergyOutput[BlockHelper.ICON_ROTATION_MAP[facing][relSide]];
 	}
 
-	public int getMaxEnergyInput(int relSide) {
+	public int getMaxEnergyInputRel(int relSide) {
 		return maxEnergyInput[BlockHelper.ICON_ROTATION_MAP[facing][relSide]];
+	}
+	
+	public int getMaxEnergyInput(int side) {
+		return maxEnergyInput[side];
+	}
+	
+	public int getMaxEnergyOutput(int side) {
+		return maxEnergyOutput[side];
 	}
 
 }

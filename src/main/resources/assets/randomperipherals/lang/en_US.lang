@@ -17,4 +17,11 @@ me.kemal.randomperipheral.idOfUpgradeInventory=The ID of the Invetory Turtle Upg
 itemGroup.tabRandomP=Random Peripherals
 
 me.kemal.randomperipheral.chat.heldItemName=The unlocalized name(which you can use in commands and Computercraft programs) is:
-me.kemal.randomperipheral.chat.noItem=To use this command you have to hold something in your hand
+me.kemal.randomperipheral.chat.noItem=You have to hold something in your hand to use this command
+
+me.kemal.randomperipheral.ui.sideConfig.0=Neutral side
+me.kemal.randomperipheral.ui.sideConfig.1=Universal side
+me.kemal.randomperipheral.ui.sideConfig.2=Item only side
+me.kemal.randomperipheral.ui.sideConfig.3=Energy only side
+me.kemal.randomperipheral.ui.sideConfig.4=Fluid input only side
+me.kemal.randomperipheral.ui.sideConfig.5=Fluid output only side

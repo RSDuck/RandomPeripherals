@@ -7,7 +7,7 @@ import org.lwjgl.util.glu.GLU;
 
 import me.kemal.randomp.RandomPeripherals;
 import me.kemal.randomp.te.TileHologramProjector;
-import me.kemal.randomp.te.TileUniversalInterface_;
+import me.kemal.randomp.te.TileUniversalInterface;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockAir;
 import net.minecraft.client.renderer.RenderBlocks;

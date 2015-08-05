@@ -59,13 +59,6 @@ public class BlockHologramProjector extends Block implements ITileEntityProvider
 		return new TileHologramProjector();
 	}
 
-	/*
-	 * @Override
-	 * 
-	 * @SideOnly(Side.CLIENT) public int getRenderType() { return
-	 * RendererHologramProjector.id; }
-	 */
-
 	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean isOpaqueCube() {
@@ -79,14 +72,8 @@ public class BlockHologramProjector extends Block implements ITileEntityProvider
 	}
 
 	@Override
-	public int getLightValue() {
-		return 12;
-	}
-
-	@Override
 	public void onBlockAdded(World world, int x, int y, int z) {
 		if (!world.isRemote) {
-			RandomPeripherals.logger.info("Added Hologram above projector");
 			world.setBlock(x, y + 1, z, RandomPeripherals.blockHologram, 0, 1 | 2);
 			world.markBlockForUpdate(x, y + 1, z);
 			world.markBlockRangeForRenderUpdate(x, y + 1, z, 1, 1, 1);
@@ -95,9 +82,8 @@ public class BlockHologramProjector extends Block implements ITileEntityProvider
 
 	@Override
 	public void onBlockPreDestroy(World world, int x, int y, int z, int oldMeta) {
-		// if (!world.isRemote) {
-		world.setBlock(x, y + 1, z, Blocks.air, 0, 1 | 2);
-		world.markBlockForUpdate(x, y + 1, z);
-		// }
+		if (!world.isRemote) {
+			world.setBlockToAir(x, y + 1, z);
+		}
 	}
 }

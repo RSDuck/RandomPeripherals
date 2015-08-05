@@ -6,7 +6,7 @@ import org.lwjgl.opengl.GL11;
 
 import me.kemal.randomp.net.Packets;
 import me.kemal.randomp.te.TileEnergyStorage;
-import me.kemal.randomp.te.TileUniversalInterface_;
+import me.kemal.randomp.te.TileUniversalInterface;
 import cofh.lib.gui.GuiBase;
 import cofh.lib.gui.element.TabBase;
 import cofh.lib.util.helpers.MathHelper;
@@ -67,7 +67,7 @@ public class TabEnergyConf extends TabBase {
 		gui.drawButton("IconPlus", posX() + 38, posY + 20, 1, 1);
 		gui.drawButton("IconMinus", posX() + 58, posY + 20, 1, 0);
 		getFontRenderer().drawString(maxEnergyIO + " RF/t", posXOffset() + 14, posY + 54, textColor);
-		getFontRenderer().drawString("" + TileUniversalInterface_.MAX_ENERGY_IO + " RF/t", posXOffset() + 14, posY + 78, textColor);
+		getFontRenderer().drawString("" + TileUniversalInterface.MAX_ENERGY_IO + " RF/t", posXOffset() + 14, posY + 78, textColor);
 		GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
 	}
 
@@ -114,11 +114,11 @@ public class TabEnergyConf extends TabBase {
 		if (38 <= mouseX && mouseX < 54 && 20 <= mouseY && mouseY < 36) {
 			int add = (isShiftDown) ? 100 : 10;
 			if (output) {
-				int sumToDec = (myContainer.getEnergyStorage().getMaxExtract() + add >= TileUniversalInterface_.MAX_ENERGY_IO) ? TileUniversalInterface_.MAX_ENERGY_IO
+				int sumToDec = (myContainer.getEnergyStorage().getMaxExtract() + add >= TileUniversalInterface.MAX_ENERGY_IO) ? TileUniversalInterface.MAX_ENERGY_IO
 						: myContainer.getEnergyStorage().getMaxExtract() + add;
 				Packets.sendToServer(Packets.ChangeMaxPowerOutput, myContainer, sumToDec);
 			} else {
-				int sumToDec = (myContainer.getEnergyStorage().getMaxReceive() + add >= TileUniversalInterface_.MAX_ENERGY_IO) ? TileUniversalInterface_.MAX_ENERGY_IO
+				int sumToDec = (myContainer.getEnergyStorage().getMaxReceive() + add >= TileUniversalInterface.MAX_ENERGY_IO) ? TileUniversalInterface.MAX_ENERGY_IO
 						: myContainer.getEnergyStorage().getMaxReceive() + add;
 				Packets.sendToServer(Packets.ChangeMaxPowerInput, myContainer, sumToDec);
 			}

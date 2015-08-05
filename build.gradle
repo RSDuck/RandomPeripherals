@@ -18,14 +18,14 @@ buildscript {
 apply plugin: 'forge'
 
 version = "1.4"
-group= "me.kemal.randompp" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
+group= "me.kemal.randomp" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "RandomPeripherals"
 
 sourceCompatibility = 1.7
 targetCompatibility = 1.7
 
 minecraft {
-    version = "1.7.10-10.13.2.1236"
+    version = "1.7.10-10.13.4.1448-1.7.10"
     runDir = "eclipse"
 }
 
@@ -42,7 +42,7 @@ dependencies {
     // for more info...
     // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
     // http://www.gradle.org/docs/current/userguide/dependency_management.html
-	// compile "appeng:appliedenergistics2:rv1-beta-37:dev"
+
 }
 
 processResources

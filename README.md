@@ -4,6 +4,7 @@ Random Peripherals is an Mod for Minecraft (and an extension for the computercra
 
 Credits: 
 Of course the Mojang, MCP and Forge guys without them nothing like that were possible, dan200 for the computercraft one of my favorite mods and TeamCofh for their great API and references like minefactory reloaded
+Special thanks go to ChickenBones, I toke the code for that a block can multiple selection boxes from him, many thanks for that(The original license can be found in the package me.kemal.randomp.raytracer where also all copied files are found)
 
 And yes, I toke some code from CofhCore(the IconRegister completely the side configuration tab almost completely and the power configuration tab is based on the redstone controll tab)
 
