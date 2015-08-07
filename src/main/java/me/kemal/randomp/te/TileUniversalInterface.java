@@ -3,10 +3,13 @@ package me.kemal.randomp.te;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 
+import javax.print.attribute.standard.Copies;
+
 import me.kemal.randomp.RandomPeripherals;
 import me.kemal.randomp.util.CCType;
 import me.kemal.randomp.util.CCUtils;
 import me.kemal.randomp.util.FunctionNotFoundException;
+import me.kemal.randomp.util.PeripheralLuaObjectWrap;
 import me.kemal.randomp.util.Util;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -22,6 +25,7 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.S35PacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.IIcon;
+import net.minecraft.world.World;
 import net.minecraftforge.common.util.ForgeDirection;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidStack;
@@ -43,6 +47,7 @@ import cofh.lib.util.helpers.InventoryHelper;
 import cofh.lib.util.helpers.ItemHelper;
 import cpw.mods.fml.common.SidedProxy;
 import dan200.computercraft.api.lua.ILuaContext;
+import dan200.computercraft.api.lua.ILuaObject;
 import dan200.computercraft.api.lua.LuaException;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 import dan200.computercraft.api.peripheral.IPeripheral;
@@ -66,9 +71,41 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 	private boolean allowAutoInput;
 	private FluidTank tank;
 
-	private Class computerCraft;
-	private Method getPeripheral;
-	
+	private IComputerAccess computer;
+
+	public IPeripheral[] connectedPeripherals;
+	public PeripheralLuaObjectWrap[] wrappedPeripherals;
+
+	private static Class<?> computerCraft;
+	private static Method cc_getPeripheralAt;
+
+	private static boolean ccFound = false;
+
+	public static void findCC() {
+		if (ccFound == false)
+			try {
+				computerCraft = Class.forName("dan200.computercraft.ComputerCraft");
+
+				cc_getPeripheralAt = computerCraft.getDeclaredMethod("getPeripheralAt", World.class, Integer.TYPE,
+						Integer.TYPE, Integer.TYPE, Integer.TYPE);
+				ccFound = true;
+			} catch (ClassNotFoundException | NoSuchMethodException | SecurityException e) {
+				e.printStackTrace();
+			}
+	}
+
+	public static IPeripheral getPeripheralAt(World world, int x, int y, int z, int side) {
+		findCC();
+		if (ccFound && cc_getPeripheralAt != null) {
+			try {
+				return (IPeripheral) cc_getPeripheralAt.invoke(null, world, x, y, z, side);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		return null;
+	}
+
 	public TileUniversalInterface() {
 		super(capacity);
 		heldStack = null;
@@ -169,12 +206,14 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 						new CCType(HashMap.class, "drainedFluid",
 								"The Informations about what fluid was drained and it's amount") },
 				this);
-		
-		try {
-			computerCraft = Class.forName("ComputerCraft");
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
-		}
+		peripheral.AddMethod("wrapPeripheral",
+				"Works exactly like peripheral.wrap(side), the only different is that it works based of the Unversal Interface position and rotation",
+				new CCType[] { new CCType(String.class, "side", "The side where the peripheral is located") },
+				new CCType[] { new CCType(ILuaObject.class, "The wrapped peripheral") }, this);
+
+		connectedPeripherals = new IPeripheral[6];
+		wrappedPeripherals = new PeripheralLuaObjectWrap[6];
+
 	}
 
 	@Override
@@ -185,8 +224,8 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 			storedEnergy.setMaxExtract(getMaxEnergyOutput(dir.getOpposite().ordinal()));
 			storedEnergy.setMaxReceive(getMaxEnergyInput(dir.getOpposite().ordinal()));
 			if (neightborCache[(dir.ordinal())] != null && neightborCache[(dir.ordinal())] instanceof IEnergyHandler
-					&& (getIOConfiguration(dir.getOpposite().ordinal()) == SIDE_IO
-							|| getIOConfiguration(dir.getOpposite().ordinal()) == SIDE_ENERGY_ONLY)) {
+					&& (getSide(dir.getOpposite().ordinal()) == SIDE_IO
+							|| getSide(dir.getOpposite().ordinal()) == SIDE_ENERGY_ONLY)) {
 				int energy = storedEnergy.getEnergyStored();
 				if (((IEnergyHandler) neightborCache[(dir.ordinal())]).receiveEnergy(dir, storedEnergy.getMaxExtract(),
 						true) > 0)
@@ -198,8 +237,8 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 			}
 
 			if (neightborCache[(dir.ordinal())] != null && neightborCache[(dir.ordinal())] instanceof IFluidHandler
-					&& this.tank.getFluid() != null && (getIOConfiguration(dir.getOpposite().ordinal()) == SIDE_IO
-							|| getIOConfiguration(dir.getOpposite().ordinal()) == SIDE_FLUID_OUTPUT_ONLY)) {
+					&& this.tank.getFluid() != null && (getSide(dir.getOpposite().ordinal()) == SIDE_IO
+							|| getSide(dir.getOpposite().ordinal()) == SIDE_FLUID_OUTPUT_ONLY)) {
 				IFluidHandler fluidHandler = (IFluidHandler) neightborCache[(dir.ordinal())];
 				if (fluidHandler.canFill(dir, tank.getFluid().getFluid())) {
 					FluidStack fluidToDrain = this.drain(dir.getOpposite(), MAX_FLUID_IO, false);
@@ -359,7 +398,6 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 			return new Object[] { allowAutoInput };
 		}
 		case "setSideConfiguration": {
-			String arg0 = (String) arguments[0];
 			String arg1 = (String) arguments[1];
 			int config = -1;
 			for (int i = 0; i < configNames.length; i++)
@@ -369,21 +407,21 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 				}
 			if (config == -1)
 				throw new LuaException("Invalid configuration");
-			int side = Util.readableRelDirToRelForgeDir(arg0);
+			int side = Util.relDirToAbsDir(facing, Util.readableRelDirToRelForgeDir((String) arguments[0]));
 			if (side == -1)
 				throw new LuaException("Invalid side");
 
-			setIOConfiguration(side, config);
+			setSide(side, config);
 			return new Object[] {};
 		}
 		case "getSideConfiguration": {
 			HashMap<String, Object> map = new HashMap<String, Object>();
-			map.put("bottom", configNames[getIOConfigurationWithFacing(0)]);
-			map.put("front", configNames[getIOConfigurationWithFacing(1)]);
-			map.put("back", configNames[getIOConfigurationWithFacing(2)]);
-			map.put("front", configNames[getIOConfigurationWithFacing(3)]);
-			map.put("left", configNames[getIOConfigurationWithFacing(4)]);
-			map.put("right", configNames[getIOConfigurationWithFacing(5)]);
+			map.put("bottom", configNames[ioConfiguration[0]]);
+			map.put("top", configNames[ioConfiguration[1]]);
+			map.put("back", configNames[ioConfiguration[2]]);
+			map.put("front", configNames[ioConfiguration[3]]);
+			map.put("left", configNames[ioConfiguration[4]]);
+			map.put("right", configNames[ioConfiguration[5]]);
 			return new Object[] { map };
 		}
 		case "getTankInfo": {
@@ -395,6 +433,9 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 					: Util.readableDirToForgeDir((String) arguments[1]);
 			int amount = ((Number) arguments[2]).intValue();
 			boolean cancelOnError = ((Boolean) arguments[3]).booleanValue();
+
+			if (direction == -1 || simulatedDir == -1)
+				throw new LuaException("Invalid Direction");
 
 			if (cancelOnError && tank.getFluidAmount() >= amount)
 				return new Object[] { false };
@@ -425,6 +466,9 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 			int amount = ((Number) arguments[2]).intValue();
 			boolean cancelOnError = ((Boolean) arguments[3]).booleanValue();
 
+			if (direction == -1 || simulatedDir == -1)
+				throw new LuaException("Invalid Direction");
+
 			ForgeDirection dir = ForgeDirection.values()[direction];
 			TileEntity te = worldObj.getTileEntity(xCoord + dir.offsetX, yCoord + dir.offsetY, zCoord + dir.offsetZ);
 			if (te instanceof IFluidHandler && tank.getFluidAmount() < tank.getCapacity()) {
@@ -450,6 +494,19 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 			}
 
 			return new Object[] { false };
+		}
+		case "wrapPeripheral": {
+			int relDir = Util.readableRelDirToRelForgeDir((String) arguments[0]);
+
+			if (relDir == -1)
+				throw new LuaException("Invalid direction");
+
+			int direction = Util.relDirToAbsDir(facing, ForgeDirection.getOrientation(relDir).getOpposite().ordinal());
+
+			if (direction == -1)
+				throw new LuaException("Invalid Direction");
+			
+			return new Object[] { wrappedPeripherals[direction] };
 		}
 		default: {
 			try {
@@ -535,22 +592,6 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 		return true;
 	}
 
-	public int getOutputFaceDir() {
-		return facing;
-	}
-
-	public void setOutputFaceDir(int dir) {
-		facing = dir;
-	}
-
-	public void setIOConfiguration(int side, int configuration) {
-		setSide(side, configuration);
-	}
-
-	public int getIOConfiguration(int side) {
-		return getIOConfigurationWithFacing(side);
-	}
-
 	@Override
 	public int[] getAccessibleSlotsFromSide(int slot) {
 		return new int[] { 0 };
@@ -558,55 +599,51 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 
 	@Override
 	public boolean canInsertItem(int slot, ItemStack stack, int side) {
-		return (getIOConfigurationWithFacing(side) == SIDE_IO || getIOConfigurationWithFacing(side) == SIDE_ITEMS_ONLY)
-				&& allowAutoInput;
+		return (getSide(side) == SIDE_IO || getSide(side) == SIDE_ITEMS_ONLY) && allowAutoInput;
 	}
 
 	@Override
 	public boolean canExtractItem(int slot, ItemStack stack, int side) {
-		return (getIOConfigurationWithFacing(side) == SIDE_IO || getIOConfigurationWithFacing(side) == SIDE_ITEMS_ONLY);
+		return (getSide(side) == SIDE_IO || getSide(side) == SIDE_ITEMS_ONLY);
 	}
 
 	@Override
 	public int extractEnergy(ForgeDirection from, int maxExtract, boolean simulate) {
-		if (getIOConfigurationWithFacing(from.ordinal()) == SIDE_IO
-				|| getIOConfigurationWithFacing(from.ordinal()) == SIDE_ENERGY_ONLY)
+		if (getSide(from.ordinal()) == SIDE_IO || getSide(from.ordinal()) == SIDE_ENERGY_ONLY)
 			return super.extractEnergy(from, maxExtract, simulate);
 		return 0;
 	}
 
 	@Override
 	public int receiveEnergy(ForgeDirection from, int maxReceive, boolean simulate) {
-		if (getIOConfigurationWithFacing(from.ordinal()) == SIDE_IO
-				|| getIOConfigurationWithFacing(from.ordinal()) == SIDE_ENERGY_ONLY)
+		if (getSide(from.ordinal()) == SIDE_IO || getSide(from.ordinal()) == SIDE_ENERGY_ONLY)
 			return super.receiveEnergy(from, maxReceive, simulate);
 		return 0;
 	}
 
 	@Override
 	public boolean decrSide(int side) {
-		// int conf = getIOConfigurationWithFacing(side);
-		ioConfiguration[BlockHelper.ICON_ROTATION_MAP[facing][side]] = (ioConfiguration[BlockHelper.ICON_ROTATION_MAP[facing][side]]
-				- 1 > -1) ? ioConfiguration[BlockHelper.ICON_ROTATION_MAP[facing][side]] - 1 : SIDES_COUNT - 1;
+		setSide(side, (getSide(side) - 1 < 0) ? SIDES_COUNT - 1 : getSide(side) - 1);
 		updateAllBlocks();
 		return true;
 	}
 
 	@Override
 	public boolean incrSide(int side) {
-		// int conf = getIOConfigurationWithFacing(side);
-		ioConfiguration[BlockHelper.ICON_ROTATION_MAP[facing][side]] = (ioConfiguration[BlockHelper.ICON_ROTATION_MAP[facing][side]]
-				+ 1 < SIDES_COUNT) ? ioConfiguration[BlockHelper.ICON_ROTATION_MAP[facing][side]] + 1 : 0;
+		setSide(side, (getSide(side) + 1 >= SIDES_COUNT) ? 0 : getSide(side) + 1);
 		updateAllBlocks();
 		return true;
 	}
 
 	@Override
 	public boolean setSide(int side, int config) {
-		// int conf = getIOConfiguration(side);
-		ioConfiguration[BlockHelper.ICON_ROTATION_MAP[facing][side]] = config;
+		ioConfiguration[Util.relDirToAbsDir(facing, side)] = config;
 		updateAllBlocks();
 		return true;
+	}
+
+	public int getSide(int side) {
+		return ioConfiguration[Util.relDirToAbsDir(facing, side)];
 	}
 
 	@Override
@@ -639,10 +676,6 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 		return true;
 	}
 
-	public int getIOConfigurationWithFacing(int side) {
-		return ioConfiguration[BlockHelper.ICON_ROTATION_MAP[facing][side]];
-	}
-
 	@Override
 	public IIcon getTexture(int side, int pass) {
 		return this.blockType.getIcon(worldObj, xCoord, yCoord, zCoord, side);
@@ -650,24 +683,21 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 
 	@Override
 	public int fill(ForgeDirection from, FluidStack resource, boolean doFill) {
-		if (getIOConfiguration(from.ordinal()) == SIDE_FLUID_INPUT_ONLY
-				|| getIOConfiguration(from.ordinal()) == SIDE_IO)
+		if (getSide(from.ordinal()) == SIDE_FLUID_INPUT_ONLY || getSide(from.ordinal()) == SIDE_IO)
 			return tank.fill(resource, doFill);
 		return 0;
 	}
 
 	@Override
 	public FluidStack drain(ForgeDirection from, FluidStack resource, boolean doDrain) {
-		if (getIOConfiguration(from.ordinal()) == SIDE_FLUID_OUTPUT_ONLY
-				|| getIOConfiguration(from.ordinal()) == SIDE_IO)
+		if (getSide(from.ordinal()) == SIDE_FLUID_OUTPUT_ONLY || getSide(from.ordinal()) == SIDE_IO)
 			return tank.drain(resource.amount, doDrain);
 		return null;
 	}
 
 	@Override
 	public FluidStack drain(ForgeDirection from, int maxDrain, boolean doDrain) {
-		if (getIOConfiguration(from.ordinal()) == SIDE_FLUID_OUTPUT_ONLY
-				|| getIOConfiguration(from.ordinal()) == SIDE_IO)
+		if (getSide(from.ordinal()) == SIDE_FLUID_OUTPUT_ONLY || getSide(from.ordinal()) == SIDE_IO)
 			return tank.drain(maxDrain, doDrain);
 		return null;
 	}
@@ -675,20 +705,18 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 	@Override
 	public boolean canFill(ForgeDirection from, Fluid fluid) {
 		return tank.getCapacity() == tank.getFluidAmount()
-				&& (getIOConfiguration(from.ordinal()) == SIDE_FLUID_INPUT_ONLY
-						|| getIOConfiguration(from.ordinal()) == SIDE_IO);
+				&& (getSide(from.ordinal()) == SIDE_FLUID_INPUT_ONLY || getSide(from.ordinal()) == SIDE_IO);
 	}
 
 	@Override
 	public boolean canDrain(ForgeDirection from, Fluid fluid) {
-		return tank.getFluidAmount() > 0 && getIOConfiguration(from.ordinal()) == SIDE_IO
-				|| getIOConfiguration(from.ordinal()) == SIDE_FLUID_INPUT_ONLY;
+		return tank.getFluidAmount() > 0 && getSide(from.ordinal()) == SIDE_IO
+				|| getSide(from.ordinal()) == SIDE_FLUID_INPUT_ONLY;
 	}
 
 	@Override
 	public FluidTankInfo[] getTankInfo(ForgeDirection from) {
-		if (getIOConfiguration(from.ordinal()) == SIDE_FLUID_INPUT_ONLY
-				|| getIOConfiguration(from.ordinal()) == SIDE_IO)
+		if (getSide(from.ordinal()) == SIDE_FLUID_INPUT_ONLY || getSide(from.ordinal()) == SIDE_IO)
 			return new FluidTankInfo[] { tank.getInfo() };
 		return new FluidTankInfo[] {};
 	}
@@ -696,11 +724,44 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 	public FluidTank getTank() {
 		return tank;
 	}
-	
+
+	@Override
+	public void attachToComputer(IComputerAccess computer) {
+		this.computer = computer;
+		for (int i = 0; i < 6; i++)
+			if (wrappedPeripherals[i] != null)
+				wrappedPeripherals[i].setComputer(computer);
+	}
+
+	@Override
+	public void detachFromComputer(IComputerAccess computer) {
+		this.computer = null;
+	}
+
 	@Override
 	public void addNeightborCache(TileEntity tile, int x, int y, int z) {
-		super.addNeightborCache(tile, x, y, z);
-		
-		
+		if (worldObj.getTileEntity(x, y, z) != null)
+			super.addNeightborCache(tile, x, y, z);
+
+		int side = 0;
+		if (x < xCoord)
+			side = 5;
+		else if (x > xCoord)
+			side = 4;
+		else if (z < zCoord)
+			side = 3;
+		else if (z > zCoord)
+			side = 2;
+		else if (y < yCoord)
+			side = 1;
+		else if (y > yCoord)
+			side = 0;
+
+		connectedPeripherals[side] = getPeripheralAt(worldObj, x, y, z, side);
+		if (wrappedPeripherals[side] != null)
+			wrappedPeripherals[side].detach();
+		if (connectedPeripherals[side] != null) {
+			wrappedPeripherals[side] = new PeripheralLuaObjectWrap(connectedPeripherals[side], computer);
+		}
 	}
 }

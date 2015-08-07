@@ -86,14 +86,11 @@ public class BlockUniversalInterface extends Block implements ITileEntityProvide
 		if (world.getTileEntity(x, y, z) instanceof TileUniversalInterface) {
 			int rotation = BlockPistonBase.determineOrientation(world, x, y, z, entity);
 			TileUniversalInterface tile = (TileUniversalInterface) world.getTileEntity(x, y, z);
-			tile.setOutputFaceDir(rotation);
-			tile.setIOConfiguration(rotation, TileUniversalInterface.SIDE_IO);
+			tile.setFacing(rotation);
+			tile.setSide(rotation, TileUniversalInterface.SIDE_IO);
 
-			for (int i = 0; i < 6; i++) {
-				ForgeDirection current = ForgeDirection.getOrientation(i);
-				if (world.getTileEntity(current.offsetX + x, current.offsetY + y, current.offsetZ + z) != null)
-					onNeighborChange(world, x, y, z, current.offsetX + x, current.offsetY + y, current.offsetZ + z);
-			}
+			if (!world.isRemote)
+				onNeighborBlockChange(world, x, y, z, Blocks.air);
 		}
 	}
 
@@ -151,7 +148,7 @@ public class BlockUniversalInterface extends Block implements ITileEntityProvide
 		if (world.getTileEntity(x, y, z) instanceof TileUniversalInterface) {
 			TileUniversalInterface te = (TileUniversalInterface) world.getTileEntity(x, y, z);
 			if (side != te.getFacing()) {
-				switch (te.getIOConfigurationWithFacing(side)) {
+				switch (te.getSide(side)) {
 				case 0:
 					return neutralFace;
 				case 1:
@@ -168,7 +165,7 @@ public class BlockUniversalInterface extends Block implements ITileEntityProvide
 					return neutralFace;
 				}
 			} else {
-				switch (te.getIOConfigurationWithFacing(side)) {
+				switch (te.getSide(side)) {
 				case 0:
 					return neutralFace_faceDir;
 				case 1:
@@ -190,9 +187,14 @@ public class BlockUniversalInterface extends Block implements ITileEntityProvide
 	}
 
 	@Override
-	public void onNeighborChange(IBlockAccess world, int x, int y, int z, int tileX, int tileY, int tileZ) {
-		TileEnergyStorage tile = (TileEnergyStorage) world.getTileEntity(x, y, z);
-		tile.addNeightborCache(world.getTileEntity(tileX, tileY, tileZ), tileX, tileY, tileZ);
+	public void onNeighborBlockChange(World world, int x, int y, int z, Block block) {
+		TileUniversalInterface tile = (TileUniversalInterface) world.getTileEntity(x, y, z);
+		for (int i = 0; i < 6; i++) {
+			ForgeDirection current = ForgeDirection.getOrientation(i);
+
+			tile.addNeightborCache(world.getTileEntity(current.offsetX + x, current.offsetY + y, current.offsetZ + z),
+					x + current.offsetX, y + current.offsetY, z + current.offsetZ);
+		}
 	}
 
 	@Override

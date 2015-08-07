@@ -81,23 +81,27 @@ public class Peripheral implements IExtendablePeripheral, IPeripheral {
 		try {
 			String functionName = functionNames.get(method);
 			CCType[] requiredTypes = functionArgs.get(functionName);
-			if (requiredTypes.length == arguments.length) {
-				int i = 0;
-				for (CCType requiredType : requiredTypes) {
-					int returnValue;
-					if ((returnValue = requiredType.isValid(arguments[i])) != 1) {
-						if (returnValue == 0)
-							throw new LuaException("Invalid argument type in argument " + requiredType.getName() + "");
-						else if (returnValue == 2)
-							throw new LuaException("Arg " + i + " should be " + requiredType.getMinValue()
-									+ " or more and be " + requiredType.getMaxValue() + " or less");
-					}
-					i++;
-				}
-			} else
-				throw new LuaException(
-						((arguments.length < requiredTypes.length) ? "To few arguments " : "To many arguments ")
-								+ " to call " + functionName);
+			boolean skipTypeCheck = false;
+			if (requiredTypes.length > 0)
+				if (!skipTypeCheck)
+					if (requiredTypes.length == arguments.length) {
+						int i = 0;
+						for (CCType requiredType : requiredTypes) {
+							int returnValue;
+							if ((returnValue = requiredType.isValid(arguments[i])) != 1) {
+								if (returnValue == 0)
+									throw new LuaException(
+											"Invalid argument type in argument " + requiredType.getName() + "");
+								else if (returnValue == 2)
+									throw new LuaException("Arg " + i + " should be " + requiredType.getMinValue()
+											+ " or more and be " + requiredType.getMaxValue() + " or less");
+							}
+							i++;
+						}
+					} else
+						throw new LuaException(
+								((arguments.length < requiredTypes.length) ? "To few arguments " : "To many arguments ")
+										+ "to call " + functionName);
 			return peripheralHolders.get(functionName).callMethod(computer, context, functionNames.get(method),
 					arguments, turtle);
 		} catch (LuaException e) {
@@ -127,7 +131,7 @@ public class Peripheral implements IExtendablePeripheral, IPeripheral {
 	@Override
 	public void detach(IComputerAccess computer) {
 		for (int i = 0; i < peripheralCallbacks.size(); i++) {
-			 peripheralCallbacks.get(i).detachFromComputer(computer);
+			peripheralCallbacks.get(i).detachFromComputer(computer);
 		}
 	}
 

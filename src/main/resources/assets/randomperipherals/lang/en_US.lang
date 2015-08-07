@@ -1,6 +1,7 @@
 #Random Peripherals USA English Language File
 
 tile.universalInterface.name=Universal Interface
+tile.hologramProjector.name=Hologram Projector
 
 container.universalInterface=Universal Interface
 

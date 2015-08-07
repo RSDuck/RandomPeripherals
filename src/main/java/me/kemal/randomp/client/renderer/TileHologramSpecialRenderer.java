@@ -64,20 +64,22 @@ public class TileHologramSpecialRenderer extends TileEntitySpecialRenderer {
 			fRawBuffer = Tessellator.class.getDeclaredField("rawBuffer");
 			fRawBuffer.setAccessible(true);
 
-			fRawBufferSize = Tessellator.class.getDeclaredField("rawBufferSize");
-			fRawBufferSize.setAccessible(true);
-
-			fRawBufferIndex = Tessellator.class.getDeclaredField("rawBufferIndex");
-			fRawBufferIndex.setAccessible(true);
-
-			fHasColor = Tessellator.class.getDeclaredField("hasColor");
-			fHasColor.setAccessible(true);
-
 			fHasBrightness = Tessellator.class.getDeclaredField("hasBrightness");
 			fHasBrightness.setAccessible(true);
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			try{
+				fVertexCount = Tessellator.class.getDeclaredField("field_78406_i");//Vertex Count
+				fVertexCount.setAccessible(true);
+				
+				fRawBuffer = Tessellator.class.getDeclaredField("field_78405_h");//Rawbuffer
+				fRawBuffer.setAccessible(true);
+				
+				fHasBrightness = Tessellator.class.getDeclaredField("field_78414_p");//hasBrightness
+				fHasBrightness.setAccessible(true);
+			}catch(Exception e2){
+				e2.printStackTrace();
+			}
 		}
 	}
 

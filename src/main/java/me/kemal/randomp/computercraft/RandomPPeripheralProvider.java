@@ -19,11 +19,11 @@ public class RandomPPeripheralProvider implements IPeripheralProvider {
 		if (world.getTileEntity(x, y, z) instanceof IExtendablePeripheral) {
 			return ((IExtendablePeripheral) world.getTileEntity(x, y, z)).getPeripheral();
 		}
-		RandomPeripherals.logger.info(RandomPeripherals.tileEntitiesWithAutoRead.length);
 		if (world.getTileEntity(x, y, z) != null) {
 			for (int i = 0; i < RandomPeripherals.tileEntitiesWithAutoRead.length; i++)
 				if (Block.blockRegistry.getNameForObject(world.getBlock(x, y, z))
-						.contains(RandomPeripherals.tileEntitiesWithAutoRead[i])) {
+						.contains(RandomPeripherals.tileEntitiesWithAutoRead[i])
+						|| RandomPeripherals.tileEntitiesWithAutoRead[i] == "*") {
 					return new PeripheralUniversalNBTRead(world.getTileEntity(x, y, z)).getPeripheral();
 				}
 		}

@@ -3,6 +3,7 @@ package me.kemal.randomp.util;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Random;
 import java.util.Map.Entry;
 import java.util.Set;
 
@@ -140,7 +141,7 @@ public class Util {
 			return -1;
 		if (ItemHelper.itemsEqualForCrafting(stackA, stackB) && stackA.stackSize < stackA.getMaxStackSize())
 			if (stackA.stackSize + stackB.stackSize > stackA.getMaxStackSize()) {
-				
+
 			}
 
 		return -1;
@@ -244,7 +245,7 @@ public class Util {
 
 	public static int readableRelDirToRelForgeDir(String dir) {
 		int output = -1;
-		final String[] dirs = new String[] { "bottom", "top", "back", "front", "left", "right" };
+		final String[] dirs = new String[] { "bottom", "top", "front", "back", "left", "right" };
 		for (int i = 0; i < dirs.length; i++)
 			if (dirs[i].indexOf(dir) != -1) {
 				output = i;
@@ -266,7 +267,22 @@ public class Util {
 	}
 
 	public static int relDirToAbsDir(int dirA, int dirB) {
-		return (int) BlockHelper.ICON_ROTATION_MAP[dirA][dirB];
+		switch (dirB) {
+		case 2:
+			return dirA;
+		case 3:
+			return BlockHelper.SIDE_OPPOSITE[dirA];
+		case 0:
+			return BlockHelper.SIDE_BELOW[dirA];
+		case 1:
+			return BlockHelper.SIDE_ABOVE[dirA];
+		case 4:
+			return BlockHelper.SIDE_LEFT[dirA];
+		case 5:
+			return BlockHelper.SIDE_RIGHT[dirA];
+		default:
+			return -1;
+		}
 	}
 
 	public static int[] dirToCoord(int dir) {

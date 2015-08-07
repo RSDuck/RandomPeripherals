@@ -100,22 +100,22 @@ public class TabConfiguration extends TabBase {
 			TileUniversalInterface te = (TileUniversalInterface) myTile;
 			if (40 <= mouseX && mouseX < 56 && 24 <= mouseY && mouseY < 40) {
 				list.add(StringHelper.localize("me.kemal.randomperipheral.ui.sideConfig."
-						+ te.getIOConfigurationWithFacing(ForgeDirection.UP.ordinal())));
+						+ te.getSide(BlockHelper.SIDE_ABOVE[myTile.getFacing()])));
 			} else if (20 <= mouseX && mouseX < 36 && 44 <= mouseY && mouseY < 60) {
 				list.add(StringHelper.localize("me.kemal.randomperipheral.ui.sideConfig."
-						+ te.getIOConfigurationWithFacing(ForgeDirection.WEST.ordinal())));
+						+ te.getSide(BlockHelper.SIDE_LEFT[myTile.getFacing()])));
 			} else if (40 <= mouseX && mouseX < 56 && 44 <= mouseY && mouseY < 60) {
-				list.add(StringHelper.localize("me.kemal.randomperipheral.ui.sideConfig."
-						+ te.getIOConfigurationWithFacing(ForgeDirection.SOUTH.ordinal())));
+				list.add(StringHelper
+						.localize("me.kemal.randomperipheral.ui.sideConfig." + te.getSide(myTile.getFacing())));
 			} else if (60 <= mouseX && mouseX < 76 && 44 <= mouseY && mouseY < 60) {
 				list.add(StringHelper.localize("me.kemal.randomperipheral.ui.sideConfig."
-						+ te.getIOConfigurationWithFacing(ForgeDirection.EAST.ordinal())));
+						+ te.getSide(BlockHelper.SIDE_RIGHT[myTile.getFacing()])));
 			} else if (40 <= mouseX && mouseX < 56 && 64 <= mouseY && mouseY < 80) {
 				list.add(StringHelper.localize("me.kemal.randomperipheral.ui.sideConfig."
-						+ te.getIOConfigurationWithFacing(ForgeDirection.DOWN.ordinal())));
+						+ te.getSide(BlockHelper.SIDE_BELOW[myTile.getFacing()])));
 			} else if (60 <= mouseX && mouseX < 76 && 64 <= mouseY && mouseY < 80) {
 				list.add(StringHelper.localize("me.kemal.randomperipheral.ui.sideConfig."
-						+ te.getIOConfigurationWithFacing(ForgeDirection.NORTH.ordinal())));
+						+ te.getSide(BlockHelper.SIDE_OPPOSITE[myTile.getFacing()])));
 			}
 		}
 	}

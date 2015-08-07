@@ -1,6 +1,7 @@
 #Random Peripherals German Language File
 
 tile.universalInterface.name=Universelle Schnittstelle
+tile.hologramProjector.name=Hologramm Projektor
 
 container.universalInterface=Unverselle Schnittstelle
 

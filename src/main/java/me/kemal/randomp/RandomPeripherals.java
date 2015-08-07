@@ -196,7 +196,6 @@ public class RandomPeripherals {
 
 	@SubscribeEvent
 	public void playerInteract(PlayerInteractEvent event) {
-		RandomPeripherals.logger.info("Player Interact!" + event.world.isRemote);
 		if ((event.action == PlayerInteractEvent.Action.LEFT_CLICK_BLOCK
 				|| event.action == PlayerInteractEvent.Action.RIGHT_CLICK_BLOCK)
 				&& event.world.getBlock(event.x, event.y, event.z) instanceof BlockHologram && !event.world.isRemote) {

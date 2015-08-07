@@ -223,6 +223,9 @@ public class TileHologramProjector extends TileEntity implements IExtendablePeri
 			return new Object[] { getBlockMetadata(x, y, z) };
 		}
 		case "clear": {
+			Block block = Block.getBlockFromName((String) arguments[0]);
+			if (block == null)
+				return new Object[] { false };
 			for (int i = 0; i < hologram.length; i++)
 				hologram[i] = (String) arguments[0];
 			for (int i = 0; i < hologramMeta.length; i++)
@@ -232,7 +235,7 @@ public class TileHologramProjector extends TileEntity implements IExtendablePeri
 
 			getWorldObj().markBlockForUpdate(xCoord, yCoord, zCoord);
 			getWorldObj().markBlockRangeForRenderUpdate(xCoord, yCoord, zCoord, 1, 1, 1);
-			return new Object[] {};
+			return new Object[] { true };
 		}
 		case "draw": {
 			HashMap<Integer, Object> args = (HashMap<Integer, Object>) arguments[0];

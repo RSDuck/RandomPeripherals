@@ -3,6 +3,8 @@ package me.kemal.randomp.util;
 import java.util.HashMap;
 import java.util.Map;
 
+import dan200.computercraft.api.lua.ILuaObject;
+
 public class CCType {
 	private Class<?> type;
 	private String name;
@@ -10,6 +12,7 @@ public class CCType {
 	private int maxValue;
 	private int minValue;
 	private boolean rangeChecker;
+	private boolean ignoreArgumentCount;
 
 	public CCType(Class<?> type, String name, String description) {
 		this.type = type;
@@ -17,6 +20,7 @@ public class CCType {
 		this.description = description;
 		this.minValue = 0;
 		this.maxValue = 0;
+		this.ignoreArgumentCount = false;
 	}
 
 	public CCType(Class<?> type, String description) {
@@ -24,6 +28,7 @@ public class CCType {
 		this.description = description;
 		this.minValue = 0;
 		this.maxValue = 0;
+		this.ignoreArgumentCount = false;
 	}
 
 	public CCType(Class<?> type, String name, String description, int minValue, int maxValue) {
@@ -31,6 +36,17 @@ public class CCType {
 		this.minValue = minValue;
 		this.maxValue = maxValue;
 		this.rangeChecker = true;
+		this.ignoreArgumentCount = false;
+	}
+
+	public CCType(String description, String name) {
+		ignoreArgumentCount = true;
+		this.description = description;
+		this.name = name;
+	}
+
+	public boolean ignoreTypeAndArgumentCount() {
+		return ignoreArgumentCount;
 	}
 
 	public int isValid(Object obj) {
@@ -65,6 +81,9 @@ public class CCType {
 			return "table";
 		if (type.isAssignableFrom(Map.class))
 			return "table";
+		if (type.isAssignableFrom(ILuaObject.class)) {
+			return "table";
+		}
 		if (type.isAssignableFrom(null)) {
 			return "nil";
 		}
@@ -93,7 +112,10 @@ public class CCType {
 		if (name != null)
 			hashMap.put("name", name);
 		hashMap.put("description", description);
-		hashMap.put("type", JavaToLuaType(type));
+		if (type != null)
+			hashMap.put("type", JavaToLuaType(type));
+		else if (ignoreArgumentCount)
+			hashMap.put("type", "...");
 		return hashMap;
 	}
 }
