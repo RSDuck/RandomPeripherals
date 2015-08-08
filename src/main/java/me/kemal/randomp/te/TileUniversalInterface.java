@@ -328,6 +328,7 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 				throw new LuaException("Invalid Direction");
 
 			ItemStack extractedStackBackup = null;
+			int oldStackSize = (heldStack == null) ? 0 : heldStack.stackSize;
 
 			ForgeDirection dirs = ForgeDirection.values()[direction];
 			TileEntity te = worldObj.getTileEntity(dirs.offsetX + xCoord, dirs.offsetY + yCoord, dirs.offsetZ + zCoord);
@@ -348,16 +349,26 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 									: heldStack.getMaxStackSize() - heldStack.stackSize;
 							extractedStack = (amount <= 0)
 									? sidedInv.getStackInSlot(i)
-											.splitStack(Math.min(space,
-													(heldStack == null) ? sidedInv.getStackInSlot(i).getMaxStackSize()
-															: heldStack.getMaxStackSize()))
-									: sidedInv.getStackInSlot(i).splitStack(Math.min(space, amount));
+											.splitStack(
+													Math.min(
+															Math.min(space,
+																	(heldStack == null)
+																			? sidedInv.getStackInSlot(i)
+																					.getMaxStackSize()
+																			: heldStack.getMaxStackSize()),
+															sidedInv.getStackInSlot(i).stackSize))
+									: sidedInv.getStackInSlot(i).splitStack(
+											Math.min(Math.min(space, amount), sidedInv.getStackInSlot(i).stackSize));
 							if (heldStack == null)
 								heldStack = extractedStack;
 							else
 								heldStack.stackSize += extractedStack.stackSize;
 							if (sidedInv.getStackInSlot(i).stackSize == 0)
 								sidedInv.setInventorySlotContents(i, null);
+							extractedStackBackup = extractedStack;
+							if ((heldStack != null) ? heldStack.stackSize == heldStack.getMaxStackSize() : false)
+								break;
+
 						}
 					}
 				} else {
@@ -368,17 +379,25 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 									: heldStack.getMaxStackSize() - heldStack.stackSize;
 							extractedStack = (amount <= 0)
 									? inventory.getStackInSlot(i)
-											.splitStack(Math.min(space,
-													(heldStack == null) ? inventory.getStackInSlot(i).getMaxStackSize()
-															: heldStack.getMaxStackSize()))
-									: inventory.getStackInSlot(i).splitStack(Math.min(space, amount));
+											.splitStack(
+													Math.min(
+															Math.min(space,
+																	(heldStack == null)
+																			? inventory.getStackInSlot(i)
+																					.getMaxStackSize()
+																			: heldStack.getMaxStackSize()),
+															inventory.getStackInSlot(i).stackSize))
+									: inventory.getStackInSlot(i).splitStack(
+											Math.min(Math.min(space, amount), inventory.getStackInSlot(i).stackSize));
 							if (heldStack == null)
 								heldStack = extractedStack;
 							else
 								heldStack.stackSize += extractedStack.stackSize;
 							if (inventory.getStackInSlot(i).stackSize == 0)
 								inventory.setInventorySlotContents(i, null);
-
+							extractedStackBackup = extractedStack;
+							if ((heldStack != null) ? heldStack.stackSize == heldStack.getMaxStackSize() : false)
+								break;
 						}
 					}
 				}
@@ -388,7 +407,8 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 				}
 			}
 
-			return new Object[] { (extractedStackBackup != null), CCUtils.stackToMap(extractedStackBackup) };
+			return new Object[] { (heldStack != null) ? heldStack.stackSize > oldStackSize : false,
+					CCUtils.stackToMap(extractedStackBackup) };
 		}
 		case "setAllowAutoInput": {
 			allowAutoInput = (Boolean) arguments[0];
@@ -505,7 +525,7 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 
 			if (direction == -1)
 				throw new LuaException("Invalid Direction");
-			
+
 			return new Object[] { wrappedPeripherals[direction] };
 		}
 		default: {
@@ -730,7 +750,7 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 		this.computer = computer;
 		for (int i = 0; i < 6; i++)
 			if (wrappedPeripherals[i] != null)
-				wrappedPeripherals[i].setComputer(computer);
+				wrappedPeripherals[i].attach(computer);
 	}
 
 	@Override
@@ -757,11 +777,18 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 		else if (y > yCoord)
 			side = 0;
 
-		connectedPeripherals[side] = getPeripheralAt(worldObj, x, y, z, side);
-		if (wrappedPeripherals[side] != null)
-			wrappedPeripherals[side].detach();
-		if (connectedPeripherals[side] != null) {
-			wrappedPeripherals[side] = new PeripheralLuaObjectWrap(connectedPeripherals[side], computer);
+		IPeripheral connectedPeripheral = getPeripheralAt(worldObj, x, y, z, side);
+		if (connectedPeripherals[side] != connectedPeripheral) {
+			connectedPeripherals[side] = connectedPeripheral;
+
+			if (wrappedPeripherals[side] != null)
+				wrappedPeripherals[side].detach();
+			if (connectedPeripherals[side] != null) {
+				wrappedPeripherals[side] = new PeripheralLuaObjectWrap(connectedPeripherals[side], computer);
+			}
+
+			RandomPeripherals.logger.info("addNeightborCache side: " + side + " connectedPeripheral: "
+					+ ((connectedPeripherals[side] == null) ? "null" : connectedPeripherals[side].getType()));
 		}
 	}
 }
