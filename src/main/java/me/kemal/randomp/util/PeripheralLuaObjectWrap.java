@@ -13,13 +13,9 @@ public class PeripheralLuaObjectWrap implements ILuaObject {
 
 	public PeripheralLuaObjectWrap(IPeripheral peripheral, IComputerAccess computer) {
 		this.peripheral = peripheral;
-		this.computer = new ComputerUIWrapDummy(computer);
+		this.computer = computer;
 
-		try {
-			if (this.computer != null)
-				peripheral.attach(this.computer);
-		} catch (Exception e) {
-		}
+		//peripheral.attach(computer);
 	}
 
 	public IPeripheral getPeripheral() {
@@ -38,16 +34,12 @@ public class PeripheralLuaObjectWrap implements ILuaObject {
 	@Override
 	public Object[] callMethod(ILuaContext context, int method, Object[] arguments)
 			throws LuaException, InterruptedException {
-		return (peripheral != null && computer != null) ? peripheral.callMethod(computer, context, method, arguments)
-				: null;
+		return (peripheral != null) ? peripheral.callMethod(computer, context, method, arguments) : new Object[] {};
 	}
 
 	public void detach() {
-		if (peripheral != null && computer != null)
-			try {
-				peripheral.detach(computer);
-			} catch (Exception e) {
-			}
+		//if (peripheral != null)
+		//	peripheral.detach(computer);
 		peripheral = null;
 	}
 
@@ -55,12 +47,7 @@ public class PeripheralLuaObjectWrap implements ILuaObject {
 		this.peripheral = peripheral;
 	}
 
-	public void attach(IComputerAccess computer2) {
+	public void setComputer(IComputerAccess computer2) {
 		computer = computer2;
-		try {
-			if (this.computer != null)
-				peripheral.attach(this.computer);
-		} catch (Exception e) {
-		}
 	}
 }

@@ -66,9 +66,11 @@ public class TileHologramProjector extends TileEntity implements IExtendablePeri
 			hologramMeta[i] = 0;
 
 		peripheral.AddMethod("setBlock", "Sets the projected block at the specific coordinates",
-				new CCType[] { new CCType(Double.class, "x",
-						"The X-Coordinate of the block, has to be 0 or more and less than 8", 0, 7),
-				new CCType(Double.class, "y", "The Y-Coordinate of the block, has be 0 or moreand less than 8", 0, 7),
+				new CCType[] {
+						new CCType(Double.class, "x",
+								"The X-Coordinate of the block, has to be more than 0 and less than 8", 0, 7),
+						new CCType(Double.class, "y",
+								"The Y-Coordinate of the block, has to be more than 0 and less than 8", 0, 7),
 				new CCType(Double.class, "z", "The Z-Coordinate of the block, has to be more than 0 and less than 8", 0,
 						7),
 				new CCType(String.class, "block",
@@ -76,23 +78,23 @@ public class TileHologramProjector extends TileEntity implements IExtendablePeri
 				new CCType[] { new CCType(Boolean.class, "True if the block was sucsessfull set") }, this);
 		peripheral.AddMethod("getBlock", "Returns the id name of the projected block at the specific coordinates",
 				new CCType[] { new CCType(Double.class, "x",
-						"The X-Coordinate of the block, you want to get, has to be 0 or more and less than 8", 0, 7),
+						"The X-Coordinate of the block, you want to get, has to be more than 0 and less than 8", 0, 7),
 						new CCType(Double.class, "y",
-								"The Y-Coordinate of the block, you want to get, has to be 0 or more and less than 8",
+								"The Y-Coordinate of the block, you want to get, has to be more than 0 and less than 8",
 								0, 7),
 						new CCType(Double.class, "z",
-								"The Z-Coordinate of the block, you want to get, has to be 0 or more and less than 8",
+								"The Z-Coordinate of the block, you want to get, has to be more than 0 and less than 8",
 								0, 7) },
 				new CCType[] { new CCType(String.class, "The id name of the block") }, this);
 
 		peripheral.AddMethod("setMeta", "Sets the meta data of an projected block at the specified coordinates",
 				new CCType[] { new CCType(Double.class, "x",
-						"The X-Coordinate of the block, you want to set, has to be 0 or more and less than 8", 0, 7),
+						"The X-Coordinate of the block, you want to set, has to be more than 0 and less than 8", 0, 7),
 						new CCType(Double.class, "y",
-								"The Y-Coordinate of the block, you want to set, has to be 0 or more and less than 8",
+								"The Y-Coordinate of the block, you want to set, has to be more than 0 and less than 8",
 								0, 7),
 						new CCType(Double.class, "z",
-								"The Z-Coordinate of the block, you want to set, has to be 0 or more and less than 8",
+								"The Z-Coordinate of the block, you want to set, has to be more than 0 and less than 8",
 								0, 7),
 						new CCType(Double.class, "meta", "The new meta data of the block", 0, 16) },
 				new CCType[] {}, this);
@@ -100,13 +102,13 @@ public class TileHologramProjector extends TileEntity implements IExtendablePeri
 		peripheral.AddMethod("getMeta", "Returns the meta data of the projected block at the specific coordinates",
 				new CCType[] {
 						new CCType(Double.class, "x",
-								"The X-Coordinate of the block, you want to get the meta data, has to be 0 or more and less than 8",
+								"The X-Coordinate of the block, you want to get the meta data, has to be more than 0 and less than 8",
 								0, 7),
 						new CCType(Double.class, "y",
-								"The Y-Coordinate of the block, you want to get the meta data, has to be 0 or more and less than 8",
+								"The Y-Coordinate of the block, you want to get the meta data, has to be more than 0 and less than 8",
 								0, 7),
 						new CCType(Double.class, "z",
-								"The Z-Coordinate of the block, you want to get the meta data, has to be 0 or more and less than 8",
+								"The Z-Coordinate of the block, you want to get the meta data, has to be more than 0 and less than 8",
 								0, 7) },
 				new CCType[] { new CCType(Double.class, "The meta data of the block") }, this);
 		peripheral.AddMethod("draw", "Uses the given table to set the blocks of the hologram",
@@ -352,8 +354,7 @@ public class TileHologramProjector extends TileEntity implements IExtendablePeri
 	public void onBlockClick(float clickX, float clickY, float clickZ, int side, int button, ItemStack heldItem) {
 		if (attachedComputer != null) {
 			HashMap<String, Object> heldItemCC = CCUtils.stackToMap(heldItem);
-			if (heldItem != null)
-				heldItemCC.put("isBlock", Block.getBlockFromItem(heldItem.getItem()) != Blocks.air);
+			heldItemCC.put("isBlock", Block.getBlockFromItem(heldItem.getItem()) != Blocks.air);
 
 			String[] sides = new String[] { "bottom", "top", "north", "south", "west", "east" };
 			attachedComputer.queueEvent("hologramTouch", new Object[] { button, (int) (clickX * 8.f),
