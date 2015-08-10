@@ -5,6 +5,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Vector;
 
+import org.lwjgl.util.vector.Matrix3f;
+
 import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -35,6 +37,8 @@ import net.minecraftforge.common.MinecraftForge;
 public class BlockHologram extends Block implements ITileEntityProvider {
 
 	public final static String blockName = "hologram";
+
+	private RayTracer raytracer = new RayTracer();
 
 	public BlockHologram() {
 		super(Material.glass);
@@ -90,30 +94,40 @@ public class BlockHologram extends Block implements ITileEntityProvider {
 
 		if (world.getTileEntity(x, y - 1, z) instanceof TileHologramProjector) {
 			TileHologramProjector te = (TileHologramProjector) world.getTileEntity(x, y - 1, z);
+			if (te.isTouchScreenFeatureAvailable()) {
+				double sin = Math.sin(Math.toRadians(te.getRotation()));
+				double cos = Math.cos(Math.toRadians(te.getRotation()));
 
-			for (int hy = 0; hy < TileHologramProjector.hologramHeight; hy++) {
-				for (int hz = 0; hz < TileHologramProjector.hologramDepth; hz++) {
-					for (int hx = 0; hx < TileHologramProjector.hologramWidth; hx++) {
-						if (!te.isAirBlock(hx, hy, hz)) {
-							double cX = (double) hx / (double) TileHologramProjector.hologramWidth;
-							double cY = (double) hy / (double) TileHologramProjector.hologramHeight;
-							double cZ = (double) hz / (double) TileHologramProjector.hologramDepth;
+				final double centerX = TileHologramProjector.hologramWidth / 2 - 0.5;
+				final double centerZ = TileHologramProjector.hologramDepth / 2 - 0.5;
 
-							cuboids.add(new IndexedCuboid6(
-									(hz * TileHologramProjector.hologramWidth)
-											+ (hy * (TileHologramProjector.hologramWidth
-													* TileHologramProjector.hologramDepth))
-											+ hx,
-									new Cuboid6(new Vector3((double) x + cX, (double) y + cY, (double) z + cZ),
-											new Vector3((double) x + cX + 0.125, (double) y + cY + 0.125,
-													(double) z + cZ + 0.125))));
+				for (int hy = 0; hy < TileHologramProjector.hologramHeight; hy++) {
+					for (int hz = 0; hz < TileHologramProjector.hologramDepth; hz++) {
+						for (int hx = 0; hx < TileHologramProjector.hologramWidth; hx++) {
+							double m = (double) hx - centerX;
+							double n = (double) hz - centerZ;
+
+							int rotX = Math.round((float) ((m * cos + n * sin) + centerX));
+							int rotZ = Math.round((float) ((n * cos - m * sin) + centerZ));
+							int rotY = hy;
+
+							if (!te.isAirBlock(hx, hy, hz)) {
+								double cX = (double) rotX / (double) TileHologramProjector.hologramWidth;
+								double cY = (double) rotY / (double) TileHologramProjector.hologramHeight;
+								double cZ = (double) rotZ / (double) TileHologramProjector.hologramDepth;
+
+								cuboids.add(new IndexedCuboid6((hx) | (hy << 8) | (hz << 16),
+										new Cuboid6(new Vector3((double) x + cX, (double) y + cY, (double) z + cZ),
+												new Vector3((double) x + cX + 0.125, (double) y + cY + 0.125,
+														(double) z + cZ + 0.125))));
+							}
 						}
 					}
 				}
 			}
 		}
-		return RayTracer.instance().rayTraceCuboids(new Vector3(start), new Vector3(end), cuboids,
-				new BlockCoord(x, y, z), this);
+		return raytracer.rayTraceCuboids(new Vector3(start), new Vector3(end), cuboids, new BlockCoord(x, y, z), this);
+
 	}
 
 	@Override
@@ -124,5 +138,9 @@ public class BlockHologram extends Block implements ITileEntityProvider {
 	@Override
 	public int getRenderBlockPass() {
 		return 1;
+	}
+
+	public RayTracer getRaytracer() {
+		return raytracer;
 	}
 }

@@ -68,16 +68,17 @@ public class TileHologramSpecialRenderer extends TileEntitySpecialRenderer {
 			fHasBrightness.setAccessible(true);
 
 		} catch (Exception e) {
-			try{
-				fVertexCount = Tessellator.class.getDeclaredField("field_78406_i");//Vertex Count
+			try {
+				fVertexCount = Tessellator.class.getDeclaredField("field_78406_i");// Vertex
+																					// Count
 				fVertexCount.setAccessible(true);
-				
-				fRawBuffer = Tessellator.class.getDeclaredField("field_78405_h");//Rawbuffer
+
+				fRawBuffer = Tessellator.class.getDeclaredField("field_78405_h");// Rawbuffer
 				fRawBuffer.setAccessible(true);
-				
-				fHasBrightness = Tessellator.class.getDeclaredField("field_78414_p");//hasBrightness
+
+				fHasBrightness = Tessellator.class.getDeclaredField("field_78414_p");// hasBrightness
 				fHasBrightness.setAccessible(true);
-			}catch(Exception e2){
+			} catch (Exception e2) {
 				e2.printStackTrace();
 			}
 		}
@@ -87,59 +88,65 @@ public class TileHologramSpecialRenderer extends TileEntitySpecialRenderer {
 	public void renderTileEntityAt(TileEntity tile, double x, double y, double z, float f) {
 		TileEntity projector = tile.getWorldObj().getTileEntity(tile.xCoord, tile.yCoord - 1, tile.zCoord);
 		if (projector instanceof TileHologramProjector) {
-				Tessellator t = Tessellator.instance;
+			Tessellator t = Tessellator.instance;
 
-				t.startDrawingQuads();
+			t.startDrawingQuads();
 
-				IBlockAccess backupAccess = RenderBlocks.getInstance().blockAccess;
-				RenderBlocks.getInstance().blockAccess = (IBlockAccess) projector;
+			IBlockAccess backupAccess = RenderBlocks.getInstance().blockAccess;
+			RenderBlocks.getInstance().blockAccess = (IBlockAccess) projector;
 
-				try {
-					int previousVertexCount = fVertexCount.getInt(t);
+			t.setTranslation(-(double) TileHologramProjector.hologramWidth / 2.0, 0.0,
+					-(double) TileHologramProjector.hologramDepth / 2.0);
 
-					for (int y1 = 0; y1 < TileHologramProjector.hologramHeight; y1++) {
-						for (int z1 = 0; z1 < TileHologramProjector.hologramDepth; z1++) {
-							for (int x1 = 0; x1 < TileHologramProjector.hologramWidth; x1++) {
-								try {
-									RenderBlocks.getInstance().renderBlockByRenderType(
-											((TileHologramProjector) projector).getBlock(x1, y1, z1), x1, y1, z1);
-								} catch (Exception e) {
-								}
-								if (fVertexCount.getInt(t) == previousVertexCount
-										&& !((TileHologramProjector) projector).isAirBlock(x1, y1, z1)) {
-									RenderBlocks.getInstance().renderStandardBlock(
-											((TileHologramProjector) projector).getBlock(x1, y1, z1), x1, y1, z1);
-								}
-								previousVertexCount = fVertexCount.getInt(t);
+			try {
+				int previousVertexCount = fVertexCount.getInt(t);
+
+				for (int y1 = 0; y1 < TileHologramProjector.hologramHeight; y1++) {
+					for (int z1 = 0; z1 < TileHologramProjector.hologramDepth; z1++) {
+						for (int x1 = 0; x1 < TileHologramProjector.hologramWidth; x1++) {
+							try {
+								RenderBlocks.getInstance().renderBlockByRenderType(
+										((TileHologramProjector) projector).getBlock(x1, y1, z1), x1, y1, z1);
+							} catch (Exception e) {
 							}
+							if (fVertexCount.getInt(t) == previousVertexCount
+									&& !((TileHologramProjector) projector).isAirBlock(x1, y1, z1)) {
+								RenderBlocks.getInstance().renderStandardBlock(
+										((TileHologramProjector) projector).getBlock(x1, y1, z1), x1, y1, z1);
+							}
+							previousVertexCount = fVertexCount.getInt(t);
 						}
 					}
-				} catch (Exception e) {
-					e.printStackTrace();
 				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 
-				RenderBlocks.getInstance().blockAccess = backupAccess;
+			RenderBlocks.getInstance().blockAccess = backupAccess;
 
-				try {
-					fHasBrightness.setBoolean(t, false);
-				} catch (IllegalArgumentException | IllegalAccessException e) {
-					e.printStackTrace();
-				}
+			try {
+				fHasBrightness.setBoolean(t, false);
+			} catch (IllegalArgumentException | IllegalAccessException e) {
+				e.printStackTrace();
+			}
 
-				GL11.glPushMatrix();
+			GL11.glPushMatrix();
 
-				Minecraft.getMinecraft().getTextureManager().bindTexture(TextureMap.locationBlocksTexture);
-				RenderHelper.disableStandardItemLighting();
+			Minecraft.getMinecraft().getTextureManager().bindTexture(TextureMap.locationBlocksTexture);
+			RenderHelper.disableStandardItemLighting();
 
-				GL11.glTranslated(x, y, z);
-				GL11.glScalef(0.125f, 0.125f, 0.125f);
-				GL11.glColor4f(1.f, 1.f, 1.f, 1.f);
+			GL11.glTranslated(x + 0.5, y, z + 0.5);
+			GL11.glScalef(0.125f, 0.125f, 0.125f);
+			GL11.glColor4f(1.f, 1.f, 1.f, 1.f);
+			GL11.glRotatef((float) ((TileHologramProjector) projector).getRotation(), 0.f, 1.f, 0.f);
 
-				t.draw();
+			t.draw();
 
-				RenderHelper.enableStandardItemLighting();
+			RenderHelper.enableStandardItemLighting();
 
-				GL11.glPopMatrix();
+			GL11.glPopMatrix();
+
+			t.setTranslation(0.0, 0.0, 0.0);
 		}
 	}
 

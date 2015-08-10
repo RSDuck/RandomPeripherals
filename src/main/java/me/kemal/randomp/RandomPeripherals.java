@@ -10,6 +10,7 @@ import cofh.api.item.IToolHammer;
 import cofh.api.modhelpers.ThaumcraftHelper;
 import cofh.api.modhelpers.ThermalExpansionHelper;
 import cofh.lib.util.ItemWrapper;
+import cofh.lib.util.helpers.BlockHelper;
 import cofh.lib.util.helpers.FluidHelper;
 import me.kemal.randomp.block.BlockHologram;
 import me.kemal.randomp.block.BlockHologramProjector;
@@ -41,10 +42,12 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.world.WorldSettings.GameType;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
+import net.minecraftforge.common.util.ForgeDirection;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.world.BlockEvent.BreakEvent;
 import net.minecraftforge.oredict.OreDictionary;
@@ -115,7 +118,7 @@ public class RandomPeripherals {
 
 	public static int inventoryTurtleUpgradeID;
 	public static int dispenserTurtleUpgradeID;
-	
+
 	public static boolean forceVanillaRecipes;
 
 	public static String[] tileEntitiesWithAutoRead;
@@ -194,6 +197,9 @@ public class RandomPeripherals {
 		event.registerServerCommand(new CommandItemName());
 	}
 
+	public final int[][] faceRotThing = { { 0, 1, 2, 3, 4, 5 }, { 0, 1, 5, 4, 2, 3 }, { 0, 1, 3, 2, 5, 4 },
+			{ 0, 1, 4, 5, 3, 2 } };
+
 	@SubscribeEvent
 	public void playerInteract(PlayerInteractEvent event) {
 		if ((event.action == PlayerInteractEvent.Action.LEFT_CLICK_BLOCK
@@ -203,10 +209,23 @@ public class RandomPeripherals {
 			TileEntity te = event.world.getTileEntity(event.x, event.y - 1, event.z);
 			if (te instanceof TileHologramProjector) {
 				TileHologramProjector projector = (TileHologramProjector) te;
-				projector.onBlockClick((float) blockHologram.getBlockBoundsMinX(),
-						(float) blockHologram.getBlockBoundsMinY(), (float) blockHologram.getBlockBoundsMinZ(),
-						event.face, (event.action == PlayerInteractEvent.Action.LEFT_CLICK_BLOCK) ? 0 : 1,
-						event.entityPlayer.getHeldItem());
+
+				MovingObjectPosition mov = ((BlockHologram) blockHologram).getRaytracer().retraceBlock(event.world,
+						event.entityPlayer, event.x, event.y, event.z);
+
+				if (mov == null)
+					return;
+
+				int subHitX = (mov.subHit & 0xff);
+				int subHitY = ((mov.subHit >> 8) & 0xff);
+				int subHitZ = ((mov.subHit >> 16) & 0xff);
+
+				projector
+						.onBlockClick(subHitX, subHitY, subHitZ,
+								faceRotThing[(projector.getRotation() == 0) ? 0
+										: projector.getRotation() / 90][event.face],
+								(event.action == PlayerInteractEvent.Action.LEFT_CLICK_BLOCK) ? 0 : 1,
+								event.entityPlayer.getHeldItem());
 			}
 		}
 	}
@@ -222,9 +241,10 @@ public class RandomPeripherals {
 		dispenserTurtleUpgradeID = config.getInt("dispenserTurtleUpgrade", config.CATEGORY_GENERAL, 154, 63, 255,
 				"The ID of the Dispenser Turtle Upgrade", "me.kemal.randomperipheral.idOfUpgradeDispenser");
 		tileEntitiesWithAutoRead = config.getStringList("autoWrappedPeripherals", config.CATEGORY_GENERAL,
-				new String[] { "minecraft:furnace" },
+				new String[] {},
 				"If you add an block name to this list, it can be used as peripheral and you can read its NBT Data");
-		forceVanillaRecipes = config.getBoolean("forceVanillaRecipes", config.CATEGORY_GENERAL, false,"If enabled no items of external mods will be used in crafting recipes");
+		forceVanillaRecipes = config.getBoolean("forceVanillaRecipes", config.CATEGORY_GENERAL, false,
+				"If enabled no items of external mods will be used in crafting recipes");
 		if (config.hasChanged()) {
 			config.save();
 		}

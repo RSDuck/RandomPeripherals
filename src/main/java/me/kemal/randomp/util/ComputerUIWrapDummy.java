@@ -43,7 +43,7 @@ public class ComputerUIWrapDummy implements IComputerAccess {
 
 	@Override
 	public void queueEvent(String event, Object[] arguments) {
-		//computer.queueEvent(event, arguments);
+		computer.queueEvent(event, arguments);
 	}
 
 	@Override

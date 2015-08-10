@@ -43,7 +43,7 @@ public class TileHologramProjector extends TileEntity implements IExtendablePeri
 	public static final int hologramHeight = 8;
 	public static final int hologramDepth = 8;
 
-	IComputerAccess attachedComputer;
+	ArrayList<IComputerAccess> attachedComputer;
 	String[] hologram;
 	byte[] hologramMeta;
 	int xOffset;
@@ -51,6 +51,9 @@ public class TileHologramProjector extends TileEntity implements IExtendablePeri
 	int zOffset;
 	boolean dirty;
 	protected Peripheral peripheral;
+
+	int rotation;
+	int velocity;
 
 	public TileHologramProjector() {
 		dirty = false;
@@ -64,6 +67,9 @@ public class TileHologramProjector extends TileEntity implements IExtendablePeri
 			hologram[i] = Block.blockRegistry.getNameForObject(Blocks.air);
 		for (int i = 0; i < hologramMeta.length; i++)
 			hologramMeta[i] = 0;
+
+		rotation = 0;
+		velocity = 0;
 
 		peripheral.AddMethod("setBlock", "Sets the projected block at the specific coordinates",
 				new CCType[] { new CCType(Double.class, "x",
@@ -117,6 +123,26 @@ public class TileHologramProjector extends TileEntity implements IExtendablePeri
 				new CCType[] { new CCType(String.class, "block", "The block to that all blocks should be converted"),
 						new CCType(Double.class, "meta", "The metadata that should be set on all blocks") },
 				new CCType[] {}, this);
+		peripheral.AddMethod("setRotation",
+				"Sets the rotation in degrees by the given value. Note: The rotation is only available on the Y-Axis(Up-Down)",
+				new CCType[] { new CCType(Double.class, "rot", "The new rotation value") }, new CCType[] {}, this);
+		peripheral.AddMethod("setVelocity",
+				"Sets the velocity by the give value. The give value gets added to every tick to the rotation. Note: The rotation is only available on the Y-Axis(Up-Down)",
+				new CCType[] { new CCType(Double.class, "vel", "The new velocity value") }, new CCType[] {}, this);
+		peripheral.AddMethod("getRotation", "Returns the current rotation", new CCType[] {},
+				new CCType[] { new CCType(Double.class, "rot", "The current rotation") }, this);
+		peripheral.AddMethod("getVelocity", "Returns the current velocity", new CCType[] {},
+				new CCType[] { new CCType(Double.class, "vel", "The current velocity") }, this);
+		
+
+		attachedComputer = new ArrayList<IComputerAccess>();
+
+	}
+
+	@Override
+	public void updateEntity() {
+		if (velocity > 0)
+			rotation += velocity;
 	}
 
 	@Override
@@ -142,6 +168,8 @@ public class TileHologramProjector extends TileEntity implements IExtendablePeri
 		}
 		tag.setTag("hologram", hologramTag);
 		tag.setByteArray("hologramMeta", hologramMeta);
+		tag.setInteger("rotationY", rotation);
+		tag.setInteger("velocityY", velocity);
 	}
 
 	@Override
@@ -154,6 +182,8 @@ public class TileHologramProjector extends TileEntity implements IExtendablePeri
 			i++;
 		}
 		hologramMeta = tag.getByteArray("hologramMeta");
+		rotation = tag.getInteger("rotationY");
+		velocity = tag.getInteger("velocityY");
 		dirty = true;
 	}
 
@@ -267,7 +297,29 @@ public class TileHologramProjector extends TileEntity implements IExtendablePeri
 							"Invalid draw call format, see method argument descript for more informations");
 				}
 			}
-			return new Object[] {};
+			return null;
+		}
+		case "setRotation": {
+			int rot = ((Number) arguments[0]).intValue() % 360;
+			rotation = rot;
+
+			getWorldObj().markBlockForUpdate(xCoord, yCoord, zCoord);
+			getWorldObj().markBlockRangeForRenderUpdate(xCoord, yCoord, zCoord, 1, 1, 1);
+			return null;
+		}
+		case "setVelocity": {
+			int vel = ((Number) arguments[0]).intValue() % 360;
+			velocity = vel;
+
+			getWorldObj().markBlockForUpdate(xCoord, yCoord, zCoord);
+
+			return null;
+		}
+		case "getVelocity": {
+			return new Object[] { velocity };
+		}
+		case "getRotation": {
+			return new Object[] { rotation };
 		}
 		default:
 			throw new FunctionNotFoundException();
@@ -341,24 +393,42 @@ public class TileHologramProjector extends TileEntity implements IExtendablePeri
 
 	@Override
 	public void attachToComputer(IComputerAccess computer) {
-		attachedComputer = computer;
+		if (!attachedComputer.contains(computer))
+			attachedComputer.add(computer);
 	}
 
 	@Override
 	public void detachFromComputer(IComputerAccess computer) {
-		attachedComputer = null;
+		attachedComputer.remove(computer);
 	}
 
-	public void onBlockClick(float clickX, float clickY, float clickZ, int side, int button, ItemStack heldItem) {
+	public void onBlockClick(int clickX, int clickY, int clickZ, int side, int button, ItemStack heldItem) {
 		if (attachedComputer != null) {
 			HashMap<String, Object> heldItemCC = CCUtils.stackToMap(heldItem);
 			if (heldItem != null)
 				heldItemCC.put("isBlock", Block.getBlockFromItem(heldItem.getItem()) != Blocks.air);
 
 			String[] sides = new String[] { "bottom", "top", "north", "south", "west", "east" };
-			attachedComputer.queueEvent("hologramTouch", new Object[] { button, (int) (clickX * 8.f),
-					(int) (clickY * 8.f), (int) (clickZ * 8.f), sides[side], heldItemCC });
+			for (int i = 0; i < attachedComputer.size(); i++)
+				attachedComputer.get(i).queueEvent("hologramTouch",
+						new Object[] { button, clickX, clickY, clickZ, sides[side], heldItemCC });
 		}
+	}
+
+	public int getRotation() {
+		return rotation;
+	}
+
+	public boolean isTouchScreenFeatureAvailable() {
+		return (rotation == 0) ? true : ((rotation % 90) == 0);
+	}
+
+	public boolean[] getAirArrayCopy() {
+		boolean[] ret = new boolean[hologram.length];
+		for (int i = 0; i < ret.length; i++)
+			ret[i] = isAirBlock(i % hologramWidth, i / (hologramWidth * hologramHeight),
+					(i / hologramWidth) % hologramDepth);
+		return ret;
 	}
 
 }

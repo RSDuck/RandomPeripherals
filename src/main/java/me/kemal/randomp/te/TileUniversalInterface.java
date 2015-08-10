@@ -1,6 +1,7 @@
 package me.kemal.randomp.te;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import javax.print.attribute.standard.Copies;
@@ -8,6 +9,7 @@ import javax.print.attribute.standard.Copies;
 import me.kemal.randomp.RandomPeripherals;
 import me.kemal.randomp.util.CCType;
 import me.kemal.randomp.util.CCUtils;
+import me.kemal.randomp.util.ComputerUIWrapDummy;
 import me.kemal.randomp.util.FunctionNotFoundException;
 import me.kemal.randomp.util.PeripheralLuaObjectWrap;
 import me.kemal.randomp.util.Util;
@@ -71,10 +73,9 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 	private boolean allowAutoInput;
 	private FluidTank tank;
 
-	private IComputerAccess computer;
+	private ArrayList<IComputerAccess> attachedComputer;
 
 	public IPeripheral[] connectedPeripherals;
-	public PeripheralLuaObjectWrap[] wrappedPeripherals;
 
 	private static Class<?> computerCraft;
 	private static Method cc_getPeripheralAt;
@@ -212,7 +213,8 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 				new CCType[] { new CCType(ILuaObject.class, "The wrapped peripheral") }, this);
 
 		connectedPeripherals = new IPeripheral[6];
-		wrappedPeripherals = new PeripheralLuaObjectWrap[6];
+
+		attachedComputer = new ArrayList<IComputerAccess>();
 
 	}
 
@@ -526,7 +528,7 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 			if (direction == -1)
 				throw new LuaException("Invalid Direction");
 
-			return new Object[] { wrappedPeripherals[direction] };
+			return new Object[] { new PeripheralLuaObjectWrap(connectedPeripherals[direction], computer) };
 		}
 		default: {
 			try {
@@ -747,15 +749,20 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 
 	@Override
 	public void attachToComputer(IComputerAccess computer) {
-		this.computer = computer;
-		for (int i = 0; i < 6; i++)
-			if (wrappedPeripherals[i] != null)
-				wrappedPeripherals[i].attach(computer);
+		if (!attachedComputer.contains(computer)) {
+			attachedComputer.add(computer);
+			for (int i = 0; i < connectedPeripherals.length; i++)
+				if (connectedPeripherals[i] != null)
+					connectedPeripherals[i].attach(computer);
+		}
 	}
 
 	@Override
 	public void detachFromComputer(IComputerAccess computer) {
-		this.computer = null;
+		for (int i = 0; i < connectedPeripherals.length; i++)
+			if (connectedPeripherals[i] != null)
+				connectedPeripherals[i].detach(computer);
+		attachedComputer.remove(computer);
 	}
 
 	@Override
@@ -779,16 +786,28 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 
 		IPeripheral connectedPeripheral = getPeripheralAt(worldObj, x, y, z, side);
 		if (connectedPeripherals[side] != connectedPeripheral) {
+			if (connectedPeripherals[side] != null)
+				for (int i = 0; i < attachedComputer.size(); i++) {
+					try {
+						connectedPeripherals[side].detach(attachedComputer.get(i));
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
 			connectedPeripherals[side] = connectedPeripheral;
 
-			if (wrappedPeripherals[side] != null)
-				wrappedPeripherals[side].detach();
-			if (connectedPeripherals[side] != null) {
-				wrappedPeripherals[side] = new PeripheralLuaObjectWrap(connectedPeripherals[side], computer);
-			}
-
-			RandomPeripherals.logger.info("addNeightborCache side: " + side + " connectedPeripheral: "
-					+ ((connectedPeripherals[side] == null) ? "null" : connectedPeripherals[side].getType()));
+			if (connectedPeripherals[side] != null)
+				for (int i = 0; i < attachedComputer.size(); i++) {
+					try {
+						connectedPeripherals[side].attach(attachedComputer.get(i));
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+			// RandomPeripherals.logger.info("addNeightborCache side: " + side +
+			// " connectedPeripheral: "
+			// + ((connectedPeripherals[side] == null) ? "null" :
+			// connectedPeripherals[side].getType()));
 		}
 	}
 }
