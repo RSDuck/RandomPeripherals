@@ -1,14 +1,18 @@
 package me.kemal.randomp.block;
 
+import org.lwjgl.opengl.GL11;
+
 import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import me.kemal.randomp.RandomPeripherals;
 import me.kemal.randomp.client.renderer.RendererHologramProjector;
+import me.kemal.randomp.client.renderer.TileHologramSpecialRenderer;
 import me.kemal.randomp.te.TileHologramProjector;
 import net.minecraft.block.Block;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.material.Material;
+import net.minecraft.client.renderer.GLAllocation;
 import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.init.Blocks;
@@ -17,6 +21,7 @@ import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.IIcon;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import net.minecraftforge.common.util.ForgeDirection;
 
 public class BlockHologramProjector extends Block implements ITileEntityProvider {
 
@@ -72,6 +77,11 @@ public class BlockHologramProjector extends Block implements ITileEntityProvider
 	}
 
 	@Override
+	public boolean isSideSolid(IBlockAccess world, int x, int y, int z, ForgeDirection side) {
+		return side == ForgeDirection.DOWN ? true : false;
+	}
+
+	@Override
 	public void onBlockAdded(World world, int x, int y, int z) {
 		if (!world.isRemote) {
 			world.setBlock(x, y + 1, z, RandomPeripherals.blockHologram, 0, 1 | 2);
@@ -84,6 +94,8 @@ public class BlockHologramProjector extends Block implements ITileEntityProvider
 	public void onBlockPreDestroy(World world, int x, int y, int z, int oldMeta) {
 		if (!world.isRemote) {
 			world.setBlockToAir(x, y + 1, z);
+		} else if (world.getTileEntity(x, y, z) instanceof TileHologramProjector) {
+			GLAllocation.deleteDisplayLists(((TileHologramProjector) world.getTileEntity(x, y, z)).getDisplayListID());
 		}
 	}
 }

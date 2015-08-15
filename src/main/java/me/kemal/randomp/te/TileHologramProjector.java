@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.lwjgl.opengl.GL11;
+
 import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -21,6 +23,7 @@ import me.kemal.randomp.util.Peripheral;
 import me.kemal.randomp.util.Util;
 import net.minecraft.block.Block;
 import net.minecraft.block.ITileEntityProvider;
+import net.minecraft.client.renderer.GLAllocation;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -46,11 +49,13 @@ public class TileHologramProjector extends TileEntity implements IExtendablePeri
 	ArrayList<IComputerAccess> attachedComputer;
 	String[] hologram;
 	byte[] hologramMeta;
-	int xOffset;
-	int yOffset;
-	int zOffset;
 	boolean dirty;
 	protected Peripheral peripheral;
+
+	@SideOnly(Side.CLIENT)
+	int displayListID;
+
+	boolean graphicsNeedUpdate;
 
 	int rotation;
 	int velocity;
@@ -133,16 +138,39 @@ public class TileHologramProjector extends TileEntity implements IExtendablePeri
 				new CCType[] { new CCType(Double.class, "rot", "The current rotation") }, this);
 		peripheral.AddMethod("getVelocity", "Returns the current velocity", new CCType[] {},
 				new CCType[] { new CCType(Double.class, "vel", "The current velocity") }, this);
-		
 
 		attachedComputer = new ArrayList<IComputerAccess>();
 
+		displayListID = -1;
+		graphicsNeedUpdate = true;
 	}
 
 	@Override
 	public void updateEntity() {
-		if (velocity > 0)
-			rotation += velocity;
+		rotation += velocity;
+		rotation = rotation % 360;
+		rotation = (rotation < 0) ? 360 - rotation : rotation;
+
+		if (dirty && !worldObj.isRemote) {
+			dirty = false;
+			worldObj.markBlockForUpdate(xCoord, yCoord, zCoord);
+		}
+	}
+
+	public boolean doGraphicsNeedAnUpdate() {
+		return graphicsNeedUpdate;
+	}
+
+	public void setGraphicsUpdate(boolean graphics) {
+		graphicsNeedUpdate = graphics;
+	}
+
+	public int getDisplayListID() {
+		return displayListID;
+	}
+
+	public void setDisplayListID(int id) {
+		displayListID = id;
 	}
 
 	@Override
@@ -156,6 +184,7 @@ public class TileHologramProjector extends TileEntity implements IExtendablePeri
 	public void onDataPacket(NetworkManager net, S35PacketUpdateTileEntity pkt) {
 		super.onDataPacket(net, pkt);
 		readFromNBT(pkt.func_148857_g());
+		graphicsNeedUpdate = true;
 		worldObj.markBlockForUpdate(xCoord, yCoord, zCoord);
 	}
 
@@ -220,8 +249,6 @@ public class TileHologramProjector extends TileEntity implements IExtendablePeri
 			setBlock(x, y, z, block);
 
 			dirty = true;
-			getWorldObj().markBlockForUpdate(xCoord, yCoord, zCoord);
-			getWorldObj().markBlockRangeForRenderUpdate(xCoord, yCoord, zCoord, 1, 1, 1);
 			return new Object[] { true };
 		}
 		case "getBlock": {
@@ -240,8 +267,6 @@ public class TileHologramProjector extends TileEntity implements IExtendablePeri
 			setBlockMetaData(x, y, z, meta);
 
 			dirty = true;
-			getWorldObj().markBlockForUpdate(xCoord, yCoord, zCoord);
-			getWorldObj().markBlockRangeForRenderUpdate(xCoord, yCoord, zCoord, 1, 1, 1);
 			return new Object[] {};
 		}
 		case "getMeta": {
@@ -260,9 +285,6 @@ public class TileHologramProjector extends TileEntity implements IExtendablePeri
 				hologramMeta[i] = ((Number) arguments[1]).byteValue();
 
 			dirty = true;
-
-			getWorldObj().markBlockForUpdate(xCoord, yCoord, zCoord);
-			getWorldObj().markBlockRangeForRenderUpdate(xCoord, yCoord, zCoord, 1, 1, 1);
 			return new Object[] { true };
 		}
 		case "draw": {
@@ -289,29 +311,22 @@ public class TileHologramProjector extends TileEntity implements IExtendablePeri
 					}
 
 					dirty = true;
-
-					getWorldObj().markBlockForUpdate(xCoord, yCoord, zCoord);
-					getWorldObj().markBlockRangeForRenderUpdate(xCoord, yCoord, zCoord, 1, 1, 1);
 				} catch (NullPointerException e) {
 					throw new LuaException(
-							"Invalid draw call format, see method argument descript for more informations");
+							"Invalid draw call format, see method argument description for more informations");
 				}
 			}
 			return null;
 		}
 		case "setRotation": {
 			int rot = ((Number) arguments[0]).intValue() % 360;
+			rot = (rot < 0) ? 360 - rot : rot;
 			rotation = rot;
-
-			getWorldObj().markBlockForUpdate(xCoord, yCoord, zCoord);
-			getWorldObj().markBlockRangeForRenderUpdate(xCoord, yCoord, zCoord, 1, 1, 1);
 			return null;
 		}
 		case "setVelocity": {
 			int vel = ((Number) arguments[0]).intValue() % 360;
 			velocity = vel;
-
-			getWorldObj().markBlockForUpdate(xCoord, yCoord, zCoord);
 
 			return null;
 		}
