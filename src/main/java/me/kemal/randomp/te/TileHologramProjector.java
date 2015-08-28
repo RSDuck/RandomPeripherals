@@ -36,6 +36,7 @@ import net.minecraft.network.play.server.S35PacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.IBlockAccess;
+import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.util.ForgeDirection;
@@ -177,13 +178,16 @@ public class TileHologramProjector extends TileEntity implements IExtendablePeri
 	public Packet getDescriptionPacket() {
 		NBTTagCompound tag = new NBTTagCompound();
 		writeToNBT(tag);
+		tag.removeTag("rotationY");
 		return new S35PacketUpdateTileEntity(xCoord, yCoord, zCoord, 1, tag);
 	}
 
 	@Override
 	public void onDataPacket(NetworkManager net, S35PacketUpdateTileEntity pkt) {
 		super.onDataPacket(net, pkt);
-		readFromNBT(pkt.func_148857_g());
+		NBTTagCompound tag = pkt.func_148857_g();
+		tag.setInteger("rotationY", rotation);
+		readFromNBT(tag);
 		graphicsNeedUpdate = true;
 		worldObj.markBlockForUpdate(xCoord, yCoord, zCoord);
 	}
@@ -418,15 +422,15 @@ public class TileHologramProjector extends TileEntity implements IExtendablePeri
 	}
 
 	public void onBlockClick(int clickX, int clickY, int clickZ, int side, int button, ItemStack heldItem) {
-		if (attachedComputer != null) {
+		if (attachedComputer.size() > 0) {
 			HashMap<String, Object> heldItemCC = CCUtils.stackToMap(heldItem);
 			if (heldItem != null)
 				heldItemCC.put("isBlock", Block.getBlockFromItem(heldItem.getItem()) != Blocks.air);
 
 			String[] sides = new String[] { "bottom", "top", "north", "south", "west", "east" };
 			for (int i = 0; i < attachedComputer.size(); i++)
-				attachedComputer.get(i).queueEvent("hologramTouch",
-						new Object[] { button, clickX, clickY, clickZ, sides[side], heldItemCC });
+				attachedComputer.get(i).queueEvent("hologramTouch", new Object[] { button, clickX, clickY, clickZ,
+						sides[side], heldItemCC, attachedComputer.get(i).getAttachmentName() });
 		}
 	}
 

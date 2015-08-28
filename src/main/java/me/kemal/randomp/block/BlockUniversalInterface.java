@@ -187,7 +187,18 @@ public class BlockUniversalInterface extends Block implements ITileEntityProvide
 	}
 
 	@Override
+	public void onNeighborChange(IBlockAccess world, int x, int y, int z, int tileX, int tileY, int tileZ) {
+		// RandomPeripherals.logger.info("onNeightborChange " + x + ", " + y, ",
+		// " + z);
+		TileEntity uiTE = world.getTileEntity(x, y, z);
+		if (uiTE instanceof TileUniversalInterface)
+			((TileUniversalInterface) uiTE).addNeightborCache(world.getTileEntity(tileX, tileY, tileZ), tileX, tileY,
+					tileZ);
+	}
+
+	@Override
 	public void onNeighborBlockChange(World world, int x, int y, int z, Block block) {
+		//RandomPeripherals.logger.info("onNeightborBlockChange" + x + ", " + y, ", " + z);
 		TileUniversalInterface tile = (TileUniversalInterface) world.getTileEntity(x, y, z);
 		for (int i = 0; i < 6; i++) {
 			ForgeDirection current = ForgeDirection.getOrientation(i);

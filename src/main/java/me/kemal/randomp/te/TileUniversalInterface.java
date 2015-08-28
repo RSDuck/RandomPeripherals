@@ -69,6 +69,8 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 	public static final int SIDE_FLUID_INPUT_ONLY = 4;
 	public static final int SIDE_FLUID_OUTPUT_ONLY = 5;
 
+	final String[] dirs = new String[] { "bottom", "top", "front", "back", "left", "right" };
+
 	private ItemStack heldStack;
 	private boolean allowAutoInput;
 	private FluidTank tank;
@@ -752,25 +754,33 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 		if (!attachedComputer.contains(computer)) {
 			attachedComputer.add(computer);
 			for (int i = 0; i < connectedPeripherals.length; i++)
-				if (connectedPeripherals[i] != null)
-					connectedPeripherals[i].attach(computer);
+				if (connectedPeripherals[i] != null && ((connectedPeripherals[i] instanceof TileUniversalInterface)
+						? !((TileUniversalInterface) connectedPeripherals[i]).isStillAttachedToComputer(computer)
+						: true))
+					connectedPeripherals[i].attach(new ComputerUIWrapDummy(computer, dirs[Util.relDirToAbsDir(facing,
+							ForgeDirection.getOrientation(i).getOpposite().ordinal())]));
 		}
 	}
 
 	@Override
 	public void detachFromComputer(IComputerAccess computer) {
-		for (int i = 0; i < connectedPeripherals.length; i++)
-			if (connectedPeripherals[i] != null)
-				connectedPeripherals[i].detach(computer);
 		attachedComputer.remove(computer);
+		for (int i = 0; i < connectedPeripherals.length; i++)
+			if (connectedPeripherals[i] != null && ((connectedPeripherals[i] instanceof TileUniversalInterface)
+					? ((TileUniversalInterface) connectedPeripherals[i]).isStillAttachedToComputer(computer) : true))
+				connectedPeripherals[i].detach(computer);
+	}
+
+	public boolean isStillAttachedToComputer(IComputerAccess computer) {
+		return attachedComputer.contains(computer);
 	}
 
 	@Override
 	public void addNeightborCache(TileEntity tile, int x, int y, int z) {
-		if (worldObj.getTileEntity(x, y, z) != null)
+		if (tile != null)
 			super.addNeightborCache(tile, x, y, z);
 
-		int side = 0;
+		int side = -1;
 		if (x < xCoord)
 			side = 5;
 		else if (x > xCoord)
@@ -799,7 +809,8 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 			if (connectedPeripherals[side] != null)
 				for (int i = 0; i < attachedComputer.size(); i++) {
 					try {
-						connectedPeripherals[side].attach(attachedComputer.get(i));
+						connectedPeripherals[side].attach(new ComputerUIWrapDummy(attachedComputer.get(i), dirs[Util
+								.relDirToAbsDir(facing, ForgeDirection.getOrientation(side).getOpposite().ordinal())]));
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
@@ -808,6 +819,7 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 			// " connectedPeripheral: "
 			// + ((connectedPeripherals[side] == null) ? "null" :
 			// connectedPeripherals[side].getType()));
-		}
+		} // else
+			// RandomPeripherals.logger.info("Already connected");
 	}
 }

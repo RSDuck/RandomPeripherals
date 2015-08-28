@@ -6,9 +6,11 @@ import dan200.computercraft.api.peripheral.IComputerAccess;
 
 public class ComputerUIWrapDummy implements IComputerAccess {
 	IComputerAccess computer;
+	String side;
 
-	public ComputerUIWrapDummy(IComputerAccess computer) {
+	public ComputerUIWrapDummy(IComputerAccess computer, String side) {
 		this.computer = computer;
+		this.side = side;
 	}
 
 	@Override
@@ -48,7 +50,12 @@ public class ComputerUIWrapDummy implements IComputerAccess {
 
 	@Override
 	public String getAttachmentName() {
-		return "UIWrapped";
+		return "UIWrapped_" + side;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		return computer.equals(obj);
 	}
 
 }

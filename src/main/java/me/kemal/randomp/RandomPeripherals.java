@@ -97,7 +97,6 @@ public class RandomPeripherals {
 	@Instance
 	public static RandomPeripherals instance;
 
-	@SideOnly(Side.CLIENT)
 	public static CreativeTabs tabRandomP = new CreativeTabs("tabRandomP") {
 
 		@Override

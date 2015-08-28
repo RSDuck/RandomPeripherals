@@ -2,6 +2,7 @@ package me.kemal.randomp.common;
 
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.TextureStitchEvent;
+import net.minecraftforge.client.event.TextureStitchEvent.Pre;
 import me.kemal.randomp.te.TileEnergyStorage;
 import me.kemal.randomp.te.TileHologram;
 import me.kemal.randomp.te.TileHologramProjector;
@@ -18,13 +19,11 @@ public class CommonProxy {
 		GameRegistry.registerTileEntity(TileHologram.class, "TEHologram");
 	}
 
-	@SideOnly(Side.CLIENT)
-	@SubscribeEvent
-	public void registerIcons(TextureStitchEvent.Pre event) {
+	public void registerRenderer() {
 	}
 
-	@SideOnly(Side.CLIENT)
-	public void registerRenderer() {
+	@SubscribeEvent
+	public void registerIcons(Pre event) {
 	}
 
 }
