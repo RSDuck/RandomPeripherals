@@ -17,6 +17,7 @@ import dan200.computercraft.api.turtle.ITurtleAccess;
 import me.kemal.randomp.RandomPeripherals;
 import me.kemal.randomp.util.CCType;
 import me.kemal.randomp.util.CCUtils;
+import me.kemal.randomp.util.ComputerUIWrapDummy;
 import me.kemal.randomp.util.FunctionNotFoundException;
 import me.kemal.randomp.util.IExtendablePeripheral;
 import me.kemal.randomp.util.Peripheral;
@@ -53,7 +54,6 @@ public class TileHologramProjector extends TileEntity implements IExtendablePeri
 	boolean dirty;
 	protected Peripheral peripheral;
 
-	@SideOnly(Side.CLIENT)
 	int displayListID;
 
 	boolean graphicsNeedUpdate;
@@ -85,6 +85,17 @@ public class TileHologramProjector extends TileEntity implements IExtendablePeri
 						7),
 				new CCType(String.class, "block",
 						"The internal name of the block to which it should be set. It's the same name you use in commands"), },
+				new CCType[] { new CCType(Boolean.class, "True if the block was sucsessfull set") }, this);
+		peripheral.AddMethod("setBlockMeta", "Sets the projected block and it's meta data at the specific coordinates",
+				new CCType[] { new CCType(Double.class, "x",
+						"The X-Coordinate of the block, has to be 0 or more and less than 8", 0, 7),
+				new CCType(Double.class, "y", "The Y-Coordinate of the block, has be 0 or moreand less than 8", 0, 7),
+				new CCType(Double.class, "z", "The Z-Coordinate of the block, has to be more than 0 and less than 8", 0,
+						7),
+				new CCType(String.class, "block",
+						"The internal name of the block to which it should be set. It's the same name you use in commands"),
+				new CCType(Double.class, "metadata", "The meta for the block you set", 0, 16)
+						},
 				new CCType[] { new CCType(Boolean.class, "True if the block was sucsessfull set") }, this);
 		peripheral.AddMethod("getBlock", "Returns the id name of the projected block at the specific coordinates",
 				new CCType[] { new CCType(Double.class, "x",
@@ -255,6 +266,22 @@ public class TileHologramProjector extends TileEntity implements IExtendablePeri
 			dirty = true;
 			return new Object[] { true };
 		}
+		case "setBlockMeta": {
+			Block block = Block.getBlockFromName((String) arguments[3]);
+			int x = ((Number) arguments[0]).intValue();
+			int y = ((Number) arguments[1]).intValue();
+			int z = ((Number) arguments[2]).intValue();
+			if (block == null)
+				return new Object[] { false };
+			setBlock(x, y, z, block);
+			
+			byte meta = ((Number) arguments[4]).byteValue();
+			
+			setBlockMetaData(x, y, z, meta);
+			
+			dirty = true;
+			return new Object[] { true };
+		}
 		case "getBlock": {
 			int x = ((Number) arguments[0]).intValue();
 			int y = ((Number) arguments[1]).intValue();
@@ -355,6 +382,11 @@ public class TileHologramProjector extends TileEntity implements IExtendablePeri
 		return (x < 0 || y < 0 || z < 0 || x >= hologramWidth || y >= hologramHeight || z >= hologramDepth) ? Blocks.air
 				: Block.getBlockFromName(hologram[((z * hologramWidth) + x) + y * (hologramWidth * hologramHeight)]);
 	}
+	
+	public String getBlockName(int x, int y, int z) {
+		return (x < 0 || y < 0 || z < 0 || x >= hologramWidth || y >= hologramHeight || z >= hologramDepth) ? "minecraft:air"
+				: hologram[((z * hologramWidth) + x) + y * (hologramWidth * hologramHeight)];		
+	}
 
 	@Override
 	public TileEntity getTileEntity(int x, int y, int z) {
@@ -412,8 +444,11 @@ public class TileHologramProjector extends TileEntity implements IExtendablePeri
 
 	@Override
 	public void attachToComputer(IComputerAccess computer) {
-		if (!attachedComputer.contains(computer))
+		//RandomPeripherals.logger.info("Computer requests connecting " + (computer instanceof ComputerUIWrapDummy));
+		if (!attachedComputer.contains(computer)) {
 			attachedComputer.add(computer);
+			//RandomPeripherals.logger.info("Sucessfull attached computer");
+		}
 	}
 
 	@Override
@@ -423,6 +458,8 @@ public class TileHologramProjector extends TileEntity implements IExtendablePeri
 
 	public void onBlockClick(int clickX, int clickY, int clickZ, int side, int button, ItemStack heldItem) {
 		if (attachedComputer.size() > 0) {
+			//RandomPeripherals.logger
+			//		.info("currently are " + attachedComputer.size() + " computers attached to the peripheral");
 			HashMap<String, Object> heldItemCC = CCUtils.stackToMap(heldItem);
 			if (heldItem != null)
 				heldItemCC.put("isBlock", Block.getBlockFromItem(heldItem.getItem()) != Blocks.air);
@@ -430,7 +467,7 @@ public class TileHologramProjector extends TileEntity implements IExtendablePeri
 			String[] sides = new String[] { "bottom", "top", "north", "south", "west", "east" };
 			for (int i = 0; i < attachedComputer.size(); i++)
 				attachedComputer.get(i).queueEvent("hologramTouch", new Object[] { button, clickX, clickY, clickZ,
-						sides[side], heldItemCC, attachedComputer.get(i).getAttachmentName() });
+						sides[side], attachedComputer.get(i).getAttachmentName(), heldItemCC });
 		}
 	}
 

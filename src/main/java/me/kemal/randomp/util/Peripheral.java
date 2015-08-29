@@ -25,6 +25,7 @@ public class Peripheral implements IExtendablePeripheral, IPeripheral {
 	private HashMap<String, CCType[]> functionReturns;
 	private HashMap<String, IExtendablePeripheral> peripheralHolders;
 	private Vector<IExtendablePeripheral> peripheralCallbacks;
+	private Vector<IComputerAccess> attachedComputers;
 
 	public Peripheral() {
 		functionNames = new Vector<String>();
@@ -34,6 +35,7 @@ public class Peripheral implements IExtendablePeripheral, IPeripheral {
 		peripheralHolders = new HashMap<String, IExtendablePeripheral>();
 		peripheralCallbacks = new Vector<IExtendablePeripheral>();
 		peripheralDescription = "";
+		attachedComputers = new Vector<IComputerAccess>();
 
 		AddMethod("help", "Get Help about an function",
 				new CCType[] {
@@ -123,13 +125,17 @@ public class Peripheral implements IExtendablePeripheral, IPeripheral {
 
 	@Override
 	public void attach(IComputerAccess computer) {
-		for (int i = 0; i < peripheralCallbacks.size(); i++) {
-			peripheralCallbacks.get(i).attachToComputer(computer);
+		if (!attachedComputers.contains(computer)) {
+			attachedComputers.add(computer);
+			for (int i = 0; i < peripheralCallbacks.size(); i++) {
+				peripheralCallbacks.get(i).attachToComputer(computer);
+			}
 		}
 	}
 
 	@Override
 	public void detach(IComputerAccess computer) {
+		attachedComputers.remove(computer);
 		for (int i = 0; i < peripheralCallbacks.size(); i++) {
 			peripheralCallbacks.get(i).detachFromComputer(computer);
 		}
@@ -181,5 +187,9 @@ public class Peripheral implements IExtendablePeripheral, IPeripheral {
 
 	@Override
 	public void detachFromComputer(IComputerAccess computer) {
+	}
+
+	public boolean isAttachedToComputer(IComputerAccess computer) {
+		return attachedComputers.contains(computer);
 	}
 }

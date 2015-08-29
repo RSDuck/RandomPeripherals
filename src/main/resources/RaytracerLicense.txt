@@ -1,4 +1,4 @@
-Everything in this file only applies for the files in the package me.kemal.randomp.raytracer for the License of the Mod see https://github.com/RSDuck/RandomPeripherals/wiki/Licensing-stuff
+Everything in this file only applies for the files in the package me.kemal.randomp.raytracer for the License of the Mod in it's entirety see https://github.com/RSDuck/RandomPeripherals/wiki/Licensing-stuff
 
 All files in the package me.kemal.randomp.raytracer come from ChickenBones API Mod CodeChickenCore and are originally licensed under the conditions of the MIT License:
 

@@ -22,7 +22,6 @@ import me.kemal.randomp.te.TileHologram;
 import me.kemal.randomp.te.TileHologramProjector;
 
 public class ClientProxy extends CommonProxy {
-	@Override
 	@SideOnly(Side.CLIENT)
 	@SubscribeEvent
 	public void registerIcons(Pre event) {

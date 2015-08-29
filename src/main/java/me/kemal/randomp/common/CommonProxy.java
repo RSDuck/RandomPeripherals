@@ -22,8 +22,4 @@ public class CommonProxy {
 	public void registerRenderer() {
 	}
 
-	@SubscribeEvent
-	public void registerIcons(Pre event) {
-	}
-
 }

@@ -11,6 +11,7 @@ import me.kemal.randomp.util.CCType;
 import me.kemal.randomp.util.CCUtils;
 import me.kemal.randomp.util.ComputerUIWrapDummy;
 import me.kemal.randomp.util.FunctionNotFoundException;
+import me.kemal.randomp.util.Peripheral;
 import me.kemal.randomp.util.PeripheralLuaObjectWrap;
 import me.kemal.randomp.util.Util;
 import net.minecraft.entity.EntityLivingBase;
@@ -220,9 +221,25 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 
 	}
 
+	boolean searchForNeightborPeripherals = false;
+
 	@Override
 	public void updateEntity() {
 		super.updateEntity();
+
+		if (!searchForNeightborPeripherals) {
+			RandomPeripherals.logger.info("Initial Peripheral search started");
+			for (int i = 0; i < 6; i++) {
+				ForgeDirection current = ForgeDirection.getOrientation(i);
+
+				addNeightborCache(
+						worldObj.getTileEntity(current.offsetX + xCoord, current.offsetY + yCoord,
+								current.offsetZ + zCoord),
+						xCoord + current.offsetX, yCoord + current.offsetY, zCoord + current.offsetZ);
+			}
+			searchForNeightborPeripherals = true;
+		}
+
 		// TODO: clean up!
 		for (ForgeDirection dir : ForgeDirection.VALID_DIRECTIONS) {
 			storedEnergy.setMaxExtract(getMaxEnergyOutput(dir.getOpposite().ordinal()));
@@ -751,12 +768,11 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 
 	@Override
 	public void attachToComputer(IComputerAccess computer) {
-		if (!attachedComputer.contains(computer)) {
+		//RandomPeripherals.logger.info("UniversalInterface_attachToComputer");
+		if (!attachedComputer.contains(computer) && !(computer instanceof ComputerUIWrapDummy)) {
 			attachedComputer.add(computer);
 			for (int i = 0; i < connectedPeripherals.length; i++)
-				if (connectedPeripherals[i] != null && ((connectedPeripherals[i] instanceof TileUniversalInterface)
-						? !((TileUniversalInterface) connectedPeripherals[i]).isStillAttachedToComputer(computer)
-						: true))
+				if (connectedPeripherals[i] != null)
 					connectedPeripherals[i].attach(new ComputerUIWrapDummy(computer, dirs[Util.relDirToAbsDir(facing,
 							ForgeDirection.getOrientation(i).getOpposite().ordinal())]));
 		}
@@ -766,9 +782,14 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 	public void detachFromComputer(IComputerAccess computer) {
 		attachedComputer.remove(computer);
 		for (int i = 0; i < connectedPeripherals.length; i++)
-			if (connectedPeripherals[i] != null && ((connectedPeripherals[i] instanceof TileUniversalInterface)
-					? ((TileUniversalInterface) connectedPeripherals[i]).isStillAttachedToComputer(computer) : true))
-				connectedPeripherals[i].detach(computer);
+			if (connectedPeripherals[i] != null)
+				if (connectedPeripherals[i] instanceof Peripheral) {
+					Peripheral peripheral = (Peripheral) connectedPeripherals[i];
+					if (peripheral.getType() == "universalInterface" && peripheral.isAttachedToComputer(computer)) {
+						connectedPeripherals[i].detach(computer);
+					}
+				} else
+					connectedPeripherals[i].detach(computer);
 	}
 
 	public boolean isStillAttachedToComputer(IComputerAccess computer) {
@@ -809,8 +830,10 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 			if (connectedPeripherals[side] != null)
 				for (int i = 0; i < attachedComputer.size(); i++) {
 					try {
-						connectedPeripherals[side].attach(new ComputerUIWrapDummy(attachedComputer.get(i), dirs[Util
-								.relDirToAbsDir(facing, ForgeDirection.getOrientation(side).getOpposite().ordinal())]));
+						if (!(attachedComputer.get(i) instanceof ComputerUIWrapDummy))
+							connectedPeripherals[side].attach(
+									new ComputerUIWrapDummy(attachedComputer.get(i), dirs[Util.relDirToAbsDir(facing,
+											ForgeDirection.getOrientation(side).getOpposite().ordinal())]));
 					} catch (Exception e) {
 						e.printStackTrace();
 					}

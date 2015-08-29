@@ -81,11 +81,11 @@ public class Util {
 
 	public static Object getRealNBTType(NBTBase obj) {
 		if (obj instanceof NBTPrimitive) {
-			System.out.println("Type: Primitive");
+			//System.out.println("Type: Primitive");
 			return ((NBTPrimitive) obj).func_150286_g();
 		}
 		if (obj instanceof NBTTagIntArray) {
-			System.out.println("Type: Int Array");
+			//System.out.println("Type: Int Array");
 			int[] array = ((NBTTagIntArray) obj).func_150302_c();
 			HashMap<Integer, Object> map = new HashMap<Integer, Object>();
 			for (int i = 0; i < array.length; i++) {
@@ -94,7 +94,7 @@ public class Util {
 			return map;
 		}
 		if (obj instanceof NBTTagByteArray) {
-			System.out.println("Type: Byte Array");
+			//System.out.println("Type: Byte Array");
 			byte[] array = ((NBTTagByteArray) obj).func_150292_c();
 			HashMap<Integer, Object> map = new HashMap<Integer, Object>();
 			for (int i = 0; i < array.length; i++) {
@@ -103,15 +103,15 @@ public class Util {
 			return map;
 		}
 		if (obj instanceof NBTTagString) {
-			System.out.println("Type: String");
+			//System.out.println("Type: String");
 			return ((NBTTagString) obj).func_150285_a_();
 		}
 		if (obj instanceof NBTTagCompound) {
-			System.out.println("Type: Compound");
+			//System.out.println("Type: Compound");
 			return CCUtils.NBTCompoundToMap((NBTTagCompound) obj);
 		}
 		if (obj instanceof NBTTagList) {
-			System.out.println("Type: List ");
+			//System.out.println("Type: List ");
 			NBTTagList list = ((NBTTagList) obj);
 			HashMap<Integer, Object> map = new HashMap<Integer, Object>();
 			NBTTagList copy = (NBTTagList) list.copy();

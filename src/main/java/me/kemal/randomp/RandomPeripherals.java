@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Timer;
 
 import cofh.api.item.IToolHammer;
@@ -29,6 +30,7 @@ import me.kemal.randomp.te.TileHologramProjector;
 import me.kemal.randomp.te.TileRandomPMachine;
 import me.kemal.randomp.te.TileUniversalInterface;
 import me.kemal.randomp.util.CCUtils;
+import me.kemal.randomp.util.ComputerUIWrapDummy;
 import me.kemal.randomp.util.Util;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
@@ -77,6 +79,7 @@ import cpw.mods.fml.common.toposort.ModSorter;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import dan200.computercraft.api.ComputerCraftAPI;
+import dan200.computercraft.api.peripheral.IComputerAccess;
 import dan200.computercraft.api.peripheral.IPeripheral;
 import dan200.computercraft.api.turtle.ITurtleUpgrade;
 
@@ -117,6 +120,8 @@ public class RandomPeripherals {
 
 	public static int inventoryTurtleUpgradeID;
 	public static int dispenserTurtleUpgradeID;
+	
+	public static int peripheralSearchTimeout;
 
 	public static boolean forceVanillaRecipes;
 
@@ -244,6 +249,7 @@ public class RandomPeripherals {
 				"If you add an block name to this list, it can be used as peripheral and you can read its NBT Data");
 		forceVanillaRecipes = config.getBoolean("forceVanillaRecipes", config.CATEGORY_GENERAL, false,
 				"If enabled no items of external mods will be used in crafting recipes");
+		
 		if (config.hasChanged()) {
 			config.save();
 		}

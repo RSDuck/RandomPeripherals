@@ -15,8 +15,8 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 
 public class PeripheralUniversalNBTRead implements IExtendablePeripheral {
-	Peripheral peripheral;
-	TileEntity te;
+	private Peripheral peripheral;
+	private TileEntity te;
 
 	public PeripheralUniversalNBTRead(TileEntity tile) {
 		peripheral = new Peripheral();
@@ -49,7 +49,5 @@ public class PeripheralUniversalNBTRead implements IExtendablePeripheral {
 
 	@Override
 	public void detachFromComputer(IComputerAccess computer) {
-		// TODO Auto-generated method stub
-		
 	}
 }
