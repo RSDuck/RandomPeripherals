@@ -35,6 +35,7 @@ public class BlockHologramProjector extends Block implements ITileEntityProvider
 		super(Material.circuits);
 		setBlockName(blockName);
 		setBlockBounds(0.f, 0.f, 0.f, 1.f, 0.6f, 1.f);
+		setHardness(2.f);
 		setCreativeTab(RandomPeripherals.tabRandomP);
 
 		GameRegistry.registerBlock(this, blockName);
