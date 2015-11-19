@@ -22,6 +22,7 @@ import net.minecraft.util.IIcon;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.ForgeDirection;
+import scala.util.parsing.combinator.Parsers.OnceParser;
 
 public class BlockHologramProjector extends Block implements ITileEntityProvider {
 
@@ -80,6 +81,11 @@ public class BlockHologramProjector extends Block implements ITileEntityProvider
 	@Override
 	public boolean isSideSolid(IBlockAccess world, int x, int y, int z, ForgeDirection side) {
 		return side == ForgeDirection.DOWN ? true : false;
+	}
+
+	@Override
+	public boolean canPlaceBlockAt(World world, int x, int y, int z) {
+		return world.isAirBlock(x, y + 1, z);
 	}
 
 	@Override

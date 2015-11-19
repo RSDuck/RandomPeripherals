@@ -106,22 +106,31 @@ public class TileHologramSpecialRenderer extends TileEntitySpecialRenderer {
 				try {
 					int previousVertexCount = fVertexCount.getInt(t);
 
-					for (int y1 = 0; y1 < TileHologramProjector.hologramHeight; y1++) {
-						for (int z1 = 0; z1 < TileHologramProjector.hologramDepth; z1++) {
-							for (int x1 = 0; x1 < TileHologramProjector.hologramWidth; x1++) {
-								try {
-									RenderBlocks.getInstance().renderBlockByRenderType(projector.getBlock(x1, y1, z1),
-											x1, y1, z1);
-								} catch (Exception e) {
+					boolean hasTransparentBlocks = false;
+
+					Block b = null;
+					for (int pass = 0; pass < 2; pass++) {
+						for (int y1 = 0; y1 < TileHologramProjector.hologramHeight; y1++) {
+							for (int z1 = 0; z1 < TileHologramProjector.hologramDepth; z1++) {
+								for (int x1 = 0; x1 < TileHologramProjector.hologramWidth; x1++) {
+									b = projector.getBlock(x1, y1, z1);
+									if (b.canRenderInPass(pass)) {
+										try {
+											RenderBlocks.getInstance().renderBlockByRenderType(b, x1, y1, z1);
+										} catch (Exception e) {
+										}
+										if (fVertexCount.getInt(t) == previousVertexCount
+												&& !projector.isAirBlock(x1, y1, z1)) {
+											RenderBlocks.getInstance().renderStandardBlock(b, x1, y1, z1);
+										}
+										previousVertexCount = fVertexCount.getInt(t);
+									} else
+										hasTransparentBlocks = true;
 								}
-								if (fVertexCount.getInt(t) == previousVertexCount
-										&& !projector.isAirBlock(x1, y1, z1)) {
-									RenderBlocks.getInstance().renderStandardBlock(projector.getBlock(x1, y1, z1), x1,
-											y1, z1);
-								}
-								previousVertexCount = fVertexCount.getInt(t);
 							}
 						}
+						if (!hasTransparentBlocks)
+							break;
 					}
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -143,14 +152,18 @@ public class TileHologramSpecialRenderer extends TileEntitySpecialRenderer {
 				GL11.glRotatef((float) projector.getRotation(), 0.f, 1.f, 0.f);
 
 				GL11.glNewList(projector.getDisplayListID(), GL11.GL_COMPILE_AND_EXECUTE);
-
+				
 				Minecraft.getMinecraft().getTextureManager().bindTexture(TextureMap.locationBlocksTexture);
 				RenderHelper.disableStandardItemLighting();
 
+				GL11.glEnable(GL11.GL_BLEND);
+				
 				t.draw();
 
 				RenderHelper.enableStandardItemLighting();
 
+				GL11.glDisable(GL11.GL_BLEND);
+				
 				GL11.glEndList();
 
 				GL11.glPopMatrix();

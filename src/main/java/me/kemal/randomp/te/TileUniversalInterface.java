@@ -768,7 +768,7 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 
 	@Override
 	public void attachToComputer(IComputerAccess computer) {
-		//RandomPeripherals.logger.info("UniversalInterface_attachToComputer");
+		// RandomPeripherals.logger.info("UniversalInterface_attachToComputer");
 		if (!attachedComputer.contains(computer) && !(computer instanceof ComputerUIWrapDummy)) {
 			attachedComputer.add(computer);
 			for (int i = 0; i < connectedPeripherals.length; i++)
@@ -816,7 +816,7 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 			side = 0;
 
 		IPeripheral connectedPeripheral = getPeripheralAt(worldObj, x, y, z, side);
-		if (connectedPeripherals[side] != connectedPeripheral) {
+		if (!((connectedPeripherals[side] == null) ? true : connectedPeripherals[side].equals(connectedPeripheral))) {
 			if (connectedPeripherals[side] != null)
 				for (int i = 0; i < attachedComputer.size(); i++) {
 					try {

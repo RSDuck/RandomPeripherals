@@ -306,7 +306,7 @@ public class TileHologramProjector extends TileEntity implements IExtendablePeri
 			setBlockMetaData(x, y, z, meta);
 
 			dirty = true;
-			return new Object[] {};
+			return null;
 		}
 		case "getMeta": {
 			int x = ((Number) arguments[0]).intValue();
