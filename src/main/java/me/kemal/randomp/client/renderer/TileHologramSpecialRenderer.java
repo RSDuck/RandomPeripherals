@@ -109,12 +109,12 @@ public class TileHologramSpecialRenderer extends TileEntitySpecialRenderer {
 					boolean hasTransparentBlocks = false;
 
 					Block b = null;
-					for (int pass = 0; pass < 2; pass++) {
+					for (int pass = 0; pass < ((RandomPeripherals.shouldTransparentBlocksRendered) ? 2 : 1); pass++) {
 						for (int y1 = 0; y1 < TileHologramProjector.hologramHeight; y1++) {
 							for (int z1 = 0; z1 < TileHologramProjector.hologramDepth; z1++) {
 								for (int x1 = 0; x1 < TileHologramProjector.hologramWidth; x1++) {
 									b = projector.getBlock(x1, y1, z1);
-									if (b.canRenderInPass(pass)) {
+									if (b.canRenderInPass(pass) || !RandomPeripherals.shouldTransparentBlocksRendered) {
 										try {
 											RenderBlocks.getInstance().renderBlockByRenderType(b, x1, y1, z1);
 										} catch (Exception e) {
@@ -150,19 +150,27 @@ public class TileHologramSpecialRenderer extends TileEntitySpecialRenderer {
 				GL11.glScalef(0.125f, 0.125f, 0.125f);
 				GL11.glColor4f(1.f, 1.f, 1.f, 1.f);
 				GL11.glRotatef((float) projector.getRotation(), 0.f, 1.f, 0.f);
-
-				GL11.glNewList(projector.getDisplayListID(), GL11.GL_COMPILE_AND_EXECUTE);
 				
+				GL11.glNewList(projector.getDisplayListID(), GL11.GL_COMPILE_AND_EXECUTE);
+
 				Minecraft.getMinecraft().getTextureManager().bindTexture(TextureMap.locationBlocksTexture);
 				RenderHelper.disableStandardItemLighting();
 
-				GL11.glEnable(GL11.GL_BLEND);
+				//GL11.glColorMask(true, true, true, false);
 				
+				GL11.glAlphaFunc(GL11.GL_ALWAYS, 0.f);
+				
+				if (RandomPeripherals.shouldTransparentBlocksRendered)
+					GL11.glEnable(GL11.GL_BLEND);
+
 				t.draw();
+				
+				if (RandomPeripherals.shouldTransparentBlocksRendered)
+					GL11.glDisable(GL11.GL_BLEND);
 
+				//GL11.glColorMask(true, true, true, true);
+				
 				RenderHelper.enableStandardItemLighting();
-
-				GL11.glDisable(GL11.GL_BLEND);
 				
 				GL11.glEndList();
 

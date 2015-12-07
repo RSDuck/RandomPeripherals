@@ -121,6 +121,8 @@ public class RandomPeripherals {
 	public static int inventoryTurtleUpgradeID;
 	public static int dispenserTurtleUpgradeID;
 	
+	public static boolean shouldTransparentBlocksRendered;
+	
 	public static int peripheralSearchTimeout;
 
 	public static boolean forceVanillaRecipes;
@@ -249,6 +251,7 @@ public class RandomPeripherals {
 				"If you add an block name to this list, it can be used as peripheral and you can read its NBT Data");
 		forceVanillaRecipes = config.getBoolean("forceVanillaRecipes", config.CATEGORY_GENERAL, false,
 				"If enabled no items of external mods will be used in crafting recipes");
+		shouldTransparentBlocksRendered = config.getBoolean("hologramRenderTransparentBlock", config.CATEGORY_GENERAL, false, "If enabled hologram projectors render transparent blocks transparent, this seems to be problematic on some systems");
 		
 		if (config.hasChanged()) {
 			config.save();
