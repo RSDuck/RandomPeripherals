@@ -1,4 +1,4 @@
-package me.kemal.randomp.computercraft;
+package me.kemal.randomp.computercraft.turtle;
 
 import java.util.HashMap;
 

@@ -221,14 +221,14 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 
 	}
 
-	boolean searchForNeightborPeripherals = false;
+	boolean initialPeripheralSearchCompleted = false;
 
 	@Override
 	public void updateEntity() {
 		super.updateEntity();
 
-		if (!searchForNeightborPeripherals) {
-			RandomPeripherals.logger.info("Initial Peripheral search started");
+		if (!initialPeripheralSearchCompleted) {
+			//RandomPeripherals.logger.info("Initial Peripheral search started");
 			for (int i = 0; i < 6; i++) {
 				ForgeDirection current = ForgeDirection.getOrientation(i);
 
@@ -237,7 +237,7 @@ public class TileUniversalInterface extends TileEnergyStorage implements ISidedI
 								current.offsetZ + zCoord),
 						xCoord + current.offsetX, yCoord + current.offsetY, zCoord + current.offsetZ);
 			}
-			searchForNeightborPeripherals = true;
+			initialPeripheralSearchCompleted = true;
 		}
 
 		// TODO: clean up!

@@ -19,9 +19,10 @@ import me.kemal.randomp.block.BlockUniversalInterface;
 import me.kemal.randomp.common.CommonProxy;
 import me.kemal.randomp.common.command.CommandItemName;
 import me.kemal.randomp.computercraft.RandomPPeripheralProvider;
-import me.kemal.randomp.computercraft.RandomPTurtleUpgrade;
-import me.kemal.randomp.computercraft.TurtleUpgradeDispense;
-import me.kemal.randomp.computercraft.TurtleUpgradeInventory;
+import me.kemal.randomp.computercraft.turtle.RandomPTurtleUpgrade;
+import me.kemal.randomp.computercraft.turtle.TurtleUpgradeClicky;
+import me.kemal.randomp.computercraft.turtle.TurtleUpgradeDispense;
+import me.kemal.randomp.computercraft.turtle.TurtleUpgradeInventory;
 import me.kemal.randomp.gui.RandomPGuiHandler;
 import me.kemal.randomp.item.ItemCreativeTabDummy;
 import me.kemal.randomp.net.RandomPMSG;
@@ -120,14 +121,17 @@ public class RandomPeripherals {
 
 	public static int inventoryTurtleUpgradeID;
 	public static int dispenserTurtleUpgradeID;
-	
+	public static int clickyTurtleUpgradeID;
+
 	public static boolean shouldTransparentBlocksRendered;
-	
+
 	public static int peripheralSearchTimeout;
 
 	public static boolean forceVanillaRecipes;
 
 	public static String[] tileEntitiesWithAutoRead;
+
+	public static String fakePlayerName;
 
 	@EventHandler
 	public void preInit(FMLPreInitializationEvent event) {
@@ -161,6 +165,7 @@ public class RandomPeripherals {
 
 		ComputerCraftAPI.registerTurtleUpgrade(new TurtleUpgradeInventory(inventoryTurtleUpgradeID));
 		ComputerCraftAPI.registerTurtleUpgrade(new TurtleUpgradeDispense(dispenserTurtleUpgradeID));
+		ComputerCraftAPI.registerTurtleUpgrade(new TurtleUpgradeClicky(clickyTurtleUpgradeID));
 		ComputerCraftAPI.registerPeripheralProvider(new RandomPPeripheralProvider());
 	}
 
@@ -251,8 +256,14 @@ public class RandomPeripherals {
 				"If you add an block name to this list, it can be used as peripheral and you can read its NBT Data");
 		forceVanillaRecipes = config.getBoolean("forceVanillaRecipes", config.CATEGORY_GENERAL, false,
 				"If enabled no items of external mods will be used in crafting recipes");
-		shouldTransparentBlocksRendered = config.getBoolean("hologramRenderTransparentBlock", config.CATEGORY_GENERAL, false, "If enabled hologram projectors render transparent blocks transparent, this seems to be problematic on some systems");
-		
+		shouldTransparentBlocksRendered = config.getBoolean("hologramRenderTransparentBlock", config.CATEGORY_GENERAL,
+				false,
+				"If enabled hologram projectors render transparent blocks transparent, this seems to be problematic on some systems");
+		fakePlayerName = config.getString("fakePlayerName", config.CATEGORY_GENERAL, "Turtle FakePlayer",
+				"The name of the fake player. Usefull for jokes");
+		clickyTurtleUpgradeID = config.getInt("clickyTurtleUpgrade", config.CATEGORY_GENERAL, 155, 63, 255,
+				"The ID of the Clicky Turtle Upgrade");
+
 		if (config.hasChanged()) {
 			config.save();
 		}

@@ -158,7 +158,7 @@ public class TileHologramSpecialRenderer extends TileEntitySpecialRenderer {
 
 				//GL11.glColorMask(true, true, true, false);
 				
-				GL11.glAlphaFunc(GL11.GL_ALWAYS, 0.f);
+				//GL11.glAlphaFunc(GL11.GL_ALWAYS, 0.f);
 				
 				if (RandomPeripherals.shouldTransparentBlocksRendered)
 					GL11.glEnable(GL11.GL_BLEND);
