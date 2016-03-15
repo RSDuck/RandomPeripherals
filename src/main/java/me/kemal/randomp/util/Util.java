@@ -81,11 +81,11 @@ public class Util {
 
 	public static Object getRealNBTType(NBTBase obj) {
 		if (obj instanceof NBTPrimitive) {
-			//System.out.println("Type: Primitive");
+			// System.out.println("Type: Primitive");
 			return ((NBTPrimitive) obj).func_150286_g();
 		}
 		if (obj instanceof NBTTagIntArray) {
-			//System.out.println("Type: Int Array");
+			// System.out.println("Type: Int Array");
 			int[] array = ((NBTTagIntArray) obj).func_150302_c();
 			HashMap<Integer, Object> map = new HashMap<Integer, Object>();
 			for (int i = 0; i < array.length; i++) {
@@ -94,7 +94,7 @@ public class Util {
 			return map;
 		}
 		if (obj instanceof NBTTagByteArray) {
-			//System.out.println("Type: Byte Array");
+			// System.out.println("Type: Byte Array");
 			byte[] array = ((NBTTagByteArray) obj).func_150292_c();
 			HashMap<Integer, Object> map = new HashMap<Integer, Object>();
 			for (int i = 0; i < array.length; i++) {
@@ -103,15 +103,15 @@ public class Util {
 			return map;
 		}
 		if (obj instanceof NBTTagString) {
-			//System.out.println("Type: String");
+			// System.out.println("Type: String");
 			return ((NBTTagString) obj).func_150285_a_();
 		}
 		if (obj instanceof NBTTagCompound) {
-			//System.out.println("Type: Compound");
+			// System.out.println("Type: Compound");
 			return CCUtils.NBTCompoundToMap((NBTTagCompound) obj);
 		}
 		if (obj instanceof NBTTagList) {
-			//System.out.println("Type: List ");
+			// System.out.println("Type: List ");
 			NBTTagList list = ((NBTTagList) obj);
 			HashMap<Integer, Object> map = new HashMap<Integer, Object>();
 			NBTTagList copy = (NBTTagList) list.copy();
@@ -170,8 +170,7 @@ public class Util {
 		if (te instanceof IInventory) {
 			int side = fromWhere;
 			IInventory inv = (IInventory) te;
-			int invSize = (sided) ? ((ISidedInventory) inv).getAccessibleSlotsFromSide(side).length
-					: inv.getSizeInventory();
+			int invSize = (sided) ? ((ISidedInventory) inv).getAccessibleSlotsFromSide(side).length : inv.getSizeInventory();
 			int[] slots = (sided) ? ((ISidedInventory) inv).getAccessibleSlotsFromSide(side) : new int[] {};
 			for (int i = 0; i < invSize; i++) {
 				int slot = (sided) ? slots[i] : i;
@@ -196,8 +195,7 @@ public class Util {
 		return null;
 	}
 
-	public static ItemStack pushStack(TileEntity tile, IInventory inventory, int whereB, ItemStack stack,
-			int fromWhere) {
+	public static ItemStack pushStack(TileEntity tile, IInventory inventory, int whereB, ItemStack stack, int fromWhere) {
 		World worldObj = tile.getWorldObj();
 		int xCoord = tile.xCoord;
 		int yCoord = tile.yCoord;
@@ -211,8 +209,7 @@ public class Util {
 		if (te instanceof IInventory) {
 			IInventory inv = (IInventory) te;
 			int side = fromWhere;
-			int invSize = (sided) ? ((ISidedInventory) inv).getAccessibleSlotsFromSide(side).length
-					: inv.getSizeInventory();
+			int invSize = (sided) ? ((ISidedInventory) inv).getAccessibleSlotsFromSide(side).length : inv.getSizeInventory();
 			int[] slots = (sided) ? ((ISidedInventory) inv).getAccessibleSlotsFromSide(side) : new int[] {};
 			for (int i = 0; i < invSize; i++) {
 				int slot = (sided) ? slots[i] : i;
@@ -268,40 +265,57 @@ public class Util {
 
 	public static int relDirToAbsDir(int dirA, int dirB) {
 		switch (dirB) {
-		case 2:
-			return dirA;
-		case 3:
-			return BlockHelper.SIDE_OPPOSITE[dirA];
-		case 0:
-			return BlockHelper.SIDE_BELOW[dirA];
-		case 1:
-			return BlockHelper.SIDE_ABOVE[dirA];
-		case 4:
-			return BlockHelper.SIDE_LEFT[dirA];
-		case 5:
-			return BlockHelper.SIDE_RIGHT[dirA];
-		default:
-			return -1;
+			case 2:
+				return dirA;
+			case 3:
+				return BlockHelper.SIDE_OPPOSITE[dirA];
+			case 0:
+				return BlockHelper.SIDE_BELOW[dirA];
+			case 1:
+				return BlockHelper.SIDE_ABOVE[dirA];
+			case 4:
+				return BlockHelper.SIDE_LEFT[dirA];
+			case 5:
+				return BlockHelper.SIDE_RIGHT[dirA];
+			default:
+				return -1;
 		}
 	}
 
 	public static int[] dirToCoord(int dir) {
 		switch (dir) {
-		case 0:
-			return new int[] { 0, -1, 0 };
-		case 1:
-			return new int[] { 0, 1, 0 };
-		case 2:
-			return new int[] { 0, 0, 1 };
-		case 3:
-			return new int[] { 0, 0, -1 };
-		case 4:
-			return new int[] { -1, 0, 0 };
-		case 5:
-			return new int[] { 1, 0, 0 };
-		default:
-			return new int[] { 0, 0, 0 };
+			case 0:
+				return new int[] { 0, -1, 0 };
+			case 1:
+				return new int[] { 0, 1, 0 };
+			case 2:
+				return new int[] { 0, 0, 1 };
+			case 3:
+				return new int[] { 0, 0, -1 };
+			case 4:
+				return new int[] { -1, 0, 0 };
+			case 5:
+				return new int[] { 1, 0, 0 };
+			default:
+				return new int[] { 0, 0, 0 };
 		}
+	}
+
+	public static int getSideFromRelativeCoordinates(int x, int y, int z, int x2, int y2, int z2) {
+		int side = 0;
+		if (x < x2)
+			side = 5;
+		else if (x > x2)
+			side = 4;
+		else if (z < z2)
+			side = 3;
+		else if (z > z2)
+			side = 2;
+		else if (y < y2)
+			side = 1;
+		else if (y > y2)
+			side = 0;
+		return side;
 	}
 
 	public static int whichOneMatches(String[] which, String search) {

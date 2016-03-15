@@ -37,18 +37,18 @@ public class Peripheral implements IExtendablePeripheral, IPeripheral {
 		peripheralDescription = "";
 		attachedComputers = new Vector<IComputerAccess>();
 
-		AddMethod("help", "Get Help about an function",
+		addMethod("help", "Get Help about an function",
 				new CCType[] {
 						new CCType(String.class, "functionName", "the name of the function you need help with") },
 				new CCType[] { new CCType(HashMap.class, "an help like this") }, this);
-		AddMethod("getMethods", "Lists all function of this peripheral", new CCType[] {},
+		addMethod("getMethods", "Lists all function of this peripheral", new CCType[] {},
 				new CCType[] { new CCType(HashMap.class, "An table filled with the names of all function") }, this);
-		AddMethod("getDescription", "Returns an description of the peripheral", new CCType[] {},
+		addMethod("getDescription", "Returns an description of the peripheral", new CCType[] {},
 				new CCType[] { new CCType(String.class, "description", "An description what the peripheral does") },
 				this);
 	}
 
-	public void AddMethod(String name, String description, CCType[] args, CCType returns[],
+	public void addMethod(String name, String description, CCType[] args, CCType returns[],
 			IExtendablePeripheral classToCall) {
 		functionNames.addElement(name);
 		functionDescriptions.put(name, description);

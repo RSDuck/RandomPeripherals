@@ -25,7 +25,7 @@ import dan200.computercraft.api.turtle.TurtleVerb;
 public class TurtleUpgradeDispense extends RandomPTurtleUpgrade {
 	public TurtleUpgradeDispense(int id) {
 		super("Dispenser", id);
-		peripheral.AddMethod("dispense", "Dispenses the current selected item out, just like a Vanilla Dispenser",
+		peripheral.addMethod("dispense", "Dispenses the current selected item out, just like a Vanilla Dispenser",
 				new CCType[] { new CCType(String.class, "direction",
 						"The direction where the projectile will be shooted(valid values: top, bottom, right, left, front, back)") },
 				new CCType[] { new CCType(Boolean.class, "If the projectile sucefull was shooted") }, this);

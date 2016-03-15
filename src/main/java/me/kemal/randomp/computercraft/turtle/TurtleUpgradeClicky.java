@@ -39,7 +39,7 @@ public class TurtleUpgradeClicky extends RandomPTurtleUpgrade {
 	public TurtleUpgradeClicky(int upgradeID) {
 		super("Clicky", upgradeID);
 
-		peripheral.AddMethod("click", "Simulates the click of an player with the currently holding item",
+		peripheral.addMethod("click", "Simulates the click of an player with the currently holding item",
 				new CCType[] { new CCType(Boolean.class, "rightClick", "If it should be a right or left click") }, new CCType[] {}, this);
 	}
 

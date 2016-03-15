@@ -24,13 +24,13 @@ import net.minecraft.network.play.server.S35PacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.IIcon;
 
-public class TileRandomPMachine extends TileEntity implements IInventory, ISidedInventory, IExtendablePeripheral,
-		IReconfigurableFacing, IReconfigurableSides, ISidedTexture {
+public class TileRandomPMachine extends TileEntity
+		implements IInventory, ISidedInventory, IExtendablePeripheral, IReconfigurableFacing, IReconfigurableSides, ISidedTexture {
 	protected Peripheral peripheral;
 	protected int[] ioConfiguration;
 	protected ItemStack[] inventory;
 	protected int facing;
-	
+
 	public static final int SIDES_COUNT = 6;
 
 	public TileRandomPMachine(String peripheralType) {
@@ -217,7 +217,7 @@ public class TileRandomPMachine extends TileEntity implements IInventory, ISided
 	@Override
 	public void detachFromComputer(IComputerAccess computer) {
 	}
-	
+
 	@Override
 	public Packet getDescriptionPacket() {
 		NBTTagCompound tag = new NBTTagCompound();
@@ -231,6 +231,5 @@ public class TileRandomPMachine extends TileEntity implements IInventory, ISided
 		readFromNBT(pkt.func_148857_g());
 		worldObj.markBlockForUpdate(xCoord, yCoord, zCoord);
 	}
-
 
 }

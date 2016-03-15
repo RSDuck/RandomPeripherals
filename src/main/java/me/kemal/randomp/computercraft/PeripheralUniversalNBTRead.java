@@ -23,7 +23,7 @@ public class PeripheralUniversalNBTRead implements IExtendablePeripheral {
 		peripheral.setType("GenericNBTReader");
 		peripheral.setDescription(
 				"This peripheral can be any block with tile entity where you can read through the peripheral the NBT Data");
-		peripheral.AddMethod("readNBT", "Reads the NBT data of this block", new CCType[] {}, new CCType[] {new CCType(HashMap.class, "The NBT data of this block")}, this);
+		peripheral.addMethod("readNBT", "Reads the NBT data of this block", new CCType[] {}, new CCType[] {new CCType(HashMap.class, "The NBT data of this block")}, this);
 		te = tile;
 	}
 

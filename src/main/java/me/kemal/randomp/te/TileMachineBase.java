@@ -52,12 +52,12 @@ public class TileMachineBase extends TileEntity implements IExtendablePeripheral
 		neightborCache = new Object[6];
 
 		peripheral
-				.AddMethod("getSideConfiguration", "Returns an table which contains the IO configuration",
+				.addMethod("getSideConfiguration", "Returns an table which contains the IO configuration",
 						new CCType[] {},
 						new CCType[] { new CCType(HashMap.class,
 								"A table which contains the Sidingconfiguration { \"side\" : \"configuration\" }") },
 				this);
-		peripheral.AddMethod("setSideConfiguration", "Sets the IO configuration on a specific side",
+		peripheral.addMethod("setSideConfiguration", "Sets the IO configuration on a specific side",
 				new CCType[] {
 						new CCType(String.class, "side",
 								"The side where the configuration should be changed(valid inputs: bottom, top, north, south, west, east)"),

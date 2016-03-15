@@ -79,7 +79,7 @@ public class TileHologramProjector extends TileEntity implements IExtendablePeri
 		rotation = 0;
 		velocity = 0;
 
-		peripheral.AddMethod("setBlock", "Sets the projected block at the specific coordinates",
+		peripheral.addMethod("setBlock", "Sets the projected block at the specific coordinates",
 				new CCType[] { new CCType(Double.class, "x",
 						"The X-Coordinate of the block, has to be 0 or more and less than 8", 0, 7),
 				new CCType(Double.class, "y", "The Y-Coordinate of the block, has be 0 or moreand less than 8", 0, 7),
@@ -88,7 +88,7 @@ public class TileHologramProjector extends TileEntity implements IExtendablePeri
 				new CCType(String.class, "block",
 						"The internal name of the block to which it should be set. It's the same name you use in commands"), },
 				new CCType[] { new CCType(Boolean.class, "True if the block was sucsessfull set") }, this);
-		peripheral.AddMethod("setBlockMeta", "Sets the projected block and it's meta data at the specific coordinates",
+		peripheral.addMethod("setBlockMeta", "Sets the projected block and it's meta data at the specific coordinates",
 				new CCType[] {
 						new CCType(Double.class, "x",
 								"The X-Coordinate of the block, has to be 0 or more and less than 8", 0, 7),
@@ -100,7 +100,7 @@ public class TileHologramProjector extends TileEntity implements IExtendablePeri
 								"The internal name of the block to which it should be set. It's the same name you use in commands"),
 						new CCType(Double.class, "metadata", "The meta for the block you set", 0, 16) },
 				new CCType[] { new CCType(Boolean.class, "True if the block was sucsessfull set") }, this);
-		peripheral.AddMethod("getBlock", "Returns the id name of the projected block at the specific coordinates",
+		peripheral.addMethod("getBlock", "Returns the id name of the projected block at the specific coordinates",
 				new CCType[] { new CCType(Double.class, "x",
 						"The X-Coordinate of the block, you want to get, has to be 0 or more and less than 8", 0, 7),
 						new CCType(Double.class, "y",
@@ -111,7 +111,7 @@ public class TileHologramProjector extends TileEntity implements IExtendablePeri
 								0, 7) },
 				new CCType[] { new CCType(String.class, "The id name of the block") }, this);
 
-		peripheral.AddMethod("setMeta", "Sets the meta data of an projected block at the specified coordinates",
+		peripheral.addMethod("setMeta", "Sets the meta data of an projected block at the specified coordinates",
 				new CCType[] { new CCType(Double.class, "x",
 						"The X-Coordinate of the block, you want to set, has to be 0 or more and less than 8", 0, 7),
 						new CCType(Double.class, "y",
@@ -123,7 +123,7 @@ public class TileHologramProjector extends TileEntity implements IExtendablePeri
 						new CCType(Double.class, "meta", "The new meta data of the block", 0, 16) },
 				new CCType[] {}, this);
 
-		peripheral.AddMethod("getMeta", "Returns the meta data of the projected block at the specific coordinates",
+		peripheral.addMethod("getMeta", "Returns the meta data of the projected block at the specific coordinates",
 				new CCType[] {
 						new CCType(Double.class, "x",
 								"The X-Coordinate of the block, you want to get the meta data, has to be 0 or more and less than 8",
@@ -135,23 +135,23 @@ public class TileHologramProjector extends TileEntity implements IExtendablePeri
 								"The Z-Coordinate of the block, you want to get the meta data, has to be 0 or more and less than 8",
 								0, 7) },
 				new CCType[] { new CCType(Double.class, "The meta data of the block") }, this);
-		peripheral.AddMethod("draw", "Uses the given table to set the blocks of the hologram",
+		peripheral.addMethod("draw", "Uses the given table to set the blocks of the hologram",
 				new CCType[] { new CCType(HashMap.class, "hologram",
 						"An table which contains the following content: {{name=The Block ID, [meta=The Block Meta Data], x=The X-Coordinate, y=The Y-Coordinate, z=The Z-Coordinate}, ...}") },
 				new CCType[] {}, this);
-		peripheral.AddMethod("clear", "Clears the whole hologram with the given block and metadata",
+		peripheral.addMethod("clear", "Clears the whole hologram with the given block and metadata",
 				new CCType[] { new CCType(String.class, "block", "The block to that all blocks should be converted"),
 						new CCType(Double.class, "meta", "The metadata that should be set on all blocks") },
 				new CCType[] {}, this);
-		peripheral.AddMethod("setRotation",
+		peripheral.addMethod("setRotation",
 				"Sets the rotation in degrees by the given value. Note: The rotation is only available on the Y-Axis(Up-Down)",
 				new CCType[] { new CCType(Double.class, "rot", "The new rotation value") }, new CCType[] {}, this);
-		peripheral.AddMethod("setVelocity",
+		peripheral.addMethod("setVelocity",
 				"Sets the velocity by the give value. The give value gets added to every tick to the rotation. Note: The rotation is only available on the Y-Axis(Up-Down)",
 				new CCType[] { new CCType(Double.class, "vel", "The new velocity value") }, new CCType[] {}, this);
-		peripheral.AddMethod("getRotation", "Returns the current rotation", new CCType[] {},
+		peripheral.addMethod("getRotation", "Returns the current rotation", new CCType[] {},
 				new CCType[] { new CCType(Double.class, "rot", "The current rotation") }, this);
-		peripheral.AddMethod("getVelocity", "Returns the current velocity", new CCType[] {},
+		peripheral.addMethod("getVelocity", "Returns the current velocity", new CCType[] {},
 				new CCType[] { new CCType(Double.class, "vel", "The current velocity") }, this);
 
 		attachedComputer = new ArrayList<IComputerAccess>();

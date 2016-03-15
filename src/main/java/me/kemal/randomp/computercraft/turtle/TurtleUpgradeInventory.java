@@ -26,7 +26,7 @@ public class TurtleUpgradeInventory extends RandomPTurtleUpgrade {
 	public TurtleUpgradeInventory(int upgradeID) {
 		super("Inventory", upgradeID);
 		peripheral
-				.AddMethod(
+				.addMethod(
 						"getStackInSlot",
 						"Returns informations about the current selected slot, this informations includes NBT data of an item so it's possible to read things like the enchantment on an item",
 						new CCType[] {},
