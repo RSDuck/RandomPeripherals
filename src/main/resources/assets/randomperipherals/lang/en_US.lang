@@ -3,6 +3,8 @@
 tile.universalInterface.name=Universal Interface
 tile.hologramProjector.name=Hologram Projector
 
+item.iconMapDisk.name=Interdimensional File Synchroniator
+
 container.universalInterface=Universal Interface
 
 me.kemal.randomperipheral.maxOutput=Maximum Output
