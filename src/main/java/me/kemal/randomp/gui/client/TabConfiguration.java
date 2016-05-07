@@ -53,10 +53,10 @@ public class TabConfiguration extends TabBase {
 		myTileSides = (IReconfigurableSides) theTile;
 		myTileTexture = (ISidedTexture) theTile;
 	}
-
+	
 	@Override
-	public void draw() {
-		drawBackground();
+	protected void drawForeground() {
+		super.drawForeground();
 		drawTabIcon("IconConfig");
 		if (!isFullyOpened()) {
 			return;
@@ -82,6 +82,11 @@ public class TabConfiguration extends TabBase {
 		GL11.glDisable(GL11.GL_BLEND);
 		RenderHelper.setDefaultFontTextureSheet();
 		GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+	}
+
+	public void draw() {
+		drawBackground();
+		drawForeground();
 	}
 
 	@Override

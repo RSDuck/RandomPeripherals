@@ -9,26 +9,21 @@ import io.netty.buffer.Unpooled;
 import cpw.mods.fml.common.network.ByteBufUtils;
 import cpw.mods.fml.common.network.simpleimpl.IMessage;
 
-public class RandomPMSG implements IMessage {
+public class RandomPMessage implements IMessage {
 	public ByteBuf buff;
 
-	public RandomPMSG() {
+	public RandomPMessage() {
 	}
 
-	public RandomPMSG(short type, TileEntity te, Object... args) {
-		ByteBuf buff = Unpooled.buffer();
-		buff.writeInt(te.getWorldObj().provider.dimensionId);
-		buff.writeInt(te.xCoord);
-		buff.writeInt(te.yCoord);
-		buff.writeInt(te.zCoord);
+	public RandomPMessage(short type, boolean isTileEntity) {
+		buff = Unpooled.buffer();
+		buff.writeBoolean(isTileEntity);
 		buff.writeShort(type);
-		handleObjects(buff, args);
-		this.buff = buff;
 	}
 
 	@Override
 	public void fromBytes(ByteBuf buf) {
-		ServerPacketHandler.readData(buf);
+		TEServerPacketHandler.readData(buf);
 	}
 
 	@Override
@@ -36,7 +31,7 @@ public class RandomPMSG implements IMessage {
 		buf.writeBytes(this.buff);
 	}
 
-	private static void handleObjects(ByteBuf data, Object[] objects) {
+	protected static void handleObjects(ByteBuf data, Object[] objects) {
 		for (Object obj : objects) {
 			Class<?> objClass = obj.getClass();
 			if (objClass.equals(Integer.class)) {
@@ -57,6 +52,7 @@ public class RandomPMSG implements IMessage {
 				data.writeFloat((Float) obj);
 			} else if (objClass.equals(Long.class)) {
 				data.writeLong((Long) obj);
+			} else if (objClass.equals(byte[].class)) {
 			}
 		}
 	}

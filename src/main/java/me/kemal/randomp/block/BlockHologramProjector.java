@@ -6,7 +6,6 @@ import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import me.kemal.randomp.RandomPeripherals;
-import me.kemal.randomp.client.renderer.RendererHologramProjector;
 import me.kemal.randomp.client.renderer.TileHologramSpecialRenderer;
 import me.kemal.randomp.te.TileHologramProjector;
 import net.minecraft.block.Block;

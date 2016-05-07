@@ -47,9 +47,14 @@ public class TabEnergyConf extends TabBase {
 		myContainer = container;
 		isShiftDown = false;
 	}
+	
+	public void draw(){
+		drawForeground();
+		drawBackground();
+	}
 
 	@Override
-	public void draw() {
+	public void drawForeground() {
 		drawBackground();
 		drawTabIcon("IconEnergy");
 		if (!isFullyOpened()) {

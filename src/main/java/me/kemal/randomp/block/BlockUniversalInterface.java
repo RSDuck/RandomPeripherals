@@ -14,7 +14,7 @@ import cpw.mods.fml.relauncher.SideOnly;
 import me.kemal.randomp.RandomPeripherals;
 import me.kemal.randomp.gui.RandomPGUIs;
 import me.kemal.randomp.net.Packets;
-import me.kemal.randomp.net.RandomPMSG;
+import me.kemal.randomp.net.RandomPMessage;
 import me.kemal.randomp.te.TileEnergyStorage;
 import me.kemal.randomp.te.TileUniversalInterface;
 import me.kemal.randomp.util.Util;

@@ -47,42 +47,6 @@ import net.minecraft.world.World;
 @SideOnly(Side.CLIENT)
 public class TileHologramSpecialRenderer extends TileEntitySpecialRenderer {
 
-	private Field fVertexCount;
-	private Field fRawBuffer;
-	private Field fRawBufferSize;
-	private Field fRawBufferIndex;
-	private Field fHasColor;
-	private Field fHasBrightness;
-
-	public TileHologramSpecialRenderer() {
-
-		try {
-			fVertexCount = Tessellator.class.getDeclaredField("vertexCount");
-			fVertexCount.setAccessible(true);
-
-			fRawBuffer = Tessellator.class.getDeclaredField("rawBuffer");
-			fRawBuffer.setAccessible(true);
-
-			fHasBrightness = Tessellator.class.getDeclaredField("hasBrightness");
-			fHasBrightness.setAccessible(true);
-
-		} catch (Exception e) {
-			try {
-				fVertexCount = Tessellator.class.getDeclaredField("field_78406_i");// Vertex
-																					// Count
-				fVertexCount.setAccessible(true);
-
-				fRawBuffer = Tessellator.class.getDeclaredField("field_78405_h");// Rawbuffer
-				fRawBuffer.setAccessible(true);
-
-				fHasBrightness = Tessellator.class.getDeclaredField("field_78414_p");// hasBrightness
-				fHasBrightness.setAccessible(true);
-			} catch (Exception e2) {
-				e2.printStackTrace();
-			}
-		}
-	}
-
 	@Override
 	public void renderTileEntityAt(TileEntity tile, double x, double y, double z, float f) {
 		TileEntity te = tile.getWorldObj().getTileEntity(tile.xCoord, tile.yCoord - 1, tile.zCoord);
@@ -100,11 +64,10 @@ public class TileHologramSpecialRenderer extends TileEntitySpecialRenderer {
 				IBlockAccess backupAccess = RenderBlocks.getInstance().blockAccess;
 				RenderBlocks.getInstance().blockAccess = (IBlockAccess) projector;
 
-				t.setTranslation(-(double) TileHologramProjector.hologramWidth / 2.0, 0.0,
-						-(double) TileHologramProjector.hologramDepth / 2.0);
+				t.setTranslation(-(double) TileHologramProjector.hologramWidth / 2.0, 0.0, -(double) TileHologramProjector.hologramDepth / 2.0);
 
 				try {
-					int previousVertexCount = fVertexCount.getInt(t);
+					int previousVertexCount = t.vertexCount;
 
 					boolean hasTransparentBlocks = false;
 
@@ -119,11 +82,10 @@ public class TileHologramSpecialRenderer extends TileEntitySpecialRenderer {
 											RenderBlocks.getInstance().renderBlockByRenderType(b, x1, y1, z1);
 										} catch (Exception e) {
 										}
-										if (fVertexCount.getInt(t) == previousVertexCount
-												&& !projector.isAirBlock(x1, y1, z1)) {
+										if (t.vertexCount == previousVertexCount && !projector.isAirBlock(x1, y1, z1)) {
 											RenderBlocks.getInstance().renderStandardBlock(b, x1, y1, z1);
 										}
-										previousVertexCount = fVertexCount.getInt(t);
+										previousVertexCount = t.vertexCount;
 									} else
 										hasTransparentBlocks = true;
 								}
@@ -138,11 +100,7 @@ public class TileHologramSpecialRenderer extends TileEntitySpecialRenderer {
 
 				RenderBlocks.getInstance().blockAccess = backupAccess;
 
-				try {
-					fHasBrightness.setBoolean(t, false);
-				} catch (IllegalArgumentException | IllegalAccessException e) {
-					e.printStackTrace();
-				}
+				t.hasBrightness = false;
 
 				GL11.glPushMatrix();
 
@@ -150,28 +108,28 @@ public class TileHologramSpecialRenderer extends TileEntitySpecialRenderer {
 				GL11.glScalef(0.125f, 0.125f, 0.125f);
 				GL11.glColor4f(1.f, 1.f, 1.f, 1.f);
 				GL11.glRotatef((float) projector.getRotation(), 0.f, 1.f, 0.f);
-				
+
 				GL11.glNewList(projector.getDisplayListID(), GL11.GL_COMPILE_AND_EXECUTE);
 
 				Minecraft.getMinecraft().getTextureManager().bindTexture(TextureMap.locationBlocksTexture);
 				RenderHelper.disableStandardItemLighting();
 
-				//GL11.glColorMask(true, true, true, false);
-				
-				//GL11.glAlphaFunc(GL11.GL_ALWAYS, 0.f);
-				
+				// GL11.glColorMask(true, true, true, false);
+
+				// GL11.glAlphaFunc(GL11.GL_ALWAYS, 0.f);
+
 				if (RandomPeripherals.shouldTransparentBlocksRendered)
 					GL11.glEnable(GL11.GL_BLEND);
 
 				t.draw();
-				
+
 				if (RandomPeripherals.shouldTransparentBlocksRendered)
 					GL11.glDisable(GL11.GL_BLEND);
 
-				//GL11.glColorMask(true, true, true, true);
-				
+				// GL11.glColorMask(true, true, true, true);
+
 				RenderHelper.enableStandardItemLighting();
-				
+
 				GL11.glEndList();
 
 				GL11.glPopMatrix();
