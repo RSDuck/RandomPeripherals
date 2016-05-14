@@ -17,7 +17,7 @@ buildscript {
 
 apply plugin: 'forge'
 
-version = "1.5 Beta 1"
+version = "1.5 Beta 2"
 group= "me.kemal.randomp" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "RandomPeripherals"
 

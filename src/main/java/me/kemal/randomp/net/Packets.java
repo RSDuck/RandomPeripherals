@@ -11,6 +11,8 @@ public class Packets {
 	public static final short ChangeMaxPowerInput = 1;
 	public static final short RotateBlock = 2;
 	public static final short ImageMessage = 3;
+	public static final short PrepareForImageMessages = 4;
+	public static final short FinishedImageTransmitting = 5;
 
 	public static void sendToServer(IMessage msg) {
 		RandomPeripherals.networkWrapper.sendToAll(msg);
@@ -22,25 +24,32 @@ public class Packets {
 
 	public static void sendImagesToServer(ItemStack[] stacks, int width, int height, Integer[] firstStack, Integer[] stacksCount,
 			byte[][] imageData) {
-		RandomPMessage msg = new RandomPMessage(ImageMessage, false);
-		msg.buff.writeInt(stacks.length);
+		RandomPMessage preparationMsg = new RandomPMessage(PrepareForImageMessages, false);
+		preparationMsg.buff.writeInt(stacks.length);
 		for (ItemStack stack : stacks)
-			ByteBufUtils.writeItemStack(msg.buff, stack);
+			ByteBufUtils.writeItemStack(preparationMsg.buff, stack);
 
-		msg.buff.writeInt(width);
-		msg.buff.writeInt(height);
+		preparationMsg.buff.writeInt(width);
+		preparationMsg.buff.writeInt(height);
 
-		msg.buff.writeInt(imageData.length);
+		sendToServer(preparationMsg);
+
 		int i = 0;
 		for (byte[] image : imageData) {
-			msg.buff.writeInt(firstStack[i].intValue());
-			msg.buff.writeInt(stacksCount[i].intValue());
-			msg.buff.writeInt(image.length);
-			msg.buff.writeBytes(image);
+			RandomPMessage actualImage = new RandomPMessage(ImageMessage, false);
+			actualImage.buff.writeInt(i);
+			actualImage.buff.writeInt(firstStack[i].intValue());
+			actualImage.buff.writeInt(stacksCount[i].intValue());
+			actualImage.buff.writeInt(image.length);
+			actualImage.buff.writeBytes(image);
+			
+			sendToServer(actualImage);
 
 			i++;
 		}
-		sendToServer(msg);
+		
+		RandomPMessage finMessage = new RandomPMessage(FinishedImageTransmitting, false);
+		sendToServer(finMessage);
 
 	}
 }

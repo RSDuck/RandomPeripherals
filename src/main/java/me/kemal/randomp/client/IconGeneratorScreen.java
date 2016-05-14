@@ -41,10 +41,12 @@ public class IconGeneratorScreen extends GuiScreen {
 		if (renderEngine == null) {
 			renderEngine = mc.renderEngine;
 			Iterator iterator = tileEntityRendererDispatcher.mapSpecialRenderers.values().iterator();
-
 			while (iterator.hasNext()) {
 				TileEntitySpecialRenderer tileentityspecialrenderer = (TileEntitySpecialRenderer) iterator.next();
-				tileentityspecialrenderer.func_147497_a(tileEntityRendererDispatcher);
+				try {
+					tileentityspecialrenderer.func_147497_a(tileEntityRendererDispatcher);
+				}catch(Exception e){
+				}
 			}
 		}
 

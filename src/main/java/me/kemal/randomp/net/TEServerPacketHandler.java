@@ -32,6 +32,13 @@ public class TEServerPacketHandler implements IMessageHandler<TileMessage, IMess
 		return null;
 	}
 
+	static Vector<ItemStack> stacks = new Vector<>();
+	static Vector<Integer> firstStacks = new Vector<>();
+	static Vector<Integer> stacksOnImage = new Vector<>();
+
+	static int imageWidth = 0;
+	static int imageHeight = 0;
+
 	public static void readData(ByteBuf buff) {
 		TileEntity te;
 
@@ -66,39 +73,39 @@ public class TEServerPacketHandler implements IMessageHandler<TileMessage, IMess
 					break;
 			}
 		} else {
-			if (type == Packets.ImageMessage) {
+			File folder = new File(RandomPeripherals.iconMapImagesMount.folder, "imageMaps");
+			folder.mkdir();
+			if (type == Packets.PrepareForImageMessages) {
+				stacks.clear();
+				firstStacks.clear();
+				stacksOnImage.clear();
+
 				int stacksCount = buff.readInt();
-				Vector<ItemStack> stacks = new Vector<>();
 				for (int i = 0; i < stacksCount; i++)
 					stacks.add(ByteBufUtils.readItemStack(buff));
 
-				int width = buff.readInt();
-				int height = buff.readInt();
+				imageWidth = buff.readInt();
+				imageHeight = buff.readInt();
+			}
+			if (type == Packets.ImageMessage) {
+				int mapi = buff.readInt();
+				firstStacks.add(buff.readInt());
+				stacksOnImage.add(buff.readInt());
+				byte[] imageData = new byte[buff.readInt()];
+				buff.readBytes(imageData);
 
-				int imagesCount = buff.readInt();
-				Vector<byte[]> imageDatas = new Vector<>();
-				Vector<Integer> firstStacks = new Vector<>();
-				Vector<Integer> stacksOnImage = new Vector<>();
-
-				File folder = new File(RandomPeripherals.iconMapImagesMount.folder, "imageMaps");
-				folder.mkdir();
-
-				for (int i = 0; i < imagesCount; i++) {
-					firstStacks.add(buff.readInt());
-					stacksOnImage.add(buff.readInt());
-					byte[] imageData = new byte[buff.readInt()];
-					buff.readBytes(imageData);
-					imageDatas.add(imageData);
-
-					FileOutputStream stream;
-					try {
-						stream = new FileOutputStream(new File(folder, "iconMap" + i + ".png"));
-						stream.write(imageData);
-						stream.close();
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
+				FileOutputStream stream;
+				try {
+					stream = new FileOutputStream(new File(folder, "iconMap" + mapi + ".png"));
+					stream.write(imageData);
+					stream.close();
+				} catch (IOException e) {
+					e.printStackTrace();
 				}
+
+				RandomPeripherals.logger.info("Received image " + mapi + " on server side width");
+			}
+			if (type == Packets.FinishedImageTransmitting) {
 				try {
 					JsonWriter writer = new JsonWriter(new OutputStreamWriter(new FileOutputStream(new File(folder, "mapInfos.json"))));
 					writer.beginObject();
@@ -122,7 +129,7 @@ public class TEServerPacketHandler implements IMessageHandler<TileMessage, IMess
 							writer.endObject();
 
 							y += 32;
-							if (y >= height) {
+							if (y >= imageHeight) {
 								x += 32;
 								y = 0;
 							}
@@ -137,8 +144,6 @@ public class TEServerPacketHandler implements IMessageHandler<TileMessage, IMess
 				} catch (IOException e1) {
 					e1.printStackTrace();
 				}
-				RandomPeripherals.logger
-						.info("Received image on server side width: " + width + " height: " + height + " imagesCount: " + imagesCount);
 			}
 		}
 	}
